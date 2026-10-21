@@ -1,0 +1,223 @@
+import React, { useState } from 'react';
+import { Pressable, Share, Text, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import * as Linking from 'expo-linking';
+import { talents } from '../talent';
+import { talentMedia } from '../talentMedia';
+import { TalentImage } from '../TalentImage';
+import { useDemo } from '../store';
+import { c, f } from '../theme';
+import {
+  CategoryChip,
+  Chips,
+  EmptyState,
+  Heading,
+  IconButton,
+  Label,
+  PortfolioGrid,
+  PriceBadge,
+  PrimaryButton,
+  SampleNote,
+  Screen,
+  SectionTitle,
+} from '../components/ui';
+export default function TalentProfile() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const talent = talents.find((t) => t.id === id);
+  const [tab, setTab] = useState('Portfolio');
+  const [expanded, setExpanded] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const { saved, toggleSaved, hydrated, openConversation } = useDemo();
+  if (!talent)
+    return (
+      <Screen title="Talent profile">
+        <EmptyState
+          title="Talent not found"
+          detail="This sample profile is unavailable."
+          action="Explore talent"
+          onPress={() => router.replace('/search')}
+        />
+      </Screen>
+    );
+  const images = [
+    { image: talent.portrait, label: `${talent.name} sample portrait` },
+    ...talent.portfolio,
+  ];
+  const message = () => {
+    openConversation(talent.id);
+    router.push(`/chat/${talent.id}`);
+  };
+  const share = async () => {
+    const url = Linking.createURL(`/talent/${talent.id}`);
+    setShareLink(url);
+    try {
+      await Share.share({ message: `Castly sample talent: ${talent.name}. ${url}` });
+    } catch {
+      /* The selectable link remains available on platforms without a share sheet. */
+    }
+  };
+  return (
+    <Screen
+      title={talent.name}
+      action={<IconButton name="share-outline" label="Share talent" onPress={share} />}
+      footer={
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{ flex: 1 }}>
+            <PrimaryButton title="Message" secondary onPress={message} />
+          </View>
+          <View style={{ flex: 1.6 }}>
+            <PrimaryButton
+              title="Request booking"
+              icon="calendar-outline"
+              onPress={() => router.push(`/booking/${talent.id}`)}
+            />
+          </View>
+        </View>
+      }
+    >
+      <View style={{ position: 'relative' }}>
+        <TalentImage
+          source={talentMedia[talent.portrait]}
+          label={`Sample portrait for ${talent.name}`}
+          style={{ height: 330, borderRadius: 22 }}
+        />
+        <View
+          style={{
+            position: 'absolute',
+            right: 10,
+            top: 10,
+            backgroundColor: c.white,
+            borderRadius: 24,
+          }}
+        >
+          <IconButton
+            name={saved.includes(talent.id) ? 'heart' : 'heart-outline'}
+            label={`${saved.includes(talent.id) ? 'Unsave' : 'Save'} ${talent.name}`}
+            selected={saved.includes(talent.id)}
+            onPress={() => {
+              if (hydrated) toggleSaved(talent.id);
+            }}
+          />
+        </View>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 8,
+        }}
+      >
+        <View style={{ flex: 1, gap: 5 }}>
+          <Heading style={{ fontSize: 23, lineHeight: 30 }}>{talent.name}</Heading>
+          <Label>
+            {talent.category.slice(0, -1)} · {talent.city}
+          </Label>
+        </View>
+        <PriceBadge rate={talent.rate} large />
+      </View>
+      <SampleNote text="Fictional profile · stock photography · indicative pricing" />
+      {!!shareLink && (
+        <View style={{ backgroundColor: c.lavender, padding: 12, borderRadius: 12 }}>
+          <Label>Share this sample profile</Label>
+          <Text selectable style={{ color: c.primaryDark, fontFamily: f.medium, fontSize: 12 }}>
+            {shareLink}
+          </Text>
+        </View>
+      )}
+      <Chips>
+        {talent.skills.map((skill) => (
+          <View
+            key={skill}
+            style={{
+              backgroundColor: c.lavender,
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 18,
+            }}
+          >
+            <Text style={{ fontFamily: f.medium, fontSize: 11, color: c.text }}>{skill}</Text>
+          </View>
+        ))}
+      </Chips>
+      <View style={{ gap: 4 }}>
+        <Label style={{ color: c.text }}>
+          {expanded
+            ? `${talent.bio} This is a fictional development profile, not a representation of the stock model pictured.`
+            : talent.bio}
+        </Label>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setExpanded(!expanded)}
+          style={{ minHeight: 44, justifyContent: 'center' }}
+        >
+          <Text style={{ color: c.primaryDark, fontFamily: f.semibold, fontSize: 12 }}>
+            {expanded ? 'Read less' : 'Read more'} ⌄
+          </Text>
+        </Pressable>
+      </View>
+      <Chips>
+        {['Portfolio', 'Services', 'Reviews', 'About'].map((value) => (
+          <CategoryChip
+            key={value}
+            title={value}
+            active={tab === value}
+            onPress={() => setTab(value)}
+          />
+        ))}
+      </Chips>
+      {tab === 'Portfolio' && (
+        <View style={{ gap: 12 }}>
+          <SectionTitle
+            title="Portfolio"
+            action="View gallery"
+            onPress={() => router.push(`/gallery/${talent.id}`)}
+          />
+          <PortfolioGrid
+            images={images}
+            onOpen={(index) =>
+              router.push({
+                pathname: '/gallery/[id]',
+                params: { id: talent.id, image: String(index) },
+              })
+            }
+          />
+          <SampleNote text="Stock studies featuring different models; not this talent’s actual work." />
+        </View>
+      )}
+      {tab === 'Services' && (
+        <View style={{ backgroundColor: c.white, borderRadius: 16, padding: 18, gap: 12 }}>
+          <Heading>Creative services</Heading>
+          {talent.skills.map((skill) => (
+            <Label key={skill} style={{ color: c.text }}>
+              • {skill}
+            </Label>
+          ))}
+          <Label>
+            Scope and final rates are discussed directly. The displayed day rate is an indicative
+            fixture.
+          </Label>
+        </View>
+      )}
+      {tab === 'Reviews' && (
+        <EmptyState
+          title="No reviews to display"
+          detail="This fictional profile has no real reviews, ratings or verification claims."
+        />
+      )}
+      {tab === 'About' && (
+        <View style={{ gap: 12 }}>
+          <Heading>About {talent.name.split(' ')[0]}</Heading>
+          <Label>{talent.bio}</Label>
+          <Label>
+            Based in {talent.city}.{' '}
+            {talent.available
+              ? 'Available in the sample catalog.'
+              : 'Currently unavailable in the sample catalog.'}
+          </Label>
+          <SampleNote text="Names, availability, services and rates are fictional fixtures." />
+        </View>
+      )}
+    </Screen>
+  );
+}
