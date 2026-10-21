@@ -26,7 +26,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
-    "test:browser": "node tests/browser.cjs"
+    "test:browser": "node tests/browser.cjs",
+    "test:portraits": "node tests/portraits-browser.cjs"
   },
   "private": true
 }

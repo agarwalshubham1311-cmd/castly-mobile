@@ -1,0 +1,90 @@
+[
+  {
+    "file": "assets/talent/portrait-01.jpg",
+    "source": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "18700402f45c96ff336956e1b9c2e9acc94494f5952b056ac6e636d22ea6bf37",
+    "bytes": 102441
+  },
+  {
+    "file": "assets/talent/portrait-02.jpg",
+    "source": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "e0f649e8776a7b86f8e1de1897fdad9a115365a8d7b99681a48cd640085043d4",
+    "bytes": 93054
+  },
+  {
+    "file": "assets/talent/portrait-03.jpg",
+    "source": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "c28d0c06442dce2b1d252e893ece91a122f8034f464ef727b6f18af6eeae035c",
+    "bytes": 94427
+  },
+  {
+    "file": "assets/talent/portrait-04.jpg",
+    "source": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "696751b91e4ee6eb8b3fe884750d8a71f95f0c3049e08afaec8f9b3dc26b938c",
+    "bytes": 255791
+  },
+  {
+    "file": "assets/talent/portrait-05.jpg",
+    "source": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "598465c4dae05fb5e8f502d8e18df06b30d8f333108a5261f5ee77f42a0a5027",
+    "bytes": 198609
+  },
+  {
+    "file": "assets/talent/portrait-06.jpg",
+    "source": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "7f61bcb7b04dfbf3b837c68daa5d9c94ad900e6551ebdb751aac1dcea64320c7",
+    "bytes": 68536
+  },
+  {
+    "file": "assets/talent/portrait-07.jpg",
+    "source": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "8b5166424ad8c1ae2e0e9ba60560e18b267e72e940e44cc070b585262742b538",
+    "bytes": 207936
+  },
+  {
+    "file": "assets/talent/portrait-08.jpg",
+    "source": "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "763cf3235a513e3053384464c6662863580398f5735c3a83abc1d00c11299eca",
+    "bytes": 178291
+  },
+  {
+    "file": "assets/talent/portrait-09.jpg",
+    "source": "https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "513757423d2b33fcf222859a98c180d977d8b339e62f4754d2df39043a0eb594",
+    "bytes": 154900
+  },
+  {
+    "file": "assets/talent/portrait-10.jpg",
+    "source": "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "e911925b355c54516b806d93dae4da0a2169a894479c8f83d7a7c64590e061b5",
+    "bytes": 152225
+  },
+  {
+    "file": "assets/talent/portrait-11.jpg",
+    "source": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=900&h=1200&q=85",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "sha256": "30e20275bd8e8b7053af027186c16cd64d0dd7525cf57e8046dc53d352a49b0a",
+    "bytes": 122279
+  }
+]

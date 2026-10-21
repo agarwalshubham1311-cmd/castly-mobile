@@ -10,3 +10,9 @@ test('category, location, budget and availability combine', () => {
  assert.equal(findTalents('', 'Creators', { ...defaultFilters, availableOnly: true }).length, 0);
 });
 test('unknown searches have no results', () => assert.equal(findTalents('nonexistent', 'All talent', defaultFilters).length, 0));
+
+test('sample catalog does not advertise fabricated reputation claims', () => {
+ for (const talent of talents) {
+  for (const field of ['rating', 'reviews', 'followers', 'verified']) assert.equal(field in talent, false);
+ }
+});
