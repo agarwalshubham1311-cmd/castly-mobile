@@ -14,7 +14,9 @@ export type Talent = {
   city: string;
   rate: number;
   portrait: string;
-  portfolio: { image: string; label: string }[];
+  portraitUri?: string;
+  remote?: boolean;
+  portfolio: { image: string; label: string; uri?: string }[];
   available: boolean;
   bio: string;
   skills: string[];
@@ -86,9 +88,14 @@ export type Filters = {
   skills?: string[];
 };
 export const defaultFilters: Filters = { city: 'All cities', maxRate: 30000, availableOnly: false };
-export function findTalents(query: string, category: Category, filters: Filters): Talent[] {
+export function findTalents(
+  query: string,
+  category: Category,
+  filters: Filters,
+  source: Talent[] = talents,
+): Talent[] {
   const term = query.trim().toLowerCase();
-  return talents.filter(
+  return source.filter(
     (t) =>
       (category === 'All talent' || t.category === category) &&
       (!term || [t.name, t.city, t.category, ...t.skills].join(' ').toLowerCase().includes(term)) &&
@@ -110,8 +117,9 @@ export function searchTalents(
   category: Category,
   filters: Filters,
   sort: SortOrder,
+  source: Talent[] = talents,
 ): Talent[] {
-  const results = findTalents(query, category, filters);
+  const results = findTalents(query, category, filters, source);
   return sort === 'Price: low to high'
     ? results.sort((a, b) => a.rate - b.rate)
     : sort === 'Price: high to low'

@@ -1,3 +1,4 @@
+import { useCatalog } from '../backend/CatalogProvider';
 import AccessibleSwitch from '../components/AccessibleSwitch';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
@@ -30,11 +31,12 @@ const skills = [
   'Brand films',
 ];
 export default function Filters() {
+  const { talents } = useCatalog();
   const store = useDemo();
   const [draft, setDraft] = useState({ ...store.filters });
   const [category, setCategory] = useState(store.category);
   const [cityQuery, setCityQuery] = useState('');
-  const count = findTalents(store.query, category, draft).length;
+  const count = findTalents(store.query, category, draft, talents).length;
   const clear = () => {
     setDraft({ ...defaultFilters, minRate: 0, skills: [] });
     setCategory('All talent');

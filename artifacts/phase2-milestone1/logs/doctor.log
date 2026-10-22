@@ -1,0 +1,14 @@
+Running 20 checks on your project...
+Unexpected error while running 'Check Expo config (app.json/ app.config.js) schema' check:
+TypeError: fetch failed
+Error: getaddrinfo EAI_AGAIN exp.host
+This check requires a connection to the Expo API. Ensure your network connection is stable.
+Warning: Could not fetch bundled native modules
+18/20 checks passed. 2 checks failed. Possible issues detected:
+Use the --verbose flag to see more details about passed checks.
+
+✖ Check Expo config (app.json/ app.config.js) schema
+✖ Validate packages against React Native Directory package metadata
+Directory check failed with unexpected server response
+
+2 checks failed, indicating possible issues with the project.

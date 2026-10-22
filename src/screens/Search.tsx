@@ -1,3 +1,5 @@
+import { BackendNotice } from '../components/BackendNotice';
+import { useCatalog } from '../backend/CatalogProvider';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
@@ -17,12 +19,14 @@ import {
   TalentGrid,
 } from '../components/ui';
 export default function Search() {
+  const catalog = useCatalog();
   const store = useDemo();
   const { query, setQuery, category, setCategory, filters, setFilters, sort, setSort } = store;
   const [sortOpen, setSortOpen] = useState(false);
-  const results = searchTalents(query, category, filters, sort);
+  const results = searchTalents(query, category, filters, sort, catalog.talents);
   const header = (
     <View style={{ gap: 12, marginBottom: 16 }}>
+      <BackendNotice />
       <SearchBar value={query} onChange={setQuery} onFilters={() => router.push('/filters')} />
       <Chips>
         {categories.map((cat) => (
@@ -73,7 +77,13 @@ export default function Search() {
           onPress={() => setSortOpen(true)}
         />
       </View>
-      <SampleNote text="Sample catalog · indicative daily rates" />
+      <SampleNote
+        text={
+          catalog.mock
+            ? 'Sample catalog · indicative daily rates'
+            : 'Published talent · indicative daily rates'
+        }
+      />
     </View>
   );
   if (!store.hydrated)
@@ -88,7 +98,9 @@ export default function Search() {
         data={results}
         header={header}
         empty={
-          !store.hydrated ? (
+          catalog.loading || catalog.error ? (
+            <View />
+          ) : !store.hydrated ? (
             <LoadingSkeleton />
           ) : (
             <EmptyState

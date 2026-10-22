@@ -1,4 +1,10 @@
-# Castly · Lavender Pearl
+# Castly mobile
+
+Phase 2 Milestone 1 adds Supabase authentication, role-based onboarding, connected accounts, published discovery, private saved talent and talent/portfolio editing. The Phase 1 Lavender Pearl UI remains available in mock mode. See [Supabase setup and authorization](docs/SUPABASE_SETUP.md) and [Milestone 1 validation](artifacts/phase2-milestone1/report.md).
+
+Approved Phase 1 fixes are preserved on `feat/initial-castly-mobile` at `1f94f82`. Phase 2 branches from that commit. No changes are merged into main.
+
+## Phase 1 Lavender Pearl preview
 
 Expo + React Native + TypeScript frontend using Expo Router. Implements the approved light Lavender Pearl direction: `#FAF8FF` surfaces, `#8055E8` violet, white cards, plum text, bundled Manrope typography, editorial portraits, accessible controls and adaptive two-column talent grids.
 

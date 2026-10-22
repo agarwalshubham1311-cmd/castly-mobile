@@ -1,0 +1,10 @@
+
+> castly-mobile@0.1.0 test:backend
+> node tests/backend-browser.cjs
+
+PASS: mocked Supabase HTTP contract: signup confirmation/PKCE callback, invalid login, session restore/logout, protected/role-aware routes, onboarding, account rename/retry, private shortlist isolation, talent create/edit/publish, web portrait/portfolio upload/removal, failed writes and offline recovery. No hosted Supabase project was contacted.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

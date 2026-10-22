@@ -14,3 +14,7 @@ export const talentMedia: Record<string, ImageSourcePropType> = {
   'portrait-10': require('../assets/talent/portrait-10.jpg'),
   'portrait-11': require('../assets/talent/portrait-11.jpg'),
 };
+
+export function imageSource(key: string, uri?: string): ImageSourcePropType | undefined {
+  return uri ? { uri } : talentMedia[key];
+}

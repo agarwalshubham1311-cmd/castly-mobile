@@ -10,9 +10,11 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "9.2.1",
     "@react-native-community/slider": "5.2.1",
+    "@supabase/supabase-js": "^2.118.0",
     "expo": "~58.0.16",
     "expo-constants": "~58.0.12",
     "expo-font": "~58.0.9",
+    "expo-image-picker": "~58.0.10",
     "expo-linear-gradient": "~58.0.3",
     "expo-linking": "~58.0.13",
     "expo-router": "~58.0.24",
@@ -22,6 +24,7 @@
     "react-native": "0.88.0",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
+    "react-native-url-polyfill": "^4.0.0",
     "react-native-web": "~0.21.4"
   },
   "devDependencies": {
@@ -48,7 +51,11 @@
     "export:web": "expo export --platform web --output-dir dist-web",
     "test:screenshots": "node tests/verify-screenshots.cjs",
     "assets:branding": "node scripts/prepare-branding.cjs",
-    "test:accessibility": "node tests/accessibility-browser.cjs"
+    "test:accessibility": "node tests/accessibility-browser.cjs",
+    "test:sql": "node scripts/test-sql.cjs",
+    "test:backend": "node tests/backend-browser.cjs",
+    "check:client-env": "node scripts/check-client-env.cjs",
+    "export:all": "expo export --platform all --output-dir dist"
   },
   "private": true
 }

@@ -1,6 +1,9 @@
+import { AccountRow } from '../components/AccountRow';
+import { useAuth } from '../auth/AuthProvider';
+import ConnectedAccount, { ConnectedSettings } from './ConnectedAccount';
 import AccessibleSwitch from '../components/AccessibleSwitch';
 import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useDemo } from '../store';
 import { talentMedia } from '../talentMedia';
@@ -12,43 +15,16 @@ import {
   Heading,
   Icon,
   IconButton,
-  IconName,
   Label,
   PrimaryButton,
   SampleNote,
   Screen,
 } from '../components/ui';
-function AccountRow({
-  title,
-  icon,
-  onPress,
-}: {
-  title: string;
-  icon: IconName;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      onPress={onPress}
-      style={{
-        minHeight: 54,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        borderBottomWidth: 1,
-        borderColor: c.border,
-        paddingHorizontal: 12,
-      }}
-    >
-      <Icon name={icon} size={19} />
-      <Text style={{ flex: 1, fontFamily: f.medium, color: c.text, fontSize: 13 }}>{title}</Text>
-      <Icon name="chevron-forward" size={15} color={c.secondary} />
-    </Pressable>
-  );
-}
 export default function Account() {
+  const auth = useAuth();
+  return auth.mode === 'mock' ? <MockAccount /> : <ConnectedAccount />;
+}
+function MockAccount() {
   const { saved, bookings } = useDemo();
   return (
     <Screen
@@ -140,6 +116,10 @@ export default function Account() {
   );
 }
 export function Settings() {
+  const auth = useAuth();
+  return auth.mode === 'mock' ? <MockSettings /> : <ConnectedSettings />;
+}
+function MockSettings() {
   const { section } = useLocalSearchParams<{ section: string }>();
   const [name, setName] = useState('Creative Studio');
   const [saved, setSaved] = useState(false);

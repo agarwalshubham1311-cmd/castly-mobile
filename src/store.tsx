@@ -1,4 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { router } from 'expo-router';
+import { useAuth } from './auth/AuthProvider';
+import { services } from './backend';
+import { readableError } from './backend/errors';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { categories, Category, defaultFilters, Filters, SortOrder, talents } from './talent';
 import {
@@ -11,9 +15,17 @@ import {
 } from './demo';
 const SAVED_KEY = 'castly.saved.v1';
 function useDemoStore() {
+  const auth = useAuth();
+  const mock = auth.mode === 'mock';
+  const userId = auth.session?.user.id;
+  const [saveBusy, setSaveBusy] = useState(false);
+  const saveLock = useRef(false);
+
   const [saved, setSaved] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [storageError, setStorageError] = useState('');
+  const [restoreFailed, setRestoreFailed] = useState(false);
+  const [savedRevision, setSavedRevision] = useState(0);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<Category>(categories[0]);
   const [filters, setFilters] = useState<Filters>({ ...defaultFilters });
@@ -22,18 +34,27 @@ function useDemoStore() {
   const [conversations, setConversations] = useState<Conversation[]>(demoConversations);
   useEffect(() => {
     let active = true;
-    AsyncStorage.getItem(SAVED_KEY)
+    const restore = mock
+      ? AsyncStorage.getItem(SAVED_KEY).then((value) =>
+          parseSaved(
+            value,
+            talents.map((t) => t.id),
+          ),
+        )
+      : userId
+        ? services!.saved.list().then((rows) => (rows || []).map((row) => row.talent_id))
+        : Promise.resolve([]);
+    restore
       .then((value) => {
-        if (active)
-          setSaved(
-            parseSaved(
-              value,
-              talents.map((t) => t.id),
-            ),
-          );
+        if (active) setSaved(value);
       })
-      .catch(() => {
-        if (active) setStorageError('Saved talent could not be restored on this device.');
+      .catch((error) => {
+        if (active) {
+          setRestoreFailed(true);
+          setStorageError(
+            mock ? 'Saved talent could not be restored on this device.' : readableError(error),
+          );
+        }
       })
       .finally(() => {
         if (active) setHydrated(true);
@@ -41,19 +62,45 @@ function useDemoStore() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [mock, userId, savedRevision]);
   useEffect(() => {
-    if (hydrated)
+    if (hydrated && mock)
       AsyncStorage.setItem(SAVED_KEY, JSON.stringify(saved)).catch(() =>
         setStorageError(
           'Changes are available this session, but could not be saved to this device.',
         ),
       );
-  }, [saved, hydrated]);
-  const toggleSaved = (id: string) =>
-    setSaved((current) =>
-      current.includes(id) ? current.filter((x) => x !== id) : [...current, id],
-    );
+  }, [saved, hydrated, mock]);
+  const toggleSaved = (id: string) => {
+    if (mock) {
+      setSaved((current) =>
+        current.includes(id) ? current.filter((x) => x !== id) : [...current, id],
+      );
+      return;
+    }
+    if (!auth.session) {
+      router.push('/login');
+      return;
+    }
+    if (restoreFailed || saveLock.current) return;
+    saveLock.current = true;
+    setSaveBusy(true);
+    setStorageError('');
+    const owner = auth.session.user.id;
+    const removing = saved.includes(id);
+    const request = removing ? services!.saved.remove(owner, id) : services!.saved.add(owner, id);
+    request
+      .then(() => {
+        setSaved((current) => (removing ? current.filter((x) => x !== id) : [...current, id]));
+      })
+      .catch((e) => {
+        setStorageError(readableError(e));
+      })
+      .finally(() => {
+        saveLock.current = false;
+        setSaveBusy(false);
+      });
+  };
   const resetSearch = () => {
     setQuery('');
     setCategory('All talent');
@@ -110,6 +157,14 @@ function useDemoStore() {
   return {
     saved,
     hydrated,
+    saveBusy,
+    restoreFailed,
+    retrySaved: () => {
+      setHydrated(false);
+      setStorageError('');
+      setRestoreFailed(false);
+      setSavedRevision((v) => v + 1);
+    },
     storageError,
     toggleSaved,
     query,
@@ -121,9 +176,9 @@ function useDemoStore() {
     sort,
     setSort,
     resetSearch,
-    bookings,
+    bookings: mock ? bookings : [],
     addBooking,
-    conversations,
+    conversations: mock ? conversations : [],
     openConversation,
     sendMessage,
     archiveConversation,
@@ -132,6 +187,14 @@ function useDemoStore() {
 type Store = ReturnType<typeof useDemoStore>;
 const Context = createContext<Store | null>(null);
 export function DemoProvider({ children }: { children: React.ReactNode }) {
+  const auth = useAuth();
+  return (
+    <ScopedDemoProvider key={auth.mode === 'mock' ? 'mock' : auth.session?.user.id || 'guest'}>
+      {children}
+    </ScopedDemoProvider>
+  );
+}
+function ScopedDemoProvider({ children }: { children: React.ReactNode }) {
   const store = useDemoStore();
   return <Context.Provider value={store}>{children}</Context.Provider>;
 }

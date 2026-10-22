@@ -6,6 +6,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { DemoProvider } from '../src/store';
 import { c } from '../src/theme';
+import { AuthProvider } from '../src/auth/AuthProvider';
+import { CatalogProvider } from '../src/backend/CatalogProvider';
+import { configuration } from '../src/backend';
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     Manrope_400Regular: require('@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf'),
@@ -27,30 +30,46 @@ export default function RootLayout() {
         <Text style={{ color: c.primaryDark }}>Loading Castly…</Text>
       </View>
     );
+  if (configuration.mode === 'invalid')
+    return (
+      <SafeAreaProvider>
+        <View
+          style={{ flex: 1, padding: 24, justifyContent: 'center', backgroundColor: c.background }}
+        >
+          <Text accessibilityRole="alert" style={{ color: c.error }}>
+            {configuration.error}
+          </Text>
+        </View>
+      </SafeAreaProvider>
+    );
   return (
     <SafeAreaProvider>
-      <DemoProvider>
-        <StatusBar style="dark" />
-        <View style={{ flex: 1, backgroundColor: c.lavender }}>
-          <View
-            style={{
-              flex: 1,
-              width: '100%',
-              maxWidth: 600,
-              alignSelf: 'center',
-              backgroundColor: c.background,
-            }}
-          >
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: c.background },
-                animation: 'slide_from_right',
-              }}
-            />
-          </View>
-        </View>
-      </DemoProvider>
+      <AuthProvider>
+        <CatalogProvider>
+          <DemoProvider>
+            <StatusBar style="dark" />
+            <View style={{ flex: 1, backgroundColor: c.lavender }}>
+              <View
+                style={{
+                  flex: 1,
+                  width: '100%',
+                  maxWidth: 600,
+                  alignSelf: 'center',
+                  backgroundColor: c.background,
+                }}
+              >
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: c.background },
+                    animation: 'slide_from_right',
+                  }}
+                />
+              </View>
+            </View>
+          </DemoProvider>
+        </CatalogProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

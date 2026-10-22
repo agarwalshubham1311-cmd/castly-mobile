@@ -1,9 +1,10 @@
+import { useCatalog } from '../backend/CatalogProvider';
 import React, { useState } from 'react';
 import { Modal, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { talents } from '../talent';
-import { talentMedia } from '../talentMedia';
+
+import { imageSource } from '../talentMedia';
 import { TalentImage } from '../TalentImage';
 import {
   CategoryChip,
@@ -16,6 +17,7 @@ import {
 } from '../components/ui';
 import { c, f } from '../theme';
 export default function Gallery() {
+  const { talents, mock } = useCatalog();
   const { id, image } = useLocalSearchParams<{ id: string; image?: string }>();
   const talent = talents.find((t) => t.id === id);
   const [tab, setTab] = useState('Photos');
@@ -29,7 +31,14 @@ export default function Gallery() {
       : null;
   });
   const images = talent
-    ? [{ image: talent.portrait, label: `${talent.name} sample portrait` }, ...talent.portfolio]
+    ? [
+        {
+          image: talent.portrait,
+          label: `${talent.name} ${mock ? 'sample portrait' : 'portrait'}`,
+          uri: talent.portraitUri,
+        },
+        ...talent.portfolio,
+      ]
     : [];
   return (
     <Screen title={talent?.name || 'Portfolio gallery'}>
@@ -43,13 +52,23 @@ export default function Gallery() {
           />
         ))}
       </Chips>
-      <SampleNote text="Sample stock gallery · different models · not actual client work" />
+      <SampleNote
+        text={
+          mock
+            ? 'Sample stock gallery · different models · not actual client work'
+            : 'Published portfolio'
+        }
+      />
       {tab === 'Photos' && images.length ? (
         <PortfolioGrid images={images} onOpen={setSelected} />
       ) : (
         <EmptyState
           title={`No ${tab.toLowerCase()} yet`}
-          detail="There are no sample assets in this category. Explore Photos to view the bundled portrait studies."
+          detail={
+            mock
+              ? 'There are no sample assets in this category. Explore Photos to view the bundled portrait studies.'
+              : 'No published assets are available in this format.'
+          }
         />
       )}
       <Modal
@@ -67,7 +86,8 @@ export default function Gallery() {
             }}
           >
             <Text style={{ fontFamily: f.semibold, color: c.text }}>
-              Sample photograph {selected === null ? '' : `${selected + 1} / ${images.length}`}
+              {mock ? 'Sample photograph' : 'Photograph'}{' '}
+              {selected === null ? '' : `${selected + 1} / ${images.length}`}
             </Text>
             <IconButton name="close" label="Close media viewer" onPress={() => setSelected(null)} />
           </View>
@@ -75,7 +95,7 @@ export default function Gallery() {
             {selected !== null && images[selected] && (
               <TalentImage
                 key={images[selected].image}
-                source={talentMedia[images[selected].image]}
+                source={imageSource(images[selected].image, images[selected].uri)}
                 label={images[selected].label}
                 fit="contain"
                 style={{ height: '100%', borderRadius: 0 }}
@@ -92,7 +112,7 @@ export default function Gallery() {
                 )
               }
             />
-            <SampleNote text="Licensed stock sample" />
+            <SampleNote text={mock ? 'Licensed stock sample' : 'Talent portfolio'} />
             <IconButton
               name="chevron-forward"
               label="Next photograph"

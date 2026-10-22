@@ -1,10 +1,12 @@
+import { BackendNotice } from '../components/BackendNotice';
+import { useCatalog } from '../backend/CatalogProvider';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { categories, talents } from '../talent';
+import { categories } from '../talent';
 import { c, f } from '../theme';
-import { talentMedia } from '../talentMedia';
+import { imageSource, talentMedia } from '../talentMedia';
 import { TalentImage } from '../TalentImage';
 import { useDemo } from '../store';
 import {
@@ -28,11 +30,13 @@ const categoryIcons: IconName[] = [
   'aperture-outline',
 ];
 export default function Discovery() {
+  const { talents, mock } = useCatalog();
   const { fontScale } = useLayout();
   const [locationOpen, setLocationOpen] = useState(false);
   const { filters, setFilters, setCategory, setQuery } = useDemo();
   const header = (
     <View style={{ gap: 18, marginBottom: 18 }}>
+      <BackendNotice />
       <View style={[s.brandRow, fontScale > 1.3 && { flexWrap: 'wrap' }]}>
         <Text accessibilityRole="header" style={s.logo}>
           castly<Text style={{ color: c.primary }}>✦</Text>
@@ -61,11 +65,15 @@ export default function Discovery() {
             onPress={() => router.push('/account')}
             style={s.avatar}
           >
-            <TalentImage
-              source={talentMedia['portrait-03']}
-              label="Sample account portrait"
-              style={{ height: 32, width: 32, borderRadius: 16 }}
-            />
+            {mock ? (
+              <TalentImage
+                source={talentMedia['portrait-03']}
+                label="Sample account portrait"
+                style={{ height: 32, width: 32, borderRadius: 16 }}
+              />
+            ) : (
+              <Icon name="person-circle-outline" size={32} />
+            )}
           </Pressable>
         </View>
       </View>
@@ -80,7 +88,7 @@ export default function Discovery() {
           style={[s.heroMedia, fontScale > 1.3 && { width: '100%', opacity: 0.18 }]}
         >
           <TalentImage
-            source={talentMedia[talents[0].portrait]}
+            source={imageSource(talents[0]?.portrait || '', talents[0]?.portraitUri)}
             label="Editorial sample talent portrait"
             style={{ height: '100%', borderRadius: 0 }}
           />
@@ -170,7 +178,13 @@ export default function Discovery() {
           action="Discover more"
           onPress={() => router.push('/search')}
         />
-        <SampleNote text="Fictional talent · stock photos · indicative rates" />
+        <SampleNote
+          text={
+            mock
+              ? 'Fictional talent · stock photos · indicative rates'
+              : 'Published talent · indicative daily rates'
+          }
+        />
       </View>
     </View>
   );

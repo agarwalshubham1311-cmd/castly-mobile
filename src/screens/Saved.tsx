@@ -1,10 +1,12 @@
+import { BackendNotice } from '../components/BackendNotice';
+import { useCatalog } from '../backend/CatalogProvider';
 import React, { useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useDemo } from '../store';
-import { categories, talents } from '../talent';
+import { categories } from '../talent';
 import { TalentImage } from '../TalentImage';
-import { talentMedia } from '../talentMedia';
+import { imageSource } from '../talentMedia';
 import { c, f } from '../theme';
 import {
   CategoryChip,
@@ -18,7 +20,8 @@ import {
   useLayout,
 } from '../components/ui';
 export default function Saved() {
-  const { saved, toggleSaved, hydrated, storageError } = useDemo();
+  const { talents, mock, error: catalogError, loading: catalogLoading } = useCatalog();
+  const { saved, toggleSaved, hydrated, storageError, restoreFailed } = useDemo();
   const { padding } = useLayout();
   const [category, setCategory] = useState('All talent');
   const results = talents.filter(
@@ -32,6 +35,7 @@ export default function Saved() {
         contentContainerStyle={{ paddingHorizontal: padding, gap: 12, paddingBottom: 24 }}
         ListHeaderComponent={
           <View style={{ gap: 10 }}>
+            <BackendNotice />
             <Chips>
               {categories.map((cat) => (
                 <CategoryChip
@@ -42,7 +46,14 @@ export default function Saved() {
                 />
               ))}
             </Chips>
-            <SampleNote text={storageError || 'Your local shortlist · fictional sample talent'} />
+            <SampleNote
+              text={
+                storageError ||
+                (mock
+                  ? 'Your local shortlist · fictional sample talent'
+                  : 'Your private saved talent')
+              }
+            />
           </View>
         }
         renderItem={({ item }) => (
@@ -64,7 +75,7 @@ export default function Saved() {
               style={{ flexDirection: 'row', gap: 12, alignItems: 'center', flex: 1 }}
             >
               <TalentImage
-                source={talentMedia[item.portrait]}
+                source={imageSource(item.portrait, item.portraitUri)}
                 label={`Sample portrait for ${item.name}`}
                 style={{ height: 76, width: 64, borderRadius: 12 }}
               />
@@ -85,7 +96,9 @@ export default function Saved() {
           </View>
         )}
         ListEmptyComponent={
-          !hydrated ? (
+          restoreFailed || catalogError ? (
+            <View />
+          ) : !hydrated || catalogLoading ? (
             <LoadingSkeleton label="Restoring saved talent" />
           ) : (
             <EmptyState

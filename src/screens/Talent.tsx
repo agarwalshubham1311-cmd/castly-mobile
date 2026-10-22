@@ -1,9 +1,11 @@
+import { BackendNotice } from '../components/BackendNotice';
+import { useCatalog } from '../backend/CatalogProvider';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Linking from 'expo-linking';
-import { talents } from '../talent';
-import { talentMedia } from '../talentMedia';
+
+import { imageSource } from '../talentMedia';
 import { TalentImage } from '../TalentImage';
 import { useDemo } from '../store';
 import { c, f } from '../theme';
@@ -23,6 +25,8 @@ import {
   useLayout,
 } from '../components/ui';
 export default function TalentProfile() {
+  const catalog = useCatalog();
+  const { talents, mock } = catalog;
   const { width, padding, fontScale } = useLayout();
   const { id } = useLocalSearchParams<{ id: string }>();
   const talent = talents.find((t) => t.id === id);
@@ -30,19 +34,29 @@ export default function TalentProfile() {
   const [expanded, setExpanded] = useState(false);
   const [shareLink, setShareLink] = useState('');
   const { saved, toggleSaved, hydrated, openConversation } = useDemo();
+  if (!talent && !mock && (catalog.loading || catalog.error))
+    return (
+      <Screen title="Talent profile">
+        <BackendNotice />
+      </Screen>
+    );
   if (!talent)
     return (
       <Screen title="Talent profile">
         <EmptyState
           title="Talent not found"
-          detail="This sample profile is unavailable."
+          detail={
+            mock
+              ? 'This sample profile is unavailable.'
+              : 'This profile is unpublished or unavailable.'
+          }
           action="Explore talent"
           onPress={() => router.replace('/search')}
         />
       </Screen>
     );
   const images = [
-    { image: talent.portrait, label: `${talent.name} sample portrait` },
+    { image: talent.portrait, label: `${talent.name} portrait`, uri: talent.portraitUri },
     ...talent.portfolio,
   ];
   const message = () => {
@@ -87,8 +101,8 @@ export default function TalentProfile() {
         <View style={{ paddingHorizontal: padding, paddingTop: 8, gap: 10 }}>
           <View style={{ position: 'relative' }}>
             <TalentImage
-              source={talentMedia[talent.portrait]}
-              label={`Sample portrait for ${talent.name}`}
+              source={imageSource(talent.portrait, talent.portraitUri)}
+              label={`${mock ? 'Sample portrait for' : 'Portrait of'} ${talent.name}`}
               style={{
                 height: fontScale > 1.3 ? 190 : Math.round(Math.min(260, width * 0.62)),
                 borderRadius: 22,
@@ -129,7 +143,13 @@ export default function TalentProfile() {
             </View>
             <PriceBadge rate={talent.rate} large />
           </View>
-          <SampleNote text="Fictional profile · stock photography · indicative pricing" />
+          <SampleNote
+            text={
+              mock
+                ? 'Fictional profile · stock photography · indicative pricing'
+                : 'Talent profile · indicative pricing'
+            }
+          />
           {!!shareLink && (
             <View style={{ backgroundColor: c.lavender, padding: 12, borderRadius: 12 }}>
               <Label>Share this sample profile</Label>
@@ -159,7 +179,7 @@ export default function TalentProfile() {
               style={{ color: c.text, fontFamily: f.regular, fontSize: 13, lineHeight: 21 }}
             >
               {expanded
-                ? `${talent.bio} This is a fictional development profile, not a representation of the stock model pictured.`
+                ? `${talent.bio}${mock ? ' This is a fictional development profile, not a representation of the stock model pictured.' : ''}`
                 : talent.bio}
             </Text>
             <Pressable
@@ -210,7 +230,13 @@ export default function TalentProfile() {
                   })
                 }
               />
-              <SampleNote text="Stock studies featuring different models; not this talent’s actual work." />
+              <SampleNote
+                text={
+                  mock
+                    ? 'Stock studies featuring different models; not this talent’s actual work.'
+                    : 'Portfolio shared by this talent'
+                }
+              />
             </View>
           )}
           {tab === 'Services' && (
@@ -223,14 +249,18 @@ export default function TalentProfile() {
               ))}
               <Label>
                 Scope and final rates are discussed directly. The displayed day rate is an
-                indicative fixture.
+                indicative rate.
               </Label>
             </View>
           )}
           {tab === 'Reviews' && (
             <EmptyState
               title="No reviews to display"
-              detail="This fictional profile has no real reviews, ratings or verification claims."
+              detail={
+                mock
+                  ? 'This fictional profile has no real reviews, ratings or verification claims.'
+                  : 'Reviews are not enabled yet. No ratings or verification claims are shown.'
+              }
             />
           )}
           {tab === 'About' && (
@@ -240,10 +270,20 @@ export default function TalentProfile() {
               <Label>
                 Based in {talent.city}.{' '}
                 {talent.available
-                  ? 'Available in the sample catalog.'
-                  : 'Currently unavailable in the sample catalog.'}
+                  ? mock
+                    ? 'Available in the sample catalog.'
+                    : 'Available for creative projects.'
+                  : mock
+                    ? 'Currently unavailable in the sample catalog.'
+                    : 'Currently unavailable for projects.'}
               </Label>
-              <SampleNote text="Names, availability, services and rates are fictional fixtures." />
+              <SampleNote
+                text={
+                  mock
+                    ? 'Names, availability, services and rates are fictional fixtures.'
+                    : 'Availability and indicative rates are provided by the talent.'
+                }
+              />
             </View>
           )}
         </View>

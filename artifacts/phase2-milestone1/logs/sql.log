@@ -1,0 +1,597 @@
+
+> castly-mobile@0.1.0 test:sql
+> node scripts/test-sql.cjs
+
+DROP DATABASE
+CREATE DATABASE
+DO
+CREATE SCHEMA
+CREATE TABLE
+CREATE FUNCTION
+GRANT
+GRANT
+CREATE SCHEMA
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+CREATE FUNCTION
+GRANT
+GRANT
+GRANT
+GRANT
+BEGIN
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 5
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+INSERT 0 0
+CREATE FUNCTION
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+REVOKE
+GRANT
+REVOKE
+COMMIT
+BEGIN
+INSERT 0 2
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+COMMIT
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 5
+ eq 
+----
+ 
+(1 row)
+
+UPDATE 2
+UPDATE 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 5
+ eq 
+----
+ 
+(1 row)
+
+SET
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+RESET
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-000000000002
+(1 row)
+
+SET
+ eq 
+----
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+RESET
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-000000000001
+(1 row)
+
+SET
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+RESET
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-000000000003
+(1 row)
+
+SET
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+RESET
+ set_config 
+------------
+ 
+(1 row)
+
+SET
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+RESET
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-000000000004
+(1 row)
+
+SET
+ eq 
+----
+ 
+(1 row)
+
+ eq 
+----
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+RESET
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-000000000005
+(1 row)
+
+SET
+ eq 
+----
+ 
+(1 row)
+
+ affected 
+----------
+ 
+(1 row)
+
+ denied 
+--------
+ 
+(1 row)
+
+ROLLBACK
+NOTICE:  PASS signup metadata cannot assign role
+NOTICE:  PASS all nine application tables enable RLS
+NOTICE:  PASS anonymous discovery hides drafts
+NOTICE:  PASS anonymous portfolio hides drafts
+NOTICE:  PASS public categories readable
+NOTICE:  PASS anonymous cannot read private accounts
+NOTICE:  PASS anonymous cannot read bookings
+NOTICE:  PASS anonymous cannot read messages
+NOTICE:  PASS anonymous cannot read saved talent
+NOTICE:  PASS anonymous cannot read entitlements
+NOTICE:  PASS anonymous onboarding denied
+NOTICE:  PASS only registered published portfolio media accessible anonymously
+NOTICE:  PASS client sees only their own account
+NOTICE:  PASS client cannot read private Auth user directory
+NOTICE:  PASS outsider cannot read booking
+NOTICE:  PASS outsider cannot read conversation
+NOTICE:  PASS outsider cannot read messages
+NOTICE:  PASS outsider cannot read private shortlist
+NOTICE:  PASS outsider cannot read entitlement
+NOTICE:  PASS role column update denied
+NOTICE:  PASS onboarding cannot change an existing role
+NOTICE:  PASS cannot rename another account
+NOTICE:  PASS client cannot edit talent
+NOTICE:  PASS client cannot create talent profile
+NOTICE:  PASS cannot save on behalf of another user
+NOTICE:  PASS cannot save an unpublished profile
+NOTICE:  PASS cannot impersonate a booking client
+NOTICE:  PASS cannot inject protected booking status
+NOTICE:  PASS cannot change agreed rates
+NOTICE:  PASS cannot reassign participants
+NOTICE:  PASS cannot impersonate a conversation participant
+NOTICE:  PASS ordinary message sends disabled
+NOTICE:  PASS cannot grant entitlement
+NOTICE:  PASS cannot extend entitlement
+NOTICE:  PASS cannot delete entitlement
+NOTICE:  PASS cannot upload to another talent folder
+NOTICE:  PASS cannot read another private file
+NOTICE:  PASS cannot request a past booking date
+NOTICE:  PASS cannot request unpublished talent
+NOTICE:  PASS client can create own published-talent request
+NOTICE:  PASS new request receives server-managed defaults
+NOTICE:  PASS client can create own conversation metadata
+NOTICE:  PASS cannot delete another private file
+NOTICE:  PASS booking client can read own request
+NOTICE:  PASS conversation client can read messages
+NOTICE:  PASS owner can read entitlement
+NOTICE:  PASS owner can read shortlist
+NOTICE:  PASS owner can read private file
+NOTICE:  PASS owner can edit account name
+NOTICE:  PASS booking owner still cannot change status
+NOTICE:  PASS owner can remove saved talent
+NOTICE:  PASS relevant talent can read booking
+NOTICE:  PASS conversation talent can read messages
+NOTICE:  PASS owner can edit own portfolio label
+NOTICE:  PASS portfolio path cannot be reassigned
+NOTICE:  PASS talent can edit own profile
+NOTICE:  PASS talent cannot edit another profile
+NOTICE:  PASS talent cannot delete another portfolio
+NOTICE:  PASS talent cannot insert another portfolio
+NOTICE:  PASS profile owner ID immutable to client
+NOTICE:  PASS talent can unpublish own profile
+NOTICE:  PASS unpublish removes public discovery
+NOTICE:  PASS unpublish hides public portfolio metadata
+NOTICE:  PASS unpublish prevents new public media reads
+NOTICE:  PASS talent can read own draft
+NOTICE:  PASS talent can read own draft portfolio
+NOTICE:  PASS talent can upload in own folder
+NOTICE:  PASS object moves/overwrites denied
+NOTICE:  PASS authenticated user can onboard once
+NOTICE:  PASS talent role can create own profile
+NOTICE:  PASS role cannot change after onboarding
+PASS: migrations and RLS policy tests on PostgreSQL. Test fixtures rolled back.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

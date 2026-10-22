@@ -1,0 +1,92 @@
+{
+  "reviewedAt": "2026-10-22T10:03:02.036647+00:00",
+  "branch": "feat/phase2-supabase-backend",
+  "phase1BaseCommit": "1f94f82ccb30e3952470931c5b1af452d24bd4f0",
+  "unitTests": 19,
+  "sqlPolicyAssertions": 71,
+  "postgresVersion": "17.11",
+  "sqlPlatform": "actual PostgreSQL Docker; minimal test-only Auth/Storage SQL contracts",
+  "browserBackend": "real SDK + intercepted mock HTTP; no hosted project",
+  "checks": {
+    "env": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/env.log"
+    },
+    "typecheck": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/typecheck.log"
+    },
+    "lint": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/lint.log"
+    },
+    "unit": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/unit.log"
+    },
+    "sql": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/sql.log"
+    },
+    "backend-browser": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/backend-browser.log"
+    },
+    "browser": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/browser.log"
+    },
+    "portraits": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/portraits.log"
+    },
+    "ui": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/ui.log"
+    },
+    "accessibility": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/accessibility.log"
+    },
+    "screenshots": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/screenshots.log"
+    },
+    "export-web": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/export-web.log"
+    },
+    "export-all-connected": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/export-all-connected.log"
+    },
+    "dependencies-offline": {
+      "result": "PASS_WITH_OFFLINE_LIMIT",
+      "exitCode": 0,
+      "log": "logs/dependencies-offline.log"
+    },
+    "doctor": {
+      "result": "BLOCKED_NETWORK",
+      "exitCode": 1,
+      "passed": 18,
+      "total": 20,
+      "log": "logs/doctor.log"
+    }
+  },
+  "nativeRuntimeTested": false,
+  "hostedMigrationsApplied": false,
+  "reviewPNGsDecoded": 39
+}

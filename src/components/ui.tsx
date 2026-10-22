@@ -20,7 +20,7 @@ import { router } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { c, f, theme } from '../theme';
 import { TalentImage } from '../TalentImage';
-import { talentMedia } from '../talentMedia';
+import { imageSource } from '../talentMedia';
 import { Talent, money } from '../talent';
 import { useDemo } from '../store';
 import type { Booking, Conversation } from '../demo';
@@ -46,14 +46,12 @@ export function useLayout() {
     cardWidth: (container - padding * 2 - 12) / 2,
   };
 }
-export function Label({
-  children,
-  style,
-}: {
-  children: React.ReactNode;
-  style?: React.ComponentProps<typeof Text>['style'];
-}) {
-  return <Text style={[styles.body, style]}>{children}</Text>;
+export function Label({ children, style, ...props }: React.ComponentProps<typeof Text>) {
+  return (
+    <Text {...props} style={[styles.body, style]}>
+      {children}
+    </Text>
+  );
 }
 export function Heading({
   children,
@@ -256,6 +254,7 @@ export function Screen({
   back?: boolean;
 }) {
   const { padding } = useLayout();
+  const { storageError, saveBusy, restoreFailed, retrySaved } = useDemo();
   const insets = useSafeAreaInsets();
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.screen}>
@@ -264,6 +263,17 @@ export function Screen({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {title && <TopBar title={title} action={action} back={back} />}
+        {!!storageError && (
+          <View style={{ paddingHorizontal: padding, paddingVertical: 8 }}>
+            <Label accessibilityRole="alert" style={{ color: c.error }}>
+              {storageError}
+            </Label>
+            {restoreFailed && (
+              <PrimaryButton title="Retry saved talent" secondary onPress={retrySaved} />
+            )}
+          </View>
+        )}
+        {saveBusy && <Label accessibilityLiveRegion="polite">Updating saved talent…</Label>}
         {scroll ? (
           <ScrollView
             style={{ flex: 1, minHeight: 0 }}
@@ -340,16 +350,16 @@ export function PriceBadge({ rate, large = false }: { rate: number; large?: bool
   );
 }
 function SaveButton({ talent }: { talent: Talent }) {
-  const { saved, toggleSaved, hydrated } = useDemo();
+  const { saved, toggleSaved, hydrated, saveBusy, restoreFailed } = useDemo();
   const selected = saved.includes(talent.id);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${selected ? 'Unsave' : 'Save'} ${talent.name}`}
-      accessibilityState={{ selected, disabled: !hydrated }}
+      accessibilityState={{ selected, disabled: !hydrated || saveBusy || restoreFailed }}
       aria-pressed={selected}
-      aria-disabled={!hydrated}
-      disabled={!hydrated}
+      aria-disabled={!hydrated || saveBusy || restoreFailed}
+      disabled={!hydrated || saveBusy || restoreFailed}
       onPress={() => toggleSaved(talent.id)}
       style={styles.saveTarget}
     >
@@ -372,7 +382,7 @@ export function TalentCard({ talent, featured = false }: { talent: Talent; featu
         onPress={() => router.push(`/talent/${talent.id}`)}
       >
         <TalentImage
-          source={talentMedia[talent.portrait]}
+          source={imageSource(talent.portrait, talent.portraitUri)}
           label={`Sample portrait for ${talent.name}`}
           style={{ height: undefined, aspectRatio: featured ? 1 : 3 / 4, borderRadius: 12 }}
         />
@@ -459,7 +469,7 @@ export function PortfolioGrid({
   images,
   onOpen,
 }: {
-  images: { image: string; label: string }[];
+  images: { image: string; label: string; uri?: string }[];
   onOpen: (index: number) => void;
 }) {
   return (
@@ -473,7 +483,7 @@ export function PortfolioGrid({
           style={{ width: '48%', flexGrow: 1, maxWidth: '50%' }}
         >
           <TalentImage
-            source={talentMedia[item.image]}
+            source={imageSource(item.image, item.uri)}
             label={item.label}
             style={{ height: undefined, aspectRatio: 3 / 4, borderRadius: 14 }}
           />
@@ -491,7 +501,7 @@ export function BookingCard({ booking, talent }: { booking: Booking; talent: Tal
       style={styles.listCard}
     >
       <TalentImage
-        source={talentMedia[talent.portrait]}
+        source={imageSource(talent.portrait, talent.portraitUri)}
         label={`Sample portrait for ${talent.name}`}
         style={styles.thumbnail}
       />
@@ -552,7 +562,7 @@ export function MessageCard({
       style={[styles.listCard, { minHeight: 76, paddingVertical: 10, paddingHorizontal: 12 }]}
     >
       <TalentImage
-        source={talentMedia[talent.portrait]}
+        source={imageSource(talent.portrait, talent.portraitUri)}
         label={`Sample portrait for ${talent.name}`}
         style={[styles.thumbnail, { width: 46, height: 46, borderRadius: 23 }]}
       />

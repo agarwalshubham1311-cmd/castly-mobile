@@ -1,0 +1,107 @@
+{
+  "browser": "Chromium; CSS pixels; 150% text simulation only",
+  "results": [
+    {
+      "width": 360,
+      "height": 800,
+      "initialTabs": {
+        "x": 16,
+        "y": 576,
+        "width": 72.421875,
+        "height": 48
+      },
+      "footer": {
+        "x": 148.3125,
+        "y": 740,
+        "width": 195.6875,
+        "height": 48
+      },
+      "scrolledTabs": {
+        "x": 16,
+        "y": 87,
+        "width": 72.421875,
+        "height": 48
+      },
+      "enlargedFooter": {
+        "x": 148.3125,
+        "y": 710,
+        "width": 195.6875,
+        "height": 78
+      },
+      "finalText": {
+        "x": 16,
+        "y": 624.5,
+        "width": 328,
+        "height": 48
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "initialTabs": {
+        "x": 20,
+        "y": 595,
+        "width": 72.421875,
+        "height": 48
+      },
+      "footer": {
+        "x": 159.84375,
+        "y": 784,
+        "width": 214.15625,
+        "height": 48
+      },
+      "scrolledTabs": {
+        "x": 20,
+        "y": 102,
+        "width": 72.421875,
+        "height": 48
+      },
+      "enlargedFooter": {
+        "x": 159.84375,
+        "y": 754,
+        "width": 214.15625,
+        "height": 78
+      },
+      "finalText": {
+        "x": 20,
+        "y": 668.5,
+        "width": 350,
+        "height": 48
+      }
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "initialTabs": {
+        "x": 20,
+        "y": 613,
+        "width": 72.421875,
+        "height": 48
+      },
+      "footer": {
+        "x": 175.234375,
+        "y": 872,
+        "width": 238.765625,
+        "height": 48
+      },
+      "scrolledTabs": {
+        "x": 20,
+        "y": 153,
+        "width": 72.421875,
+        "height": 48
+      },
+      "enlargedFooter": {
+        "x": 175.234375,
+        "y": 867,
+        "width": 238.765625,
+        "height": 53
+      },
+      "finalText": {
+        "x": 20,
+        "y": 782,
+        "width": 390,
+        "height": 48
+      }
+    }
+  ]
+}

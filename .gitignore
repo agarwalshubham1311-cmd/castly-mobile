@@ -42,3 +42,10 @@ yarn-error.*
 
 # Platform export outputs
 dist-web/
+
+# Credentials (only the empty example belongs in Git)
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/.branches/

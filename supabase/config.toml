@@ -1,0 +1,11 @@
+project_id = "castly-mobile"
+
+[auth]
+site_url = "http://localhost:8081"
+additional_redirect_urls = ["http://127.0.0.1:8082/auth/callback", "http://localhost:8081/auth/callback", "castly://auth/callback"]
+enable_signup = true
+minimum_password_length = 8
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
