@@ -1,3 +1,4 @@
+import { localDateISO } from './dates.ts';
 export type Booking = {
   id: string;
   talentId: string;
@@ -49,10 +50,12 @@ export type Conversation = {
   archived: boolean;
   booking: boolean;
   messages: Message[];
+  updatedLabel?: string;
 };
 export const demoConversations: Conversation[] = [
   {
     id: 'aria',
+    updatedLabel: 'Sample · 10:24',
     talentId: 'aria',
     unread: true,
     archived: false,
@@ -63,6 +66,7 @@ export const demoConversations: Conversation[] = [
   },
   {
     id: 'rehan',
+    updatedLabel: 'Sample · 09:10',
     talentId: 'rehan',
     unread: false,
     archived: false,
@@ -73,6 +77,7 @@ export const demoConversations: Conversation[] = [
   },
   {
     id: 'maya',
+    updatedLabel: 'Sample · 08:45',
     talentId: 'maya',
     unread: true,
     archived: false,
@@ -81,6 +86,7 @@ export const demoConversations: Conversation[] = [
   },
   {
     id: 'ishaan',
+    updatedLabel: 'Sample · 12 Oct',
     talentId: 'ishaan',
     unread: false,
     archived: true,
@@ -95,7 +101,7 @@ export type BookingForm = {
   requirements: string;
   budget: string;
 };
-export function validateBooking(form: BookingForm, today = new Date().toISOString().slice(0, 10)) {
+export function validateBooking(form: BookingForm, today = localDateISO()) {
   const errors: Partial<Record<keyof BookingForm, string>> = {};
   if (!form.project.trim()) errors.project = 'Choose a project type.';
   const parsed = new Date(`${form.date}T12:00:00Z`);

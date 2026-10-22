@@ -101,7 +101,7 @@ export default function Chat() {
             <Text
               style={{
                 fontFamily: f.medium,
-                fontSize: 9,
+                fontSize: 11,
                 color: message.mine ? '#EDE5FF' : c.secondary,
                 marginTop: 7,
               }}

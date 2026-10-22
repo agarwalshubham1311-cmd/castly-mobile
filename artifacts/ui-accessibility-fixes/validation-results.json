@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-10-22T06:58:49.526579+00:00",
+  "branch": "feat/initial-castly-mobile",
+  "baseCommit": "fac6c6c860e8eb843ff28b167bdac8f5f0ef2ed0",
+  "implementation": "uncommitted feature-branch working tree; no merge or push",
+  "checks": {
+    "typecheck": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/typecheck.log"
+    },
+    "lint": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/lint.log"
+    },
+    "unit": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/unit.log"
+    },
+    "browser": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/browser.log"
+    },
+    "portraits": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/portraits.log"
+    },
+    "ui": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/ui.log"
+    },
+    "screenshots": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/screenshots.log"
+    },
+    "accessibility": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/accessibility.log"
+    },
+    "export-web": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/export-web.log"
+    },
+    "export-all": {
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "logs/export-all.log"
+    },
+    "expo-doctor": {
+      "result": "INCOMPLETE_NETWORK",
+      "exitCode": 1,
+      "passed": 18,
+      "total": 20,
+      "log": "logs/doctor.log"
+    },
+    "expo-install-check-online": {
+      "result": "BLOCKED_PROXY",
+      "exitCode": 1,
+      "log": "logs/dependencies.log"
+    },
+    "expo-install-check-offline": {
+      "result": "PASS_WITH_OFFLINE_LIMIT",
+      "exitCode": 0,
+      "log": "logs/dependencies-offline.log"
+    }
+  },
+  "nativeRuntimeTested": false,
+  "currentScreenshots": 30,
+  "allReviewPNGsFullyDecoded": 52
+}

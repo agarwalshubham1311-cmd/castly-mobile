@@ -1,0 +1,51 @@
+
+> castly-mobile@0.1.0 test
+> node --experimental-strip-types --test tests/*.test.ts
+
+(node:67297) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/accessibility.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ normal text meets AA on actual Lavender Pearl surfaces without changing primary colors (1.089628ms)
+✔ date selection preserves the device calendar day and rejects impossible dates (13.502264ms)
+(node:67298) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/branding.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ launcher PNGs decode at platform sizes with opaque app icons and padded adaptive silhouettes (293.071388ms)
+(node:67299) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/demo.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ booking validation accepts a complete future local request (2.466382ms)
+✔ booking validation rejects impossible dates, past dates and incomplete fields (0.849863ms)
+✔ saved restoration deduplicates and removes obsolete or malformed IDs (0.672853ms)
+✔ search applies minimum budget and skills while sorting without mutating fixtures (0.333057ms)
+(node:67322) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/portraits.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 11 distinct local JPEGs match source hashes and license metadata (3.394645ms)
+✔ every talent has a bundled portrait and gallery; every photograph is used (0.421151ms)
+(node:67328) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/talent.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ discovery returns the full catalog without constraints (1.067374ms)
+✔ search matches skills and trims case-insensitively (0.931557ms)
+✔ category, location, budget and availability combine (0.284513ms)
+✔ unknown searches have no results (0.163369ms)
+✔ sample catalog does not advertise fabricated reputation claims (0.185583ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 397.190774
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

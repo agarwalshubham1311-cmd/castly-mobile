@@ -100,7 +100,7 @@ const fs = require('node:fs');
     assert.equal(await page.getByRole('alert').count(), 5);
     await page.getByRole('button', { name: 'Choose project type', exact: true }).click();
     await page.getByRole('button', { name: 'Brand photoshoot', exact: true }).click();
-    await page.getByRole('textbox', { name: 'Proposed date', exact: true }).fill('2027-12-20');
+    await page.getByLabel('Proposed date', { exact: true }).fill('2027-12-20');
     await page.getByRole('textbox', { name: 'Location', exact: true }).fill('Mumbai studio');
     await page
       .getByRole('textbox', { name: 'Project requirements', exact: true })
@@ -148,8 +148,19 @@ const fs = require('node:fs');
       await capture('discovery', width, height);
       await go(page, '/search', 'Search talent');
       await capture('search', width, height);
-      await go(page, '/talent/aria', 'Portfolio');
-      await capture('talent-profile', width, height);
+      for (const [route, name, label] of [
+        ['/talent/aria', 'talent-profile', 'Portfolio'],
+        ['/filters', 'filters', 'Filters'],
+        ['/gallery/aria', 'portfolio-gallery', 'Photos'],
+        ['/booking/aria', 'booking-request', 'Request booking'],
+        ['/messages', 'messages', 'Messages'],
+        ['/bookings', 'bookings', 'Bookings'],
+        ['/saved', 'saved-talent', 'Saved talent'],
+        ['/account', 'account-profile', 'Creative Studio'],
+      ]) {
+        await go(page, route, label);
+        await capture(name, width, height);
+      }
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await go(page, '/search', 'Search talent');
@@ -163,14 +174,14 @@ const fs = require('node:fs');
       elements
         .filter((el) => {
           const r = el.getBoundingClientRect();
-          return r.width > 0 && r.height > 0 && (r.height < 43 || r.width < 43);
+          return r.width > 0 && r.height > 0 && (r.height < 48 || r.width < 48);
         })
         .map((el) => el.getAttribute('aria-label') || el.textContent),
     );
     assert.deepEqual(targets, [], 'Interactive controls meet minimum touch target size');
     assert.deepEqual(errors, []);
     console.log(
-      'PASS: ten screens, gallery viewer/empty media, filters/skills/sorting, five-tab routes, local booking validation/confirmation, local chat, saved persistence, account/notifications, responsive bounds. Captured 16 PNGs.',
+      'PASS: ten screens, gallery viewer/empty media, filters/skills/sorting, five-tab routes, local booking validation/confirmation, local chat, saved persistence, account/notifications, responsive bounds. Captured 30 PNGs.',
     );
   } finally {
     await browser.close();

@@ -1,0 +1,16 @@
+Error: HTTP Proxy Network Error: Forbidden
+Error: HTTP Proxy Network Error: Forbidden
+    at ClientRequest.<anonymous> (/workspace/castly-mobile/node_modules/fetch-nodeshim/dist/minifetch.js:353:13)
+    at Object.onceWrapper (node:events:631:26)
+    at ClientRequest.emit (node:events:509:28)
+    at Socket.socketOnData (node:_http_client:825:11)
+    at Socket.emit (node:events:509:28)
+    at addChunk (node:internal/streams/readable:563:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
+    at Readable.push (node:internal/streams/readable:394:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

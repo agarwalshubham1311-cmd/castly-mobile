@@ -40,6 +40,7 @@ export function useLayout() {
   const padding = container <= 360 ? 16 : 20;
   return {
     width: container,
+    fontScale,
     padding,
     columns: fontScale > 1.4 ? 1 : 2,
     cardWidth: (container - padding * 2 - 12) / 2,
@@ -232,10 +233,10 @@ export function TopBar({
           onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
         />
       ) : (
-        <View style={{ width: 44 }} />
+        <View style={{ width: 48 }} />
       )}
       <Text style={styles.topTitle}>{title}</Text>
-      <View style={{ minWidth: 44, alignItems: 'flex-end' }}>{action}</View>
+      <View style={{ minWidth: 48, alignItems: 'flex-end' }}>{action}</View>
     </View>
   );
 }
@@ -259,12 +260,13 @@ export function Screen({
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.screen}>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{ flex: 1, minHeight: 0 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {title && <TopBar title={title} action={action} back={back} />}
         {scroll ? (
           <ScrollView
+            style={{ flex: 1, minHeight: 0 }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             contentContainerStyle={{
@@ -445,7 +447,7 @@ export function SectionTitle({
           accessibilityRole="button"
           accessibilityLabel={action}
           onPress={onPress}
-          style={{ minHeight: 44, justifyContent: 'center' }}
+          style={{ minHeight: 48, minWidth: 48, justifyContent: 'center' }}
         >
           <Text style={styles.link}>{action} ›</Text>
         </Pressable>
@@ -516,7 +518,7 @@ export function BookingCard({ booking, talent }: { booking: Booking; talent: Tal
         <Text
           style={{
             fontFamily: f.medium,
-            fontSize: 10,
+            fontSize: 11,
             color: booking.status === 'Confirmed' ? c.success : c.primaryDark,
           }}
         >
@@ -534,28 +536,66 @@ export function MessageCard({
   talent: Talent;
 }) {
   const { openConversation } = useDemo();
+  const { fontScale } = useLayout();
+  const unread = conversation.unread
+    ? conversation.messages.filter((message) => !message.mine).length
+    : 0;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Open conversation with ${talent.name}`}
+      accessibilityHint={`${unread ? `${unread} unread sample messages. ` : ''}${conversation.updatedLabel || 'Local draft'}. Opens a local-only demonstration.`}
       onPress={() => {
         openConversation(talent.id);
         router.push(`/chat/${talent.id}`);
       }}
-      style={styles.listCard}
+      style={[styles.listCard, { minHeight: 76, paddingVertical: 10, paddingHorizontal: 12 }]}
     >
       <TalentImage
         source={talentMedia[talent.portrait]}
         label={`Sample portrait for ${talent.name}`}
-        style={[styles.thumbnail, { width: 48, height: 48, borderRadius: 24 }]}
+        style={[styles.thumbnail, { width: 46, height: 46, borderRadius: 23 }]}
       />
       <View style={{ flex: 1, gap: 5 }}>
-        <Text style={styles.cardName}>{talent.name}</Text>
-        <Text numberOfLines={1} style={styles.metadata}>
-          {conversation.messages.at(-1)?.text || 'Start a local conversation'}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', gap: 4 }}>
+          <Text style={[styles.cardName, { flexGrow: 1 }]}>{talent.name}</Text>
+          <Text style={{ color: c.secondary, fontFamily: f.medium, fontSize: 11 }}>
+            {conversation.updatedLabel || 'Local draft'}
+          </Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Text
+            numberOfLines={fontScale > 1.3 ? 2 : 1}
+            style={[
+              styles.metadata,
+              {
+                flex: 1,
+                color: unread ? c.text : c.secondary,
+                fontFamily: unread ? f.semibold : f.regular,
+              },
+            ]}
+          >
+            {conversation.messages.at(-1)?.text || 'Start a local conversation'}
+          </Text>
+          {unread > 0 && (
+            <View
+              accessibilityLabel={`${unread} unread sample messages`}
+              style={{
+                minWidth: 23,
+                minHeight: 23,
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                borderRadius: 12,
+                backgroundColor: c.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text style={{ color: c.white, fontFamily: f.bold, fontSize: 11 }}>{unread}</Text>
+            </View>
+          )}
+        </View>
       </View>
-      {conversation.unread && <View accessibilityLabel="Unread conversation" style={styles.dot} />}
     </Pressable>
   );
 }
@@ -615,7 +655,7 @@ export function BottomNavigation({
             <Text
               style={{
                 fontFamily: focused ? f.bold : f.medium,
-                fontSize: 10,
+                fontSize: 11,
                 color: focused ? c.primaryDark : c.secondary,
               }}
             >
@@ -709,7 +749,7 @@ export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: c.background },
   body: { fontFamily: f.regular, fontSize: 13, color: c.secondary, lineHeight: 21 },
   heading: { fontFamily: f.bold, color: c.text, fontSize: 17, lineHeight: 25 },
-  sample: { fontFamily: f.medium, color: c.primaryDark, fontSize: 10, lineHeight: 16 },
+  sample: { fontFamily: f.medium, color: c.primaryDark, fontSize: 11, lineHeight: 16 },
   topbar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -721,8 +761,8 @@ export const styles = StyleSheet.create({
   },
   topTitle: { flex: 1, textAlign: 'center', fontFamily: f.bold, fontSize: 16, color: c.text },
   iconButton: {
-    minHeight: 44,
-    minWidth: 44,
+    minHeight: 48,
+    minWidth: 48,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 22,
@@ -747,8 +787,8 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
   chip: {
-    minHeight: 44,
-    minWidth: 44,
+    minHeight: 48,
+    minWidth: 48,
     borderWidth: 1,
     borderColor: c.border,
     borderRadius: 22,
@@ -777,7 +817,7 @@ export const styles = StyleSheet.create({
   input: {
     flex: 1,
     minWidth: 0,
-    minHeight: 46,
+    minHeight: 48,
     color: c.text,
     fontFamily: f.regular,
     fontSize: 13,
@@ -810,7 +850,7 @@ export const styles = StyleSheet.create({
   },
   cardBody: { padding: 9, gap: 5 },
   cardName: { fontFamily: f.bold, color: c.text, fontSize: 13, lineHeight: 19 },
-  metadata: { fontFamily: f.regular, color: c.secondary, fontSize: 10, lineHeight: 16 },
+  metadata: { fontFamily: f.regular, color: c.secondary, fontSize: 11, lineHeight: 16 },
   priceBadge: {
     backgroundColor: c.lavender,
     paddingHorizontal: 6,
@@ -818,14 +858,14 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     alignSelf: 'flex-start',
   },
-  price: { fontFamily: f.bold, fontSize: 10, color: c.primaryDark, lineHeight: 16 },
-  day: { fontFamily: f.medium, fontSize: 9 },
+  price: { fontFamily: f.bold, fontSize: 11, color: c.primaryDark, lineHeight: 16 },
+  day: { fontFamily: f.medium, fontSize: 11 },
   saveTarget: {
     position: 'absolute',
     top: 0,
     right: 0,
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },

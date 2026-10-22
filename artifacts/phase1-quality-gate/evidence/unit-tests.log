@@ -1,0 +1,35 @@
+
+> castly-mobile@0.1.0 test
+> node --experimental-strip-types --test tests/*.test.ts
+
+(node:59403) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/demo.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ booking validation accepts a complete future local request (2.80928ms)
+✔ booking validation rejects impossible dates, past dates and incomplete fields (0.565706ms)
+✔ saved restoration deduplicates and removes obsolete or malformed IDs (0.725845ms)
+✔ search applies minimum budget and skills while sorting without mutating fixtures (0.549301ms)
+(node:59404) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/portraits.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 11 distinct local JPEGs match source hashes and license metadata (5.511459ms)
+✔ every talent has a bundled portrait and gallery; every photograph is used (0.338786ms)
+(node:59406) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/talent.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ discovery returns the full catalog without constraints (0.860156ms)
+✔ search matches skills and trims case-insensitively (1.15057ms)
+✔ category, location, budget and availability combine (0.731003ms)
+✔ unknown searches have no results (0.541379ms)
+✔ sample catalog does not advertise fabricated reputation claims (0.310885ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 475.746935

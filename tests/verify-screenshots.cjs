@@ -22,7 +22,18 @@ const { assert, launch } = require('./browser-utils.cjs');
       [360, 800],
       [430, 932],
     ])
-      for (const name of ['discovery', 'search', 'talent-profile'])
+      for (const name of [
+        'discovery',
+        'search',
+        'filters',
+        'talent-profile',
+        'portfolio-gallery',
+        'booking-request',
+        'messages',
+        'bookings',
+        'saved-talent',
+        'account-profile',
+      ])
         targets.push([name, width, height]);
     const results = [];
     for (const [name, width, height] of targets) {

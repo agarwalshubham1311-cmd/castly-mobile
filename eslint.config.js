@@ -4,7 +4,7 @@ module.exports = defineConfig([
   expo,
   { ignores: ['dist/**', 'dist-web/**', '.expo/**', 'artifacts/**'] },
   {
-    files: ['tests/*.cjs', 'eslint.config.js'],
+    files: ['tests/*.cjs', 'scripts/*.cjs', 'eslint.config.js'],
     languageOptions: {
       globals: {
         require: 'readonly',

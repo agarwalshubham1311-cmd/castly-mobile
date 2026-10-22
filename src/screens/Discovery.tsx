@@ -17,6 +17,7 @@ import {
   Screen,
   SectionTitle,
   TalentGrid,
+  useLayout,
 } from '../components/ui';
 const categoryIcons: IconName[] = [
   'grid-outline',
@@ -27,11 +28,12 @@ const categoryIcons: IconName[] = [
   'aperture-outline',
 ];
 export default function Discovery() {
+  const { fontScale } = useLayout();
   const [locationOpen, setLocationOpen] = useState(false);
   const { filters, setFilters, setCategory, setQuery } = useDemo();
   const header = (
     <View style={{ gap: 18, marginBottom: 18 }}>
-      <View style={s.brandRow}>
+      <View style={[s.brandRow, fontScale > 1.3 && { flexWrap: 'wrap' }]}>
         <Text accessibilityRole="header" style={s.logo}>
           castly<Text style={{ color: c.primary }}>✦</Text>
         </Text>
@@ -68,17 +70,29 @@ export default function Discovery() {
         </View>
       </View>
       <LinearGradient
-        colors={['#F0E7FF', '#F9F5FF', '#E6D9FA']}
+        colors={[c.lavender, c.lavender]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={s.hero}
       >
-        <TalentImage
-          source={talentMedia[talents[0].portrait]}
-          label="Editorial sample talent portrait"
-          style={s.heroImage}
-        />
-        <View style={s.heroCopy}>
+        <View
+          pointerEvents="none"
+          style={[s.heroMedia, fontScale > 1.3 && { width: '100%', opacity: 0.18 }]}
+        >
+          <TalentImage
+            source={talentMedia[talents[0].portrait]}
+            label="Editorial sample talent portrait"
+            style={{ height: '100%', borderRadius: 0 }}
+          />
+          <LinearGradient
+            colors={[c.lavender, '#EDE5FFEE', '#EDE5FF00']}
+            locations={[0, 0.25, 0.85]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
+        <View style={[s.heroCopy, fontScale > 1.3 && { width: '100%' }]}>
           <Text style={s.eyebrow}>WHERE TALENT SHINES</Text>
           <Text style={s.heroTitle}>
             Find the perfect{'\n'}talent for your{'\n'}
@@ -180,7 +194,7 @@ const s = StyleSheet.create({
   brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 4 },
   logo: { fontFamily: f.extrabold, fontSize: 31, letterSpacing: -2, color: '#171038' },
   location: {
-    minHeight: 44,
+    minHeight: 48,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -188,12 +202,12 @@ const s = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#F1EBFF',
   },
-  locationText: { fontFamily: f.semibold, color: c.text, fontSize: 10 },
-  avatar: { height: 44, width: 44, alignItems: 'center', justifyContent: 'center' },
-  hero: { height: 185, borderRadius: 22, overflow: 'hidden' },
-  heroImage: { position: 'absolute', height: 185, width: '48%', right: 0, borderRadius: 0 },
-  heroCopy: { padding: 16, width: '67%', gap: 7 },
-  eyebrow: { fontSize: 9, letterSpacing: 1.4, fontFamily: f.extrabold, color: c.primaryDark },
+  locationText: { fontFamily: f.semibold, color: c.text, fontSize: 11 },
+  avatar: { height: 48, width: 48, alignItems: 'center', justifyContent: 'center' },
+  hero: { minHeight: 196, borderRadius: 22, overflow: 'hidden' },
+  heroMedia: { position: 'absolute', top: 0, bottom: 0, width: '61%', right: 0 },
+  heroCopy: { padding: 16, paddingBottom: 36, minHeight: 196, width: '67%', gap: 7 },
+  eyebrow: { fontSize: 11, letterSpacing: 1.4, fontFamily: f.extrabold, color: c.primaryDark },
   heroTitle: {
     fontFamily: f.extrabold,
     fontSize: 23,
@@ -201,7 +215,7 @@ const s = StyleSheet.create({
     letterSpacing: -0.9,
     lineHeight: 28,
   },
-  heroCaption: { fontFamily: f.medium, fontSize: 10, color: c.secondary },
+  heroCaption: { fontFamily: f.medium, fontSize: 11, color: c.secondary },
   searchEntry: {
     minHeight: 50,
     backgroundColor: c.white,
@@ -228,5 +242,5 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  categoryLabel: { color: c.text, fontFamily: f.medium, fontSize: 10 },
+  categoryLabel: { color: c.text, fontFamily: f.medium, fontSize: 11 },
 });

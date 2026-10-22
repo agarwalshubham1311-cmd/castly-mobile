@@ -55,13 +55,14 @@ npm run test:browser
 npm run test:portraits
 npm run test:ui
 npm run test:screenshots
+npm run test:accessibility
 ```
 
 The static preview serves `dist-web` with Expo Router SPA fallback on port 8082. Override `WEB_EXPORT_DIR` or `PORT` if needed. The browser tests use locally installed Chromium (`/usr/bin/chromium` by default); override `CHROMIUM_PATH` and `TEST_URL` as needed. This static file server is development tooling, not an application backend.
 
-`test:browser` preserves the original discovery/filter/profile/save regression coverage, including saved persistence. `test:portraits` exercises all local profile/gallery assets, image bounds, loading and error states. `test:ui` exercises the ten screens, local booking and chat flows, sorting/filter synchronization and five active tabs. It captures all ten screens at 390×844 plus Home/Search/Talent at 360×800 and 430×932.
+`test:browser` preserves the original discovery/filter/profile/save regression coverage, including saved persistence. `test:portraits` exercises all local profile/gallery assets, image bounds, loading and error states. `test:ui` exercises the ten screens, local booking and chat flows, sorting/filter synchronization and five active tabs. It captures all ten screens at 360×800, 390×844 and 430×932.
 
-`test:screenshots` fully decodes the 16 PNGs in Chromium, checks exact dimensions and nonblank pixels, and writes hashes, sizes and decoding results to [the screenshot manifest](artifacts/screenshots/manifest.json). Images live in [artifacts/screenshots](artifacts/screenshots/).
+`test:screenshots` fully decodes the 30 PNGs in Chromium, checks exact dimensions and nonblank pixels, and writes hashes, sizes and decoding results to [the screenshot manifest](artifacts/screenshots/manifest.json). Images live in [artifacts/screenshots](artifacts/screenshots/).
 
 Native exports verify bundling, not real-device rendering, native keyboards, screen readers or notch/home-indicator behavior. Android/iOS device validation remains required before release.
 
@@ -77,3 +78,5 @@ Native exports verify bundling, not real-device rendering, native keyboards, scr
 - `tests/`: pure logic/asset tests and Playwright UI checks.
 
 Work remains on `feat/initial-castly-mobile`. No merge, Supabase integration, backend development or billing is part of this implementation.
+
+The UI/accessibility follow-up adds AA secondary text, 48px web control targets, a blended Discovery hero, compact/sticky profile content, local message timestamps/unread counts, platform date selection and Castly launcher assets. `test:accessibility` covers responsive controls, sticky tabs/footer, browser 150% text simulation, switch keyboard use and local interactions. Native TalkBack, system font scaling, calendar dialogs and launcher masking still require device testing. See [the implementation report and before/after comparisons](artifacts/ui-accessibility-fixes/report.md), and [branding exports](assets/branding/README.md).

@@ -1,0 +1,42 @@
+[
+  {
+    "command": "npm run typecheck",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run lint",
+    "exitCode": 0
+  },
+  {
+    "command": "npm test",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run export:web",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run test:browser",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run test:portraits",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run test:ui",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run test:accessibility",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run test:screenshots",
+    "exitCode": 0
+  },
+  {
+    "command": "npx expo export --platform all --output-dir /tmp/castly-phase2-step0/export-all",
+    "exitCode": 0
+  }
+]

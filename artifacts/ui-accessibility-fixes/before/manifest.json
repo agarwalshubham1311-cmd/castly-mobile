@@ -1,0 +1,150 @@
+{
+  "verifiedAt": "2026-10-21T13:05:39.293Z",
+  "engine": "Playwright Chromium PNG decode + canvas pixel inspection",
+  "screenshots": [
+    {
+      "file": "discovery-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 184103,
+      "sha256": "d42c4a9910ad82ab5448bc79bb705bb05a151e65f9900de2734159b9fe8b9395",
+      "decoded": true,
+      "sampledColors": 2422
+    },
+    {
+      "file": "search-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 218853,
+      "sha256": "db43156bd3a1fbbd667f1cdab0dac1aa4243dbeca7ed0e5d02ead9d8b56396cd",
+      "decoded": true,
+      "sampledColors": 2710
+    },
+    {
+      "file": "filters-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 42122,
+      "sha256": "2e3e08aeedc1e896d2eaaa5cc0d998d566b0af488f57fc2a037885673692baf9",
+      "decoded": true,
+      "sampledColors": 270
+    },
+    {
+      "file": "talent-profile-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 157817,
+      "sha256": "0cdbb7030e771004fd8ee779239fda67dd42161075a3be7334454f127159b08d",
+      "decoded": true,
+      "sampledColors": 2874
+    },
+    {
+      "file": "portfolio-gallery-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 160428,
+      "sha256": "4a3f98ba41c7188bf5c8bde3293b68b49eca08b806250031d0364ae991bb160f",
+      "decoded": true,
+      "sampledColors": 3078
+    },
+    {
+      "file": "booking-request-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 48628,
+      "sha256": "e8954bfca9186b6931c02846a097096642503da3935ed50f73772c45e1f524bd",
+      "decoded": true,
+      "sampledColors": 360
+    },
+    {
+      "file": "messages-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 47501,
+      "sha256": "406cbbccfb6dc6a51a99339d32bd833b3962781258857e61d002764c10089bf3",
+      "decoded": true,
+      "sampledColors": 430
+    },
+    {
+      "file": "bookings-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 53871,
+      "sha256": "f35af825fbac27fde98f596cf05c9be73002c1e5733e09a671eab168bebdfb75",
+      "decoded": true,
+      "sampledColors": 530
+    },
+    {
+      "file": "saved-talent-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 42308,
+      "sha256": "0729080f7e67950c295832e1010f4b4104a2fda2089fa9d128216a8dade61588",
+      "decoded": true,
+      "sampledColors": 483
+    },
+    {
+      "file": "account-profile-390x844.png",
+      "width": 390,
+      "height": 844,
+      "bytes": 51700,
+      "sha256": "1b64e3cf4083c218e77781c8056e2d541176cf5e10c4d537becfc4fff3181df4",
+      "decoded": true,
+      "sampledColors": 385
+    },
+    {
+      "file": "discovery-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 169622,
+      "sha256": "d49cc30959b4f6b0b49430a3d0f5f262329a256371f56d4ac13232f86b2b5f85",
+      "decoded": true,
+      "sampledColors": 2211
+    },
+    {
+      "file": "search-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 188755,
+      "sha256": "0631e8b1cc08064e0d84a4b7c1ac3468a362a1d61a3033061caf04997f7d4236",
+      "decoded": true,
+      "sampledColors": 2365
+    },
+    {
+      "file": "talent-profile-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 148702,
+      "sha256": "9db2c9d8e56320ee2f793a66a7dafc6a8885b15fafcf7b8e5ed544cc5d18c249",
+      "decoded": true,
+      "sampledColors": 2782
+    },
+    {
+      "file": "discovery-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 242026,
+      "sha256": "332b53c1527beef0a770ab975145264f86e92c045c3dcb0dafbbc118af99fa01",
+      "decoded": true,
+      "sampledColors": 2830
+    },
+    {
+      "file": "search-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 289027,
+      "sha256": "95588d8f85504b2703272cfc1c54670404d05e6cade804fcfa6005f5bc6dea61",
+      "decoded": true,
+      "sampledColors": 3584
+    },
+    {
+      "file": "talent-profile-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 167296,
+      "sha256": "5fe2e2b2df0d1d74d5071173f5c63ee1c0b7484e0dba912e97526914f71517b6",
+      "decoded": true,
+      "sampledColors": 3176
+    }
+  ]
+}

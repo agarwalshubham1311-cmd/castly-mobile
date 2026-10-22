@@ -1,150 +1,276 @@
 {
-  "verifiedAt": "2026-10-21T13:05:39.293Z",
+  "verifiedAt": "2026-10-22T08:58:57.202Z",
   "engine": "Playwright Chromium PNG decode + canvas pixel inspection",
   "screenshots": [
     {
       "file": "discovery-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 184103,
-      "sha256": "d42c4a9910ad82ab5448bc79bb705bb05a151e65f9900de2734159b9fe8b9395",
+      "bytes": 175590,
+      "sha256": "db0a1a00f5d7e0878af2aa77753f268e0a18db5bb52dc43c45fa469f7f4d6e87",
       "decoded": true,
-      "sampledColors": 2422
+      "sampledColors": 2539
     },
     {
       "file": "search-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 218853,
-      "sha256": "db43156bd3a1fbbd667f1cdab0dac1aa4243dbeca7ed0e5d02ead9d8b56396cd",
+      "bytes": 214408,
+      "sha256": "29759d7e5ef02efb87f645d8b5b0a58cb7e322e502c80e9814db73fff88a3473",
       "decoded": true,
-      "sampledColors": 2710
+      "sampledColors": 2678
     },
     {
       "file": "filters-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 42122,
-      "sha256": "2e3e08aeedc1e896d2eaaa5cc0d998d566b0af488f57fc2a037885673692baf9",
+      "bytes": 39064,
+      "sha256": "8243203d589f1bb129f2122c40870824fa017c54be7b7393c292bb95ab6c902d",
       "decoded": true,
-      "sampledColors": 270
+      "sampledColors": 255
     },
     {
       "file": "talent-profile-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 157817,
-      "sha256": "0cdbb7030e771004fd8ee779239fda67dd42161075a3be7334454f127159b08d",
+      "bytes": 139518,
+      "sha256": "be4791365f7d4ee21806c7747b77827cefb7161b7a0380fbd6fe3db265a791f4",
       "decoded": true,
-      "sampledColors": 2874
+      "sampledColors": 2154
     },
     {
       "file": "portfolio-gallery-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 160428,
-      "sha256": "4a3f98ba41c7188bf5c8bde3293b68b49eca08b806250031d0364ae991bb160f",
+      "bytes": 160595,
+      "sha256": "c25133016131e31fc909aed2b11e9cee43b6dcd36c2c38d34b3b715b051c5cf6",
       "decoded": true,
-      "sampledColors": 3078
+      "sampledColors": 3099
     },
     {
       "file": "booking-request-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 48628,
-      "sha256": "e8954bfca9186b6931c02846a097096642503da3935ed50f73772c45e1f524bd",
+      "bytes": 46713,
+      "sha256": "750f9b0f72cc35a8b84d40b07eeffa908bc627b6dc78a5704660715fed6e629d",
       "decoded": true,
-      "sampledColors": 360
+      "sampledColors": 387
     },
     {
       "file": "messages-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 47501,
-      "sha256": "406cbbccfb6dc6a51a99339d32bd833b3962781258857e61d002764c10089bf3",
+      "bytes": 51551,
+      "sha256": "b5e6f8a1d4d78f95eb56d39ec5511dd8698fb71ca23f035dcee833844aeed7b9",
       "decoded": true,
-      "sampledColors": 430
+      "sampledColors": 431
     },
     {
       "file": "bookings-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 53871,
-      "sha256": "f35af825fbac27fde98f596cf05c9be73002c1e5733e09a671eab168bebdfb75",
+      "bytes": 54273,
+      "sha256": "a5a15bedce9756181b2136caca38f16e093534536eeac966630cd2893d091008",
       "decoded": true,
-      "sampledColors": 530
+      "sampledColors": 539
     },
     {
       "file": "saved-talent-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 42308,
-      "sha256": "0729080f7e67950c295832e1010f4b4104a2fda2089fa9d128216a8dade61588",
+      "bytes": 42985,
+      "sha256": "08d4351f8690546d7ea5d4bd404267fe8081e58eb711fe5a364cbcfac9bab1b4",
       "decoded": true,
-      "sampledColors": 483
+      "sampledColors": 478
     },
     {
       "file": "account-profile-390x844.png",
       "width": 390,
       "height": 844,
-      "bytes": 51700,
-      "sha256": "1b64e3cf4083c218e77781c8056e2d541176cf5e10c4d537becfc4fff3181df4",
+      "bytes": 52220,
+      "sha256": "efab49b4dee4a6b85424c53c645b2ead58e41e7d52f3c365ac85b072e50a14ff",
       "decoded": true,
-      "sampledColors": 385
+      "sampledColors": 390
     },
     {
       "file": "discovery-360x800.png",
       "width": 360,
       "height": 800,
-      "bytes": 169622,
-      "sha256": "d49cc30959b4f6b0b49430a3d0f5f262329a256371f56d4ac13232f86b2b5f85",
+      "bytes": 162948,
+      "sha256": "c770bdab58f7e15277f464421765631f4a2ea411f018bcdad36a068860511b67",
       "decoded": true,
-      "sampledColors": 2211
+      "sampledColors": 2356
     },
     {
       "file": "search-360x800.png",
       "width": 360,
       "height": 800,
-      "bytes": 188755,
-      "sha256": "0631e8b1cc08064e0d84a4b7c1ac3468a362a1d61a3033061caf04997f7d4236",
+      "bytes": 185700,
+      "sha256": "84d9f871ee0af8776a2d14813168e0162c05a578b29248c985c96300c3582117",
       "decoded": true,
-      "sampledColors": 2365
+      "sampledColors": 2299
+    },
+    {
+      "file": "filters-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 35254,
+      "sha256": "1a1b54b95387cbd545a1ff1b55ff08f216bf3f35b2d89dfe527ebe54d2ad4118",
+      "decoded": true,
+      "sampledColors": 245
     },
     {
       "file": "talent-profile-360x800.png",
       "width": 360,
       "height": 800,
-      "bytes": 148702,
-      "sha256": "9db2c9d8e56320ee2f793a66a7dafc6a8885b15fafcf7b8e5ed544cc5d18c249",
+      "bytes": 120253,
+      "sha256": "689b8d8d02074606404c0d39269268d49e7cb8b188f15883ddbe7a6d2c0d565f",
       "decoded": true,
-      "sampledColors": 2782
+      "sampledColors": 1903
+    },
+    {
+      "file": "portfolio-gallery-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 146538,
+      "sha256": "6cf2dd7a7eba18a3d8d8d30e487d1a8d85829085d123c2da9fc069c8984e5fb7",
+      "decoded": true,
+      "sampledColors": 2798
+    },
+    {
+      "file": "booking-request-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 45397,
+      "sha256": "fba9db46198dda48154cf2080937662eba61523f514fe5700b21113e2dc0764c",
+      "decoded": true,
+      "sampledColors": 388
+    },
+    {
+      "file": "messages-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 50622,
+      "sha256": "a334c075f5776bb4181954f99ff71ef9a9445f88464d4d427360bff0fc4a31e9",
+      "decoded": true,
+      "sampledColors": 434
+    },
+    {
+      "file": "bookings-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 53865,
+      "sha256": "119f0e53ff3049412ed82d8e7ac42b7f623803a0641710749b49fbefe71c4d66",
+      "decoded": true,
+      "sampledColors": 540
+    },
+    {
+      "file": "saved-talent-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 42279,
+      "sha256": "2d3eef40984035bd9f35ba58c63d8051ca5117bee6a836bb6d968d8a499b4789",
+      "decoded": true,
+      "sampledColors": 475
+    },
+    {
+      "file": "account-profile-360x800.png",
+      "width": 360,
+      "height": 800,
+      "bytes": 48340,
+      "sha256": "7b76a82de5a05f99d85fb9b9ac7bba591d77de787c4fd3ee9c9ffc6183da3fb9",
+      "decoded": true,
+      "sampledColors": 345
     },
     {
       "file": "discovery-430x932.png",
       "width": 430,
       "height": 932,
-      "bytes": 242026,
-      "sha256": "332b53c1527beef0a770ab975145264f86e92c045c3dcb0dafbbc118af99fa01",
+      "bytes": 227648,
+      "sha256": "8a7dc33ccd9958c62159575bc2d6236931ea7744c2b53171bdf38f72ee04b17a",
       "decoded": true,
-      "sampledColors": 2830
+      "sampledColors": 2820
     },
     {
       "file": "search-430x932.png",
       "width": 430,
       "height": 932,
-      "bytes": 289027,
-      "sha256": "95588d8f85504b2703272cfc1c54670404d05e6cade804fcfa6005f5bc6dea61",
+      "bytes": 283605,
+      "sha256": "68f8b154e58c73409c7d7f77859abddd9ea6d1e389950571dd54f3d3fbeba958",
       "decoded": true,
-      "sampledColors": 3584
+      "sampledColors": 3504
+    },
+    {
+      "file": "filters-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 45281,
+      "sha256": "63117054e3c117010a02d4fd851640d4996296a58881bf0d49ef02f695cadbb3",
+      "decoded": true,
+      "sampledColors": 297
     },
     {
       "file": "talent-profile-430x932.png",
       "width": 430,
       "height": 932,
-      "bytes": 167296,
-      "sha256": "5fe2e2b2df0d1d74d5071173f5c63ee1c0b7484e0dba912e97526914f71517b6",
+      "bytes": 185933,
+      "sha256": "049bfc38e71c6361a42183f2a0b2ac7f62390b5ba44a6f5e04c3bc0e81414d7b",
       "decoded": true,
-      "sampledColors": 3176
+      "sampledColors": 2774
+    },
+    {
+      "file": "portfolio-gallery-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 188352,
+      "sha256": "589f62e7efa2e21f05fd9410091578a6ef362c88ec096501e88e54e1618ad7ab",
+      "decoded": true,
+      "sampledColors": 3713
+    },
+    {
+      "file": "booking-request-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 55088,
+      "sha256": "da89fbab6d06d71bb14a2eb7ce4f654777168c010ac3428595197ed683c4dbea",
+      "decoded": true,
+      "sampledColors": 454
+    },
+    {
+      "file": "messages-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 52318,
+      "sha256": "1ddd3c2c6dbe2f8bad6e0d5b218dc21f8ec7efe7319fc311274aa0afd3369fbb",
+      "decoded": true,
+      "sampledColors": 453
+    },
+    {
+      "file": "bookings-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 54809,
+      "sha256": "790869647258c77ccb56e0ef13e3a47be52c6e05beab2074b08306830b5368b2",
+      "decoded": true,
+      "sampledColors": 527
+    },
+    {
+      "file": "saved-talent-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 43445,
+      "sha256": "cefb942fa911c2e84030e066514c6c49445c9d5e4cab149b98969bd843919356",
+      "decoded": true,
+      "sampledColors": 483
+    },
+    {
+      "file": "account-profile-430x932.png",
+      "width": 430,
+      "height": 932,
+      "bytes": 53432,
+      "sha256": "2a254c789a5d564ad45f1f1e750dca551a2d0719329c6bd358c6abb781934008",
+      "decoded": true,
+      "sampledColors": 431
     }
   ]
 }

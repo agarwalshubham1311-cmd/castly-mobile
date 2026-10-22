@@ -1,5 +1,6 @@
+import AccessibleSwitch from '../components/AccessibleSwitch';
 import React, { useState } from 'react';
-import { Switch, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { router } from 'expo-router';
 import { categories, defaultFilters, findTalents, money } from '../talent';
@@ -105,7 +106,7 @@ export default function Filters() {
           }
           minimumTrackTintColor={c.primary}
           thumbTintColor={c.primaryDark}
-          style={{ height: 44 }}
+          style={{ height: 48 }}
         />
         <Label>Maximum daily rate</Label>
         <Slider
@@ -123,7 +124,7 @@ export default function Filters() {
           }
           minimumTrackTintColor={c.primary}
           thumbTintColor={c.primaryDark}
-          style={{ height: 44 }}
+          style={{ height: 48 }}
         />
       </View>
       <Heading>Skills / niche</Heading>
@@ -146,11 +147,10 @@ export default function Filters() {
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Label style={{ color: c.text }}>Available talent only</Label>
-        <Switch
-          accessibilityLabel="Available talent only"
+        <AccessibleSwitch
+          label="Available talent only"
           value={draft.availableOnly}
           onValueChange={(availableOnly) => setDraft({ ...draft, availableOnly })}
-          trackColor={{ false: c.border, true: c.primary }}
         />
       </View>
       <PrimaryButton title="Clear filters" secondary onPress={clear} />

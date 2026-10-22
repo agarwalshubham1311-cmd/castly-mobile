@@ -1,0 +1,10 @@
+
+> castly-mobile@0.1.0 test:ui
+> node tests/lavender-browser.cjs
+
+PASS: ten screens, gallery viewer/empty media, filters/skills/sorting, five-tab routes, local booking validation/confirmation, local chat, saved persistence, account/notifications, responsive bounds. Captured 16 PNGs.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

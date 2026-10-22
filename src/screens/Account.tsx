@@ -1,5 +1,6 @@
+import AccessibleSwitch from '../components/AccessibleSwitch';
 import React, { useState } from 'react';
-import { Pressable, Switch, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useDemo } from '../store';
 import { talentMedia } from '../talentMedia';
@@ -94,7 +95,7 @@ export default function Account() {
             }}
           >
             <Text style={{ fontFamily: f.bold, color: c.text, fontSize: 20 }}>{count}</Text>
-            <Label style={{ fontSize: 10 }}>{label}</Label>
+            <Label style={{ fontSize: 11 }}>{label}</Label>
           </View>
         ))}
       </View>
@@ -234,12 +235,7 @@ export function Notifications() {
           <Heading>Demo notifications</Heading>
           <Label>Toggle this local preview preference.</Label>
         </View>
-        <Switch
-          accessibilityLabel="Demo notifications"
-          value={enabled}
-          onValueChange={setEnabled}
-          trackColor={{ false: c.border, true: c.primary }}
-        />
+        <AccessibleSwitch label="Demo notifications" value={enabled} onValueChange={setEnabled} />
       </View>
       <EmptyState
         title={enabled ? 'You’re all caught up' : 'Demo notifications paused'}

@@ -1,0 +1,128 @@
+{
+  "targets": [
+    {
+      "label": "Back",
+      "width": 44,
+      "height": 44
+    },
+    {
+      "label": "Filters",
+      "width": 44,
+      "height": 44
+    },
+    {
+      "label": "All",
+      "width": 44,
+      "height": 44
+    },
+    {
+      "label": "Actors",
+      "width": 62,
+      "height": 44
+    },
+    {
+      "label": "Models",
+      "width": 66,
+      "height": 44
+    },
+    {
+      "label": "Creators",
+      "width": 73,
+      "height": 44
+    },
+    {
+      "label": "Musicians",
+      "width": 80,
+      "height": 44
+    },
+    {
+      "label": "Photographers",
+      "width": 105,
+      "height": 44
+    },
+    {
+      "label": "Sort: Recommended",
+      "width": 134,
+      "height": 44
+    },
+    {
+      "label": "Save Aria Kapoor",
+      "width": 44,
+      "height": 44
+    },
+    {
+      "label": "Save Rehan Mehta",
+      "width": 44,
+      "height": 44
+    },
+    {
+      "label": "Save Maya Sen",
+      "width": 44,
+      "height": 44
+    },
+    {
+      "label": "Save Ishaan Roy",
+      "width": 44,
+      "height": 44
+    }
+  ],
+  "profileSecondary": {
+    "color": "rgb(119, 113, 135)",
+    "fontSize": "13px"
+  },
+  "profileFolds": [
+    {
+      "width": 360,
+      "height": 800,
+      "tab": {
+        "x": 16,
+        "y": 761,
+        "width": 72.421875,
+        "height": 44
+      },
+      "cta": {
+        "x": 148.3125,
+        "y": 740,
+        "width": 195.6875,
+        "height": 48
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "tab": {
+        "x": 20,
+        "y": 740,
+        "width": 72.421875,
+        "height": 44
+      },
+      "cta": {
+        "x": 159.84375,
+        "y": 784,
+        "width": 214.15625,
+        "height": 48
+      }
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "tab": {
+        "x": 20,
+        "y": 740,
+        "width": 72.421875,
+        "height": 44
+      },
+      "cta": {
+        "x": 175.234375,
+        "y": 872,
+        "width": 238.765625,
+        "height": 48
+      }
+    }
+  ],
+  "accountSecondary": {
+    "color": "rgb(119, 113, 135)",
+    "fontSize": "10px",
+    "background": "rgb(242, 236, 255)"
+  }
+}

@@ -139,7 +139,7 @@ export function Messages() {
       <FlatList
         data={results}
         keyExtractor={(m) => m.id}
-        contentContainerStyle={{ paddingHorizontal: padding, paddingBottom: 24, gap: 10 }}
+        contentContainerStyle={{ paddingHorizontal: padding, paddingBottom: 24, gap: 8 }}
         ListHeaderComponent={
           <View style={{ gap: 12, marginBottom: 4 }}>
             <SearchBar

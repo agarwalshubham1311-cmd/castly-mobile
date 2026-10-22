@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { talents, money } from '../talent';
 import { TalentImage } from '../TalentImage';
 import { talentMedia } from '../talentMedia';
+import DateField from '../components/DateField';
 import { BookingForm, validateBooking } from '../demo';
 import { useDemo } from '../store';
 import { c, f } from '../theme';
@@ -111,14 +112,7 @@ export default function BookingRequest() {
           </Text>
         )}
       </View>
-      <Field
-        label="Proposed date"
-        placeholder="YYYY-MM-DD"
-        value={form.date}
-        onChangeText={update('date')}
-        error={errors.date}
-        autoCapitalize="none"
-      />
+      <DateField value={form.date} onChange={update('date')} error={errors.date} />
       <Field
         label="Location"
         placeholder="Enter city or studio"

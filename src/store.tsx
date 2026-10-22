@@ -83,6 +83,7 @@ function useDemoStore() {
               archived: false,
               booking: false,
               messages: [],
+              updatedLabel: 'Local draft',
             },
             ...current,
           ];
@@ -93,6 +94,7 @@ function useDemoStore() {
         t.id === id
           ? {
               ...t,
+              updatedLabel: `Local · ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false })}`,
               messages: [
                 ...t.messages,
                 { id: `local-${Date.now()}`, text: text.trim(), mine: true },

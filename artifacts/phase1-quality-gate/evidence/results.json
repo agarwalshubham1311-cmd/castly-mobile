@@ -1,0 +1,76 @@
+{
+  "typecheck": {
+    "command": [
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "seconds": 6.4
+  },
+  "lint": {
+    "command": [
+      "npm",
+      "run",
+      "lint"
+    ],
+    "exitCode": 0,
+    "seconds": 5.9
+  },
+  "unit-tests": {
+    "command": [
+      "npm",
+      "test"
+    ],
+    "exitCode": 0,
+    "seconds": 0.77
+  },
+  "ui": {
+    "command": [
+      "npm",
+      "run",
+      "test:ui"
+    ],
+    "exitCode": 0,
+    "seconds": 25.29
+  },
+  "screenshots-fresh": {
+    "command": [
+      "npm",
+      "run",
+      "test:screenshots"
+    ],
+    "exitCode": 0,
+    "seconds": 1.27
+  },
+  "screenshots-existing": {
+    "command": [
+      "npm",
+      "run",
+      "test:screenshots"
+    ],
+    "exitCode": 0,
+    "seconds": 1.2
+  },
+  "export": {
+    "command": [
+      "npx",
+      "expo",
+      "export",
+      "--platform",
+      "all",
+      "--output-dir",
+      "/tmp/castly-phase1-gate/export",
+      "--max-workers",
+      "2"
+    ],
+    "exitCode": 0,
+    "seconds": 21.29
+  },
+  "commit": "fac6c6c860e8eb843ff28b167bdac8f5f0ef2ed0",
+  "branch": "feat/initial-castly-mobile",
+  "preservation": {
+    "trackedFilesChecked": 91,
+    "changedTrackedFiles": []
+  }
+}
