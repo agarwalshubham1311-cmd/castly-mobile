@@ -238,8 +238,8 @@ export function ConnectedSettings() {
     return (
       <Screen title="Help & support">
         <Label>
-          Your account, talent profile and shortlist are saved to your account. Booking requests,
-          messaging and payments are not available yet. Your saved talent is private.
+          Your account, talent profile and shortlist are saved to your account. Booking and
+          messaging are available between authorized participants. Payments are not enabled.
         </Label>
       </Screen>
     );

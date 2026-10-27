@@ -60,6 +60,10 @@ export default function TalentProfile() {
     ...talent.portfolio,
   ];
   const message = () => {
+    if (!mock) {
+      router.push({ pathname: '/messages', params: { talent: talent.id } });
+      return;
+    }
     openConversation(talent.id);
     router.push(`/chat/${talent.id}`);
   };

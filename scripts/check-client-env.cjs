@@ -19,7 +19,8 @@ function checkClientEnvironment(env = process.env, root = process.cwd()) {
     for (const [name, value] of Object.entries(source)) {
       if (!name.startsWith('EXPO_PUBLIC_') || !value) continue;
       let forbidden =
-        /SERVICE_ROLE|SECRET_KEY/i.test(name) || String(value).startsWith('sb_secret_');
+        /SERVICE_ROLE|SECRET_KEY|DATABASE_PASSWORD|JWT_SECRET/i.test(name) ||
+        String(value).startsWith('sb_secret_');
       try {
         forbidden ||=
           JSON.parse(Buffer.from(String(value).split('.')[1], 'base64url').toString('utf8'))

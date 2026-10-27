@@ -1,3 +1,5 @@
+import { LiveBookingDetail } from '../../src/screens/LiveActivity';
+import { businessMode } from '../../src/backend';
 import React from 'react';
 import { BookingDetail as Component } from '../../src/screens/Activity';
 import { AuthGuard } from '../../src/auth/Guard';
@@ -9,6 +11,8 @@ export default function Route() {
     <AuthGuard>
       {auth.mode === 'mock' ? (
         <Component />
+      ) : businessMode === 'spring' ? (
+        <LiveBookingDetail />
       ) : (
         <Screen title="Booking details">
           <EmptyState

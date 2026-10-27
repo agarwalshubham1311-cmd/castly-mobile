@@ -49,3 +49,8 @@ dist-web/
 !.env.example
 supabase/.temp/
 supabase/.branches/
+
+backend/target/
+backend/.env
+backend/.env.*
+!backend/.env.example

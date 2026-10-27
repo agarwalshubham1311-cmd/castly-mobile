@@ -1,0 +1,66 @@
+[
+  {
+    "file": "accepted-booking-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 29135,
+    "sha256": "8d8cd46bd6801847e023cb58624ddfe0fd2fd74defd215bc4c3d791fe4c7fea0"
+  },
+  {
+    "file": "conversation-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 28455,
+    "sha256": "838b24dfdb73516278ae99b7cffa5ce64ab5b7f3e78bdf2a984e0f1421d6d20e"
+  },
+  {
+    "file": "legacy-m1/client-account-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 44332,
+    "sha256": "820ad4a820071b400a40861503ff56a6addad9efe9fa1f0c3272cf07f00480ea"
+  },
+  {
+    "file": "legacy-m1/login-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 25382,
+    "sha256": "acacad15f9d93637a5e833239230d3cf3d472f65f0ee8461d2703ba7e54174d4"
+  },
+  {
+    "file": "legacy-m1/offline-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 47543,
+    "sha256": "d0cb0bf40980b86316c5ff27183af22e05742e985efa478153683051ae348300"
+  },
+  {
+    "file": "legacy-m1/onboarding-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 23595,
+    "sha256": "7b1a160c0dd4dbe0e85532fc33bf16c3b0f2337f0ddefb5199dc09b50c3b4d48"
+  },
+  {
+    "file": "legacy-m1/signup-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 32480,
+    "sha256": "ecb92308aa7f8e83e995b53fd0612d44960fab3ccaeabea1f691c3bede4f1fff"
+  },
+  {
+    "file": "legacy-m1/talent-editor-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 35227,
+    "sha256": "c490dd2b582642324c4de22446fc04af417bbd7c546eadbcf3d5a7fcf6cff4d8"
+  }
+]

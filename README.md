@@ -1,4 +1,10 @@
-# Castly mobile
+# Castly — mobile and Spring business API
+
+Current development branch: `feat/phase2-bookings-messaging`. Spring Boot now owns Milestone 1 business operations and Milestone 2 booking/messaging workflows. Supabase remains the Auth, Storage and Realtime provider. See [backend setup and API contract](backend/README.md) and [validation results](artifacts/spring-api/report.md).
+
+No hosted migrations, production deployment, main merge or payment enablement is performed by this work. The direct Supabase business implementation is retained only as an explicit Metro development fallback against a pre-cutover development database.
+
+## Earlier Phase 2 foundation
 
 Phase 2 Milestone 1 adds Supabase authentication, role-based onboarding, connected accounts, published discovery, private saved talent and talent/portfolio editing. The Phase 1 Lavender Pearl UI remains available in mock mode. See [Supabase setup and authorization](docs/SUPABASE_SETUP.md) and [Milestone 1 validation](artifacts/phase2-milestone1/report.md).
 

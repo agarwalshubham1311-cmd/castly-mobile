@@ -1,4 +1,6 @@
-# Supabase — Phase 2 Milestone 1
+# Supabase — historical Milestone 1 development guide
+
+**Current architecture:** normal business requests use Spring Boot. Follow [backend/README.md](../backend/README.md) for the reviewed cutover migration, restricted login, JWT verification and current setup. This document describes the preserved pre-cutover direct-Supabase implementation; its business writes are development-only and are deliberately revoked on an API-backed database.
 
 This branch adds authentication, one primary role, talent profile/portfolio editing, published discovery, private saved talent and a connected Account Profile. Existing ten-screen layouts are retained. Without credentials, Phase 1 remains a local mock demo. Live booking operations, message sending, checkout, commissions and entitlement management are not enabled.
 

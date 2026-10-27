@@ -1,0 +1,370 @@
+
+> castly-mobile@0.1.0 test:sql
+> node scripts/test-sql.cjs
+
+DROP DATABASE
+CREATE DATABASE
+DO
+CREATE SCHEMA
+CREATE TABLE
+CREATE FUNCTION
+GRANT
+GRANT
+CREATE SCHEMA
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+CREATE FUNCTION
+GRANT
+GRANT
+GRANT
+GRANT
+DO
+WARNING:  "wal_level" is insufficient to publish logical changes
+HINT:  Set "wal_level" to "logical" before creating subscriptions.
+BEGIN
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 5
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+INSERT 0 0
+CREATE FUNCTION
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+REVOKE
+GRANT
+REVOKE
+COMMIT
+BEGIN
+INSERT 0 2
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+COMMIT
+BEGIN
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE INDEX
+COMMIT
+BEGIN
+DO
+GRANT
+GRANT
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+DROP POLICY
+ALTER TABLE
+UPDATE 0
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE TRIGGER
+REVOKE
+DO
+COMMIT
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 3
+UPDATE 2
+UPDATE 1
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000011
+(1 row)
+
+SET
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+SET
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000012
+(1 row)
+
+SET
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000013
+(1 row)
+
+SET
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+RESET
+SET
+ eq
+----
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000011
+(1 row)
+
+SET
+ eq
+----
+
+(1 row)
+
+RESET
+SET
+UPDATE 1
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ROLLBACK
+NOTICE:  PASS dedicated role is not privileged
+NOTICE:  PASS participant tables are in Realtime publication
+NOTICE:  PASS old decision RPC disabled
+NOTICE:  PASS old cancellation RPC disabled
+NOTICE:  PASS old onboarding RPC disabled
+NOTICE:  PASS direct account write disabled
+NOTICE:  PASS direct booking write disabled
+NOTICE:  PASS direct message write disabled
+NOTICE:  PASS direct favourite write disabled
+NOTICE:  PASS direct talent edit disabled
+NOTICE:  PASS API can create own client request
+NOTICE:  PASS client cannot accept own request even through API DB role
+NOTICE:  PASS API role cannot modify protected agreed rate
+NOTICE:  PASS API role cannot grant subscriptions
+NOTICE:  PASS API role cannot read Auth directory
+NOTICE:  PASS API private accounts remain self-only
+NOTICE:  PASS relevant talent can send
+NOTICE:  PASS API cannot impersonate sender
+NOTICE:  PASS outsider cannot read booking
+NOTICE:  PASS outsider cannot read conversation
+NOTICE:  PASS outsider cannot read messages
+NOTICE:  PASS Realtime RLS excludes outsider
+NOTICE:  PASS Realtime RLS includes participant
+NOTICE:  PASS message writes stop after cancellation
+NOTICE:  PASS history retained after cancellation
+PASS: migrations and RLS policy tests on PostgreSQL. Test fixtures rolled back.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

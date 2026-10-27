@@ -216,11 +216,14 @@ async function mockApi(route) {
 }
 (async () => {
   const browser = await launch();
-  const folder = path.resolve(__dirname, '../artifacts/phase2-milestone1/screenshots');
+  const folder = path.resolve(
+    process.env.CASTLY_SCREENSHOT_DIR || path.join(__dirname, '../artifacts/spring-api/legacy-m1'),
+  );
   fs.mkdirSync(folder, { recursive: true });
   try {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    await context.route(api + '/**', mockApi);
+    for (const pattern of ['**/auth/v1/**', '**/rest/v1/**', '**/storage/v1/**'])
+      await context.route(pattern, mockApi);
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
@@ -381,7 +384,8 @@ async function mockApi(route) {
       'no live messaging UI',
     );
     const callbackContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    await callbackContext.route(api + '/**', mockApi);
+    for (const pattern of ['**/auth/v1/**', '**/rest/v1/**', '**/storage/v1/**'])
+      await callbackContext.route(pattern, mockApi);
     const callbackPage = await callbackContext.newPage();
     callbackPage.on('pageerror', (e) => errors.push(e.message));
     await go(callbackPage, '/signup', 'Your next creative chapter');

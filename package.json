@@ -53,9 +53,11 @@
     "assets:branding": "node scripts/prepare-branding.cjs",
     "test:accessibility": "node tests/accessibility-browser.cjs",
     "test:sql": "node scripts/test-sql.cjs",
-    "test:backend": "node tests/backend-browser.cjs",
+    "test:backend": "node tests/spring-e2e.cjs",
     "check:client-env": "node scripts/check-client-env.cjs",
-    "export:all": "expo export --platform all --output-dir dist"
+    "export:all": "expo export --platform all --output-dir dist",
+    "test:legacy-backend": "node tests/backend-browser.cjs",
+    "test:jwt-config": "node backend/scripts/check-jwt-config.cjs"
   },
   "private": true
 }

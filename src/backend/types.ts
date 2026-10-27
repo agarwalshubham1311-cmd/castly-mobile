@@ -53,10 +53,15 @@ export type BookingRow = {
   indicative_budget: number;
   status: 'requested' | 'accepted' | 'declined' | 'cancelled' | 'completed';
   agreed_rate: number | null;
+  client_name?: string;
+  talent_name?: string;
   created_at: string;
   updated_at: string;
 };
 export type ConversationRow = {
+  client_name?: string;
+  talent_name?: string;
+  can_send?: boolean;
   id: string;
   client_id: string;
   talent_id: string;

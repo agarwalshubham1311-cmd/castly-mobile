@@ -2,9 +2,9 @@ const { defineConfig } = require('eslint/config');
 const expo = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expo,
-  { ignores: ['dist/**', 'dist-web/**', '.expo/**', 'artifacts/**'] },
+  { ignores: ['dist/**', 'dist-web/**', '.expo/**', 'artifacts/**', 'backend/target/**'] },
   {
-    files: ['tests/*.cjs', 'scripts/*.cjs', 'eslint.config.js'],
+    files: ['tests/*.cjs', 'scripts/*.cjs', 'backend/scripts/*.cjs', 'eslint.config.js'],
     languageOptions: {
       globals: {
         require: 'readonly',
