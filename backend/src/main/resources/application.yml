@@ -1,0 +1,17 @@
+server:
+  port: ${PORT:8080}
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SUPABASE_JWT_ISSUER}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
