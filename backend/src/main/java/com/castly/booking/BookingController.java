@@ -15,5 +15,5 @@ import jakarta.validation.constraints.*;
  public BookingController(JdbcClient db){this.db=db;}
  public record CreateBooking(@NotNull UUID talentId,@NotBlank String projectType,@NotBlank String location,@NotBlank String requirements,@NotNull java.time.LocalDate proposedDate,@NotNull @Positive java.math.BigDecimal budget){}
  @GetMapping public List<Map<String,Object>> list(@AuthenticationPrincipal Jwt jwt){UUID me=UUID.fromString(jwt.getSubject());return db.sql("select * from public.bookings where client_id=:me or talent_id=:me order by created_at desc limit 100").param("me",me).query().listOfRows();}
- @GetMapping("/{id}") public Map<String,Object> get(@PathVariable UUID id,@AuthenticationPrincipal Jwt jwt){UUID me=UUID.fromString(jwt.getSubject());return db.sql("select * from public.bookings where id=:id and (client_id=:me or talent_id=:me)").param("id",id).param("me",me).query().optionalRow().orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
+ @GetMapping("/{id}") public Map<String,Object> get(@PathVariable UUID id,@AuthenticationPrincipal Jwt jwt){UUID me=UUID.fromString(jwt.getSubject());return db.sql("select * from public.bookings where id=:id and (client_id=:me or talent_id=:me)").param("id",id).param("me",me).query().listOfRows().stream().findFirst().orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
 }
