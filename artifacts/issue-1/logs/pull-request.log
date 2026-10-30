@@ -1,0 +1,5 @@
+gh pr create --repo agarwalshubham1311-cmd/castly-mobile --base feat/phase2-bookings-messaging --head fix/issue-1-booking-security --body-file artifacts/issue-1/pull-request.md
+Post "https://api.github.com/graphql": Forbidden
+
+REST fallback: POST repos/agarwalshubham1311-cmd/castly-mobile/pulls
+Post "https://api.github.com/repos/agarwalshubham1311-cmd/castly-mobile/pulls": Forbidden

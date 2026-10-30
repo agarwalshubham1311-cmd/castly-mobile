@@ -1,0 +1,5 @@
+
+> castly-mobile@0.1.0 check:client-env
+> node scripts/check-client-env.cjs
+
+PASS: no privileged keys in public client environment.

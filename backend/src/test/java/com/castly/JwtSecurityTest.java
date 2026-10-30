@@ -22,6 +22,10 @@ class JwtSecurityTest {
   private RSAKey rsa;
   private ECKey ec;
   private String legacy;
+  private String authUser = SUBJECT;
+  private int authStatus = 200;
+  private final java.util.concurrent.atomic.AtomicInteger authCalls =
+      new java.util.concurrent.atomic.AtomicInteger();
   private static final String SUBJECT = "00000000-0000-0000-0000-000000000001";
 
   @BeforeEach
@@ -45,13 +49,14 @@ class JwtSecurityTest {
     server.createContext(
         "/auth/v1/user",
         exchange -> {
+          authCalls.incrementAndGet();
           boolean valid =
               ("Bearer " + legacy).equals(exchange.getRequestHeaders().getFirst("Authorization"))
                   && "sb_publishable_test".equals(exchange.getRequestHeaders().getFirst("apikey"));
           byte[] body =
-              (valid ? "{\"id\":\"" + SUBJECT + "\"}" : "{}").getBytes(StandardCharsets.UTF_8);
+              (valid ? "{\"id\":\"" + authUser + "\"}" : "{}").getBytes(StandardCharsets.UTF_8);
           exchange.getResponseHeaders().add("Content-Type", "application/json");
-          exchange.sendResponseHeaders(valid ? 200 : 401, body.length);
+          exchange.sendResponseHeaders(valid ? authStatus : 401, body.length);
           exchange.getResponseBody().write(body);
           exchange.close();
         });
@@ -197,5 +202,73 @@ class JwtSecurityTest {
     assertThrows(
         IllegalStateException.class,
         () -> ApiSecurity.decoder(issuer, "authenticated", "supabase-auth", "sb_secret_invalid"));
+  }
+
+  @Test
+  void authModeRejectsInvalidClaimsBeforeContactingProvider() throws Exception {
+    var decoder =
+        ApiSecurity.decoder(issuer, "authenticated", "supabase-auth", "sb_publishable_test");
+    for (var alg : List.of(JWSAlgorithm.HS256, JWSAlgorithm.ES256, JWSAlgorithm.RS256)) {
+      for (var raw :
+          List.of(
+              token(alg, issuer, "wrong", Instant.now().plusSeconds(300), "authenticated"),
+              token(
+                  alg,
+                  "https://other.example/auth/v1",
+                  "authenticated",
+                  Instant.now().plusSeconds(300),
+                  "authenticated"),
+              token(alg, issuer, "authenticated", Instant.now().minusSeconds(1), "authenticated"),
+              token(alg, issuer, "authenticated", null, "authenticated"),
+              token(alg, issuer, "authenticated", Instant.now().plusSeconds(300), "anon"))) {
+        legacy = raw;
+        assertThrows(JwtException.class, () -> decoder.decode(raw));
+      }
+    }
+    assertEquals(0, authCalls.get());
+  }
+
+  @Test
+  void authModeSupportsAsymmetricOverlapAndFailsClosedForWrongUserAndProviderError()
+      throws Exception {
+    var decoder =
+        ApiSecurity.decoder(issuer, "authenticated", "supabase-auth", "sb_publishable_test");
+    for (var alg : List.of(JWSAlgorithm.ES256, JWSAlgorithm.RS256)) {
+      legacy = token(alg, issuer, "authenticated", Instant.now().plusSeconds(300), "authenticated");
+      assertEquals(SUBJECT, decoder.decode(legacy).getSubject());
+    }
+    authUser = UUID.randomUUID().toString();
+    assertThrows(JwtException.class, () -> decoder.decode(legacy));
+    authUser = SUBJECT;
+    authStatus = 503;
+    assertThrows(JwtException.class, () -> decoder.decode(legacy));
+  }
+
+  @Test
+  void rejectsMalformedAndInvalidSubjectAndFutureNotBeforeInBothModes() throws Exception {
+    for (String mode : List.of("jwks", "supabase-auth")) {
+      var decoder = ApiSecurity.decoder(issuer, "authenticated", mode, "sb_publishable_test");
+      assertThrows(JwtException.class, () -> decoder.decode("malformed-token"));
+      for (boolean badSubject : List.of(true, false)) {
+        var claims =
+            new JWTClaimsSet.Builder()
+                .issuer(issuer)
+                .audience("authenticated")
+                .claim("role", "authenticated")
+                .subject(badSubject ? "not-a-uuid" : SUBJECT)
+                .issueTime(new Date())
+                .expirationTime(Date.from(Instant.now().plusSeconds(600)));
+        if (!badSubject) claims.notBeforeTime(Date.from(Instant.now().plusSeconds(300)));
+        var signed =
+            new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("rsa").build(), claims.build());
+        signed.sign(new RSASSASigner(rsa));
+        legacy = signed.serialize();
+        assertThrows(JwtException.class, () -> decoder.decode(legacy));
+      }
+    }
+    assertThrows(
+        IllegalStateException.class,
+        () -> ApiSecurity.decoder(issuer, "authenticated", "unknown", ""));
   }
 }

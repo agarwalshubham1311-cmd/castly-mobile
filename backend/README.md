@@ -13,15 +13,21 @@ mvn -version
 mvn clean verify
 ```
 
-The integration suite automatically calls `scripts/prepare-test-db.cjs`. It starts/uses the isolated Docker container `castly-spring-test-db` (`postgres:17-alpine`, loopback port 55432), recreates only `castly_spring_test`, applies all versioned migrations and seeds synthetic users. The Docker owner is used **only for local DDL/test-fixture setup**. Spring tests and business requests connect exclusively as the restricted `castly_api` login. The database is intentionally disposable; do not put personal data there or rename production containers to this test name. Ports 55432, 8080, 8086 and 8098 are used by the full browser test. No test uses a hosted `DATABASE_URL`.
+The integration suite automatically calls `scripts/prepare-test-db.cjs`. Repeat with `CASTLY_TEST_SCHEMA_PATH=reconciliation mvn clean verify` to exercise the prepared reconciliation schema instead of the fresh repository-history path. The same environment switch also works with `npm run test:backend` from the root. Both paths are disposable local fixtures, never hosted schemas. It starts/uses the isolated Docker container `castly-spring-test-db` (`postgres:17-alpine`, loopback port 55432), recreates only `castly_spring_test`, applies all versioned migrations and seeds synthetic users. The Docker owner is used **only for local DDL/test-fixture setup**. Spring tests and business requests connect exclusively as the restricted `castly_api` login. The database is intentionally disposable; do not put personal data there or rename production containers to this test name. Ports 55432, 8080, 8086 and 8098 are used by the full browser test. No test uses a hosted `DATABASE_URL`.
 
 `mvn -Dtest=JwtSecurityTest,ConfigurationTest test` runs the signing/configuration tests without PostgreSQL. Complete verification requires the Docker-backed API tests. CI must provide Docker and Node; tests do not silently skip missing infrastructure. To remove the local test resource after review: `docker rm -f castly-spring-test-db`.
 
 Cloud validation used a workspace-installed Maven/JDK and temporary Maven proxy/trust-store settings because the base image provided only a runtime and direct Java network resolution failed. Those machine-specific settings and tools are not application dependencies or committed secrets.
 
+## Existing hosted schema: issue #1
+
+The owner's hosted baseline has a different migration ledger and lacks the old decision RPCs. **Do not replay repository history or run `supabase db push` against it.** Use the [gated forward-only reconciliation plan](../supabase/reconciliation/issue-1/README.md): read-only inventory, reviewed preparation that preserves mobile writes, staging verification, and a separately approved cutover. This PR changes no mobile configuration. Historical migration instructions below describe the fresh repository-history path only.
+
+`npm run test:reconciliation` from the repository root verifies the two reconciliation paths on disposable Docker PostgreSQL. New `20261030090000_booking_guard_hardening.sql` extends the fresh-history path with protected-field/account-role transition checks and database-level send/cancel locking, matching the reconciliation preparation. No historical migration is rewritten.
+
 ## Approved database cutover
 
-**Do not execute against a hosted database without approval.** Inspect all four migrations in `supabase/migrations/`. The existing `20261027120000_booking_decisions_and_messaging.sql` is preserved as history. The new forward migration, `20261027140000_spring_business_api.sql`, reconciles it by:
+**Do not execute against a hosted database without approval.** Inspect the versioned migrations in `supabase/migrations/`. The existing `20261027120000_booking_decisions_and_messaging.sql` is preserved as history. The new forward migration, `20261027140000_spring_business_api.sql`, reconciles it by:
 
 - Revoking table **and column** business-write privileges from `authenticated`/`anon`.
 - Revoking ordinary execution of `respond_to_booking`, `cancel_booking` and `complete_onboarding`. Spring does not call these SECURITY DEFINER functions.

@@ -1,0 +1,81 @@
+begin;
+create schema reconcile_test;
+create function reconcile_test.eq(actual bigint,expected bigint,label text) returns void language plpgsql as $$begin
+ if actual is distinct from expected then raise exception 'FAIL % expected %, got %',label,expected,actual;end if;raise notice 'PASS %',label;end$$;
+create function reconcile_test.denied(statement text,label text) returns void language plpgsql as $$begin
+ begin execute statement;exception when insufficient_privilege then raise notice 'PASS %',label;return;end;
+ raise exception 'FAIL % unauthorized operation succeeded',label;end$$;
+grant usage on schema reconcile_test to anon,authenticated,castly_api;
+grant execute on all functions in schema reconcile_test to anon,authenticated,castly_api;
+select reconcile_test.eq((select count(*) from public.bookings where status='accepted' and indicative_budget=18000 and agreed_rate=17000 and requirements='A preserved legacy project' and client_name in ('Client seed','Archived client') and talent_name='Talent seed'),1,'booking data and name snapshots preserved');
+select reconcile_test.eq((select count(*) from public.messages where body='Preserved legacy history'),1,'history preserved');
+select reconcile_test.eq((select count(*) from public.bookings where created_at='2020-01-01T00:00:00Z' and updated_at='2020-01-02T00:00:00Z'),1,'booking historical timestamps preserved');
+select reconcile_test.eq((select count(*) from public.saved_talent),1,'favourites preserved');
+select reconcile_test.eq((select count(*) from public.subscription_entitlements),1,'entitlements preserved');
+select reconcile_test.eq((select count(*) from storage.objects),4,'Storage rows preserved');
+select reconcile_test.eq((select count(*) from supabase_migrations.schema_migrations where version='20261027032615'),1,'real ledger baseline preserved');
+-- Anonymous API operation uses the restricted DB role with no actor, not a database owner.
+set local role castly_api;
+select reconcile_test.eq((select count(*) from public.talent_profiles),1,'anonymous API discovery hides draft');
+select reconcile_test.eq((select count(*) from public.users),0,'anonymous API private accounts hidden');
+select reconcile_test.eq((select count(*) from public.bookings),0,'anonymous API bookings hidden');
+select reconcile_test.denied($$insert into public.saved_talent(user_id,talent_id) values('90000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000002')$$,'anonymous API cannot impersonate client');
+reset role;
+select set_config('request.jwt.claims','{"sub":"90000000-0000-0000-0000-000000000003","role":"authenticated"}',true);
+set local role castly_api;
+select reconcile_test.eq((select count(*) from public.bookings),0,'unrelated API booking isolation');
+select reconcile_test.eq((select count(*) from public.conversations),0,'unrelated API conversation isolation');
+select reconcile_test.eq((select count(*) from public.messages),0,'unrelated API message isolation');
+select reconcile_test.denied($$insert into public.conversations(client_id,talent_id) values('90000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000002')$$,'unrelated API cannot open accepted conversation');
+-- Onboarding goes through Spring's column-restricted update and immutable-role trigger.
+update public.users set primary_role='client',display_name='Onboarded outsider' where id=auth.uid();
+select reconcile_test.eq((select count(*) from public.users where primary_role='client'),1,'API self onboarding');
+reset role;
+select set_config('request.jwt.claims','{"sub":"90000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
+set local role castly_api;
+select reconcile_test.eq((select count(*) from public.users),1,'talent private self account');
+update public.talent_profiles set bio='Edited by API' where id=auth.uid();
+insert into public.portfolio_assets(talent_id,path,label) values(auth.uid(),auth.uid()||'/new.jpg','API metadata');
+select reconcile_test.denied($$insert into public.portfolio_assets(talent_id,path,label) values('90000000-0000-0000-0000-000000000004','90000000-0000-0000-0000-000000000004/forged.jpg','Forged')$$,'cannot edit another portfolio');
+select reconcile_test.denied($$insert into public.subscription_entitlements(user_id,entitlement) values(auth.uid(),'forged')$$,'API cannot grant entitlements');
+insert into public.messages(conversation_id,sender_id,body) values('92000000-0000-0000-0000-000000000001',auth.uid(),'Allowed API message');
+select reconcile_test.denied($$insert into public.messages(conversation_id,sender_id,body) values('92000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000001','Impersonation')$$,'API cannot impersonate sender');
+-- Direct Storage remains functional even after API cutover.
+reset role;
+set local role authenticated;
+insert into storage.objects(bucket_id,name) values('portfolio','90000000-0000-0000-0000-000000000002/new.jpg');
+select reconcile_test.eq((select count(*) from storage.objects where bucket_id='private-media'),0,'talent cannot see client private media');
+select reconcile_test.denied($$insert into storage.objects(bucket_id,name) values('portfolio','90000000-0000-0000-0000-000000000004/forged.jpg')$$,'cross-owner Storage upload denied');
+reset role;
+-- Exercise trigger defense with an intentionally wider grant inside a rolled-back test.
+grant update(agreed_rate) on public.bookings to castly_api;
+set local role castly_api;
+select reconcile_test.denied($$update public.bookings set status='accepted',agreed_rate=1$$,'trigger blocks protected fields even with accidental wider column grant');
+update public.bookings set status='accepted';
+update public.bookings set status='cancelled';
+select reconcile_test.denied($$update public.bookings set status='accepted'$$,'terminal status cannot reopen');
+select reconcile_test.denied($$insert into public.messages(conversation_id,sender_id,body) values('92000000-0000-0000-0000-000000000001',auth.uid(),'After cancellation')$$,'direct API SQL send stops after cancellation');
+select reconcile_test.eq((select count(*) from public.messages),2,'participant history retained');
+reset role;
+set local role authenticated;
+select reconcile_test.eq((select count(*) from public.messages),2,'Realtime participant SELECT retained');
+reset role;
+select set_config('request.jwt.claims','{"sub":"90000000-0000-0000-0000-000000000003"}',true);
+set local role authenticated;
+select reconcile_test.eq((select count(*) from public.messages),0,'Realtime unrelated SELECT denied');
+reset role;
+select set_config('request.jwt.claims','{"sub":"90000000-0000-0000-0000-000000000001"}',true);
+set local role castly_api;
+select reconcile_test.eq((select count(*) from public.saved_talent),1,'API private favourites accessible');
+delete from public.saved_talent where user_id=auth.uid();
+select reconcile_test.eq((select count(*) from public.saved_talent),0,'API favourite removal');
+reset role;
+set local role authenticated;
+select reconcile_test.eq((select count(*) from storage.objects where bucket_id='private-media'),1,'client private Storage read retained');
+reset role;
+-- Prove API UPDATE(status) works without table-wide UPDATE or protected-field grant.
+revoke update(agreed_rate) on public.bookings from castly_api;
+select reconcile_test.eq(has_table_privilege('castly_api','public.bookings','UPDATE')::int,0,'no table-wide API booking update');
+select reconcile_test.eq(has_column_privilege('castly_api','public.bookings','status','UPDATE')::int,1,'status-only API column grant');
+select reconcile_test.eq(has_column_privilege('castly_api','public.bookings','agreed_rate','UPDATE')::int,0,'no protected rate grant');
+rollback;

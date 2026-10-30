@@ -106,10 +106,11 @@ public class ActivityController {
         actor(jwt),
         db -> {
           var row = booking(db, id, true);
-          String me = actor(jwt).toString();
+          UUID me = actor(jwt);
+          requireParticipant(me, row);
           String status = (String) row.get("status");
-          boolean talent = me.equals(row.get("talent_id"));
-          boolean client = me.equals(row.get("client_id"));
+          boolean talent = me.equals(participantId(row, "talent_id"));
+          boolean client = me.equals(participantId(row, "client_id"));
           if (!target.equals("cancelled") && !talent)
             throw new ResponseStatusException(
                 HttpStatus.FORBIDDEN, "Only the relevant talent can decide this request");
@@ -137,9 +138,20 @@ public class ActivityController {
         });
   }
 
+  // JDBC UUIDs and the JSON row mapper's UUID strings must authorize identically.
+  static UUID participantId(Map<String, Object> row, String column) {
+    Object id = row.get(column);
+    return id instanceof UUID uuid ? uuid : UUID.fromString(id.toString());
+  }
+
+  static void requireParticipant(UUID actor, Map<String, Object> row) {
+    if (!actor.equals(participantId(row, "client_id"))
+        && !actor.equals(participantId(row, "talent_id")))
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found");
+  }
+
   private Map<String, Object> ensureConversation(JdbcClient db, Map<String, Object> booking) {
-    UUID client = UUID.fromString(booking.get("client_id").toString()),
-        talent = UUID.fromString(booking.get("talent_id").toString());
+    UUID client = participantId(booking, "client_id"), talent = participantId(booking, "talent_id");
     db.sql(
             "insert into public.conversations(client_id,talent_id) values(:client,:talent) on"
                 + " conflict(client_id,talent_id) do nothing")
@@ -190,6 +202,7 @@ public class ActivityController {
         actor(jwt),
         db -> {
           var row = booking(db, request.bookingId(), true);
+          requireParticipant(actor(jwt), row);
           if (!"accepted".equals(row.get("status")))
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT, "An accepted booking is required");
@@ -242,6 +255,7 @@ public class ActivityController {
         db -> {
           var conversation =
               one(db.sql("select * from public.conversations where id=:id").param("id", id));
+          requireParticipant(actor(jwt), conversation);
           // Lock an accepted booking so send versus cancellation has a deterministic transaction
           // order.
           var accepted =

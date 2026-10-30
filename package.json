@@ -57,7 +57,8 @@
     "check:client-env": "node scripts/check-client-env.cjs",
     "export:all": "expo export --platform all --output-dir dist",
     "test:legacy-backend": "node tests/backend-browser.cjs",
-    "test:jwt-config": "node backend/scripts/check-jwt-config.cjs"
+    "test:jwt-config": "node backend/scripts/check-jwt-config.cjs",
+    "test:reconciliation": "node scripts/test-reconciliation.cjs"
   },
   "private": true
 }

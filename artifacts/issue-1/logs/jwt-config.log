@@ -1,0 +1,5 @@
+
+> castly-mobile@0.1.0 test:jwt-config
+> node backend/scripts/check-jwt-config.cjs
+
+Public JWKS verification failed: curl: (22) The requested URL returned error: 403
