@@ -1,0 +1,10 @@
+
+> castly-mobile@0.1.0 test:backend
+> node tests/spring-e2e.cjs
+
+PASS: real Java HTTP/JWT/JWKS + PostgreSQL + browser: talent create/edit/publish, favourites, booking creation/acceptance/cancellation, conversation creation, two-party sending/history, outsider denial, paused sending. Supabase Auth/JWKS are local fixtures; hosted Realtime is not tested.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

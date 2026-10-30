@@ -1,0 +1,72 @@
+
+> castly-mobile@0.1.0 test
+> node --experimental-strip-types --test tests/*.test.ts
+
+(node:144764) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/accessibility.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ normal text meets AA on actual Lavender Pearl surfaces without changing primary colors (1.327398ms)
+✔ date selection preserves the device calendar day and rejects impossible dates (16.879615ms)
+(node:144765) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/api.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ API attaches verified session token and refreshes once after 401 (33.166088ms)
+✔ API does not retry failed writes or silently fall back, and exposes server errors (1.407128ms)
+✔ typed business service excludes caller identities and protected talent fields (0.541626ms)
+✔ missing own profile is empty while other API failures remain errors (0.386933ms)
+✔ message history merges duplicate POST/Realtime results in precise server order (10.855459ms)
+✔ direct database fallback is opt-in and impossible in production mode (1.200307ms)
+✔ a refreshed token cannot retry a request under a different account (0.932693ms)
+✔ history recovery never joins stale pages across an unseen reconnect gap (0.297848ms)
+(node:144766) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/backend.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ backend mode preserves mock without credentials and fails closed for partial or privileged configuration (3.082509ms)
+✔ Expo build guard rejects service-role/secret credentials in public variables and dotenv files (1.512957ms)
+✔ talent validation rejects invalid rates/names/skills and strips server-managed columns from writes (0.481925ms)
+✔ portfolio upload detects supported image content and rejects oversized or unsupported files (0.369175ms)
+✔ network failures remain explicit errors and never resolve as successful writes (0.428635ms)
+(node:144786) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/branding.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ launcher PNGs decode at platform sizes with opaque app icons and padded adaptive silhouettes (315.073677ms)
+(node:144792) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/demo.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ booking validation accepts a complete future local request (1.947271ms)
+✔ booking validation rejects impossible dates, past dates and incomplete fields (0.374153ms)
+✔ saved restoration deduplicates and removes obsolete or malformed IDs (0.406281ms)
+✔ search applies minimum budget and skills while sorting without mutating fixtures (0.309156ms)
+(node:144793) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/portraits.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 11 distinct local JPEGs match source hashes and license metadata (3.696964ms)
+✔ every talent has a bundled portrait and gallery; every photograph is used (0.403317ms)
+(node:144811) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-mobile/tests/talent.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ discovery returns the full catalog without constraints (0.916159ms)
+✔ search matches skills and trims case-insensitively (0.767025ms)
+✔ category, location, budget and availability combine (0.223847ms)
+✔ unknown searches have no results (0.194122ms)
+✔ sample catalog does not advertise fabricated reputation claims (0.182385ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 562.172982
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

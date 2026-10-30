@@ -1,0 +1,306 @@
+
+> castly-mobile@0.1.0 test:reconciliation
+> node scripts/test-reconciliation.cjs
+
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/02-prepare.sql:8: ERROR:  Review 01-inventory against README structural checklist before setting castly.reconciliation_schema_reviewed=issue-1-reviewed
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/structural-check.sql:56: ERROR:  Structural mismatch: bookings.indicative_budget must be int4
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/backfill-booking-names.sql:15: ERROR:  Unresolved booking display names: review source accounts before preparing/cutting over
+psql:/tmp/castly-sql/reconciliation/issue-1/04-verify.sql:45: NOTICE:  PASS reconciliation catalog verification; cutover=f
+NOTICE:  PASS signup metadata cannot assign role
+NOTICE:  PASS all nine application tables enable RLS
+NOTICE:  PASS anonymous discovery hides drafts
+NOTICE:  PASS anonymous portfolio hides drafts
+NOTICE:  PASS public categories readable
+NOTICE:  PASS anonymous cannot read private accounts
+NOTICE:  PASS anonymous cannot read bookings
+NOTICE:  PASS anonymous cannot read messages
+NOTICE:  PASS anonymous cannot read saved talent
+NOTICE:  PASS anonymous cannot read entitlements
+NOTICE:  PASS anonymous onboarding denied
+NOTICE:  PASS only registered published portfolio media accessible anonymously
+NOTICE:  PASS client sees only their own account
+NOTICE:  PASS client cannot read private Auth user directory
+NOTICE:  PASS outsider cannot read booking
+NOTICE:  PASS outsider cannot read conversation
+NOTICE:  PASS outsider cannot read messages
+NOTICE:  PASS outsider cannot read private shortlist
+NOTICE:  PASS outsider cannot read entitlement
+NOTICE:  PASS role column update denied
+NOTICE:  PASS onboarding cannot change an existing role
+NOTICE:  PASS cannot rename another account
+NOTICE:  PASS client cannot edit talent
+NOTICE:  PASS client cannot create talent profile
+NOTICE:  PASS cannot save on behalf of another user
+NOTICE:  PASS cannot save an unpublished profile
+NOTICE:  PASS cannot impersonate a booking client
+NOTICE:  PASS cannot inject protected booking status
+NOTICE:  PASS cannot change agreed rates
+NOTICE:  PASS cannot reassign participants
+NOTICE:  PASS cannot impersonate a conversation participant
+NOTICE:  PASS ordinary message sends disabled
+NOTICE:  PASS cannot grant entitlement
+NOTICE:  PASS cannot extend entitlement
+NOTICE:  PASS cannot delete entitlement
+NOTICE:  PASS cannot upload to another talent folder
+NOTICE:  PASS cannot read another private file
+NOTICE:  PASS cannot request a past booking date
+NOTICE:  PASS cannot request unpublished talent
+NOTICE:  PASS client can create own published-talent request
+NOTICE:  PASS new request receives server-managed defaults
+NOTICE:  PASS client can create own conversation metadata
+NOTICE:  PASS cannot delete another private file
+NOTICE:  PASS booking client can read own request
+NOTICE:  PASS conversation client can read messages
+NOTICE:  PASS owner can read entitlement
+NOTICE:  PASS owner can read shortlist
+NOTICE:  PASS owner can read private file
+NOTICE:  PASS owner can edit account name
+NOTICE:  PASS booking owner still cannot change status
+NOTICE:  PASS owner can remove saved talent
+NOTICE:  PASS relevant talent can read booking
+NOTICE:  PASS conversation talent can read messages
+NOTICE:  PASS owner can edit own portfolio label
+NOTICE:  PASS portfolio path cannot be reassigned
+NOTICE:  PASS talent can edit own profile
+NOTICE:  PASS talent cannot edit another profile
+NOTICE:  PASS talent cannot delete another portfolio
+NOTICE:  PASS talent cannot insert another portfolio
+NOTICE:  PASS profile owner ID immutable to client
+NOTICE:  PASS talent can unpublish own profile
+NOTICE:  PASS unpublish removes public discovery
+NOTICE:  PASS unpublish hides public portfolio metadata
+NOTICE:  PASS unpublish prevents new public media reads
+NOTICE:  PASS talent can read own draft
+NOTICE:  PASS talent can read own draft portfolio
+NOTICE:  PASS talent can upload in own folder
+NOTICE:  PASS object moves/overwrites denied
+NOTICE:  PASS authenticated user can onboard once
+NOTICE:  PASS talent role can create own profile
+NOTICE:  PASS role cannot change after onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:10: NOTICE:  PASS booking data and name snapshots preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:11: NOTICE:  PASS history preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:12: NOTICE:  PASS booking historical timestamps preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:13: NOTICE:  PASS favourites preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:14: NOTICE:  PASS entitlements preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:15: NOTICE:  PASS Storage rows preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:16: NOTICE:  PASS real ledger baseline preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:19: NOTICE:  PASS anonymous API discovery hides draft
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:20: NOTICE:  PASS anonymous API private accounts hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:21: NOTICE:  PASS anonymous API bookings hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:22: NOTICE:  PASS anonymous API cannot impersonate client
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:26: NOTICE:  PASS unrelated API booking isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:27: NOTICE:  PASS unrelated API conversation isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:28: NOTICE:  PASS unrelated API message isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:29: NOTICE:  PASS unrelated API cannot open accepted conversation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:32: NOTICE:  PASS API self onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:36: NOTICE:  PASS talent private self account
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:39: NOTICE:  PASS cannot edit another portfolio
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:40: NOTICE:  PASS API cannot grant entitlements
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:42: NOTICE:  PASS API cannot impersonate sender
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:47: NOTICE:  PASS talent cannot see client private media
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:48: NOTICE:  PASS cross-owner Storage upload denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:53: NOTICE:  PASS trigger blocks protected fields even with accidental wider column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:56: NOTICE:  PASS terminal status cannot reopen
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:57: NOTICE:  PASS direct API SQL send stops after cancellation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:58: NOTICE:  PASS participant history retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:61: NOTICE:  PASS Realtime participant SELECT retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:65: NOTICE:  PASS Realtime unrelated SELECT denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:69: NOTICE:  PASS API private favourites accessible
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:71: NOTICE:  PASS API favourite removal
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:74: NOTICE:  PASS client private Storage read retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:78: NOTICE:  PASS no table-wide API booking update
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:79: NOTICE:  PASS status-only API column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:80: NOTICE:  PASS no protected rate grant
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/03-cutover.sql:11: ERROR:  Separate owner cutover approval required
+psql:/tmp/castly-sql/reconciliation/issue-1/04-verify.sql:45: NOTICE:  PASS reconciliation catalog verification; cutover=t
+NOTICE:  PASS intervening legacy request gets snapshots at cutover
+NOTICE:  PASS cutover preserves intervening request timestamp
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:10: NOTICE:  PASS booking data and name snapshots preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:11: NOTICE:  PASS history preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:12: NOTICE:  PASS booking historical timestamps preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:13: NOTICE:  PASS favourites preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:14: NOTICE:  PASS entitlements preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:15: NOTICE:  PASS Storage rows preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:16: NOTICE:  PASS real ledger baseline preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:19: NOTICE:  PASS anonymous API discovery hides draft
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:20: NOTICE:  PASS anonymous API private accounts hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:21: NOTICE:  PASS anonymous API bookings hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:22: NOTICE:  PASS anonymous API cannot impersonate client
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:26: NOTICE:  PASS unrelated API booking isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:27: NOTICE:  PASS unrelated API conversation isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:28: NOTICE:  PASS unrelated API message isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:29: NOTICE:  PASS unrelated API cannot open accepted conversation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:32: NOTICE:  PASS API self onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:36: NOTICE:  PASS talent private self account
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:39: NOTICE:  PASS cannot edit another portfolio
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:40: NOTICE:  PASS API cannot grant entitlements
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:42: NOTICE:  PASS API cannot impersonate sender
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:47: NOTICE:  PASS talent cannot see client private media
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:48: NOTICE:  PASS cross-owner Storage upload denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:53: NOTICE:  PASS trigger blocks protected fields even with accidental wider column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:56: NOTICE:  PASS terminal status cannot reopen
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:57: NOTICE:  PASS direct API SQL send stops after cancellation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:58: NOTICE:  PASS participant history retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:61: NOTICE:  PASS Realtime participant SELECT retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:65: NOTICE:  PASS Realtime unrelated SELECT denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:69: NOTICE:  PASS API private favourites accessible
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:71: NOTICE:  PASS API favourite removal
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:74: NOTICE:  PASS client private Storage read retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:78: NOTICE:  PASS no table-wide API booking update
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:79: NOTICE:  PASS status-only API column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:80: NOTICE:  PASS no protected rate grant
+PASS castly_reconcile_baseline: inventory, refusal gates, preparation preserving legacy M1, API/RLS/Storage actors, cutover, data and ledger preservation
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/02-prepare.sql:8: ERROR:  Review 01-inventory against README structural checklist before setting castly.reconciliation_schema_reviewed=issue-1-reviewed
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/structural-check.sql:56: ERROR:  Structural mismatch: bookings.indicative_budget must be int4
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/backfill-booking-names.sql:15: ERROR:  Unresolved booking display names: review source accounts before preparing/cutting over
+psql:/tmp/castly-sql/reconciliation/issue-1/04-verify.sql:45: NOTICE:  PASS reconciliation catalog verification; cutover=f
+NOTICE:  PASS signup metadata cannot assign role
+NOTICE:  PASS all nine application tables enable RLS
+NOTICE:  PASS anonymous discovery hides drafts
+NOTICE:  PASS anonymous portfolio hides drafts
+NOTICE:  PASS public categories readable
+NOTICE:  PASS anonymous cannot read private accounts
+NOTICE:  PASS anonymous cannot read bookings
+NOTICE:  PASS anonymous cannot read messages
+NOTICE:  PASS anonymous cannot read saved talent
+NOTICE:  PASS anonymous cannot read entitlements
+NOTICE:  PASS anonymous onboarding denied
+NOTICE:  PASS only registered published portfolio media accessible anonymously
+NOTICE:  PASS client sees only their own account
+NOTICE:  PASS client cannot read private Auth user directory
+NOTICE:  PASS outsider cannot read booking
+NOTICE:  PASS outsider cannot read conversation
+NOTICE:  PASS outsider cannot read messages
+NOTICE:  PASS outsider cannot read private shortlist
+NOTICE:  PASS outsider cannot read entitlement
+NOTICE:  PASS role column update denied
+NOTICE:  PASS onboarding cannot change an existing role
+NOTICE:  PASS cannot rename another account
+NOTICE:  PASS client cannot edit talent
+NOTICE:  PASS client cannot create talent profile
+NOTICE:  PASS cannot save on behalf of another user
+NOTICE:  PASS cannot save an unpublished profile
+NOTICE:  PASS cannot impersonate a booking client
+NOTICE:  PASS cannot inject protected booking status
+NOTICE:  PASS cannot change agreed rates
+NOTICE:  PASS cannot reassign participants
+NOTICE:  PASS cannot impersonate a conversation participant
+NOTICE:  PASS ordinary message sends disabled
+NOTICE:  PASS cannot grant entitlement
+NOTICE:  PASS cannot extend entitlement
+NOTICE:  PASS cannot delete entitlement
+NOTICE:  PASS cannot upload to another talent folder
+NOTICE:  PASS cannot read another private file
+NOTICE:  PASS cannot request a past booking date
+NOTICE:  PASS cannot request unpublished talent
+NOTICE:  PASS client can create own published-talent request
+NOTICE:  PASS new request receives server-managed defaults
+NOTICE:  PASS client can create own conversation metadata
+NOTICE:  PASS cannot delete another private file
+NOTICE:  PASS booking client can read own request
+NOTICE:  PASS conversation client can read messages
+NOTICE:  PASS owner can read entitlement
+NOTICE:  PASS owner can read shortlist
+NOTICE:  PASS owner can read private file
+NOTICE:  PASS owner can edit account name
+NOTICE:  PASS booking owner still cannot change status
+NOTICE:  PASS owner can remove saved talent
+NOTICE:  PASS relevant talent can read booking
+NOTICE:  PASS conversation talent can read messages
+NOTICE:  PASS owner can edit own portfolio label
+NOTICE:  PASS portfolio path cannot be reassigned
+NOTICE:  PASS talent can edit own profile
+NOTICE:  PASS talent cannot edit another profile
+NOTICE:  PASS talent cannot delete another portfolio
+NOTICE:  PASS talent cannot insert another portfolio
+NOTICE:  PASS profile owner ID immutable to client
+NOTICE:  PASS talent can unpublish own profile
+NOTICE:  PASS unpublish removes public discovery
+NOTICE:  PASS unpublish hides public portfolio metadata
+NOTICE:  PASS unpublish prevents new public media reads
+NOTICE:  PASS talent can read own draft
+NOTICE:  PASS talent can read own draft portfolio
+NOTICE:  PASS talent can upload in own folder
+NOTICE:  PASS object moves/overwrites denied
+NOTICE:  PASS authenticated user can onboard once
+NOTICE:  PASS talent role can create own profile
+NOTICE:  PASS role cannot change after onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:10: NOTICE:  PASS booking data and name snapshots preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:11: NOTICE:  PASS history preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:12: NOTICE:  PASS booking historical timestamps preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:13: NOTICE:  PASS favourites preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:14: NOTICE:  PASS entitlements preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:15: NOTICE:  PASS Storage rows preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:16: NOTICE:  PASS real ledger baseline preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:19: NOTICE:  PASS anonymous API discovery hides draft
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:20: NOTICE:  PASS anonymous API private accounts hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:21: NOTICE:  PASS anonymous API bookings hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:22: NOTICE:  PASS anonymous API cannot impersonate client
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:26: NOTICE:  PASS unrelated API booking isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:27: NOTICE:  PASS unrelated API conversation isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:28: NOTICE:  PASS unrelated API message isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:29: NOTICE:  PASS unrelated API cannot open accepted conversation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:32: NOTICE:  PASS API self onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:36: NOTICE:  PASS talent private self account
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:39: NOTICE:  PASS cannot edit another portfolio
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:40: NOTICE:  PASS API cannot grant entitlements
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:42: NOTICE:  PASS API cannot impersonate sender
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:47: NOTICE:  PASS talent cannot see client private media
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:48: NOTICE:  PASS cross-owner Storage upload denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:53: NOTICE:  PASS trigger blocks protected fields even with accidental wider column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:56: NOTICE:  PASS terminal status cannot reopen
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:57: NOTICE:  PASS direct API SQL send stops after cancellation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:58: NOTICE:  PASS participant history retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:61: NOTICE:  PASS Realtime participant SELECT retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:65: NOTICE:  PASS Realtime unrelated SELECT denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:69: NOTICE:  PASS API private favourites accessible
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:71: NOTICE:  PASS API favourite removal
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:74: NOTICE:  PASS client private Storage read retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:78: NOTICE:  PASS no table-wide API booking update
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:79: NOTICE:  PASS status-only API column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:80: NOTICE:  PASS no protected rate grant
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/03-cutover.sql:11: ERROR:  Separate owner cutover approval required
+psql:/tmp/castly-sql/reconciliation/issue-1/04-verify.sql:45: NOTICE:  PASS reconciliation catalog verification; cutover=t
+NOTICE:  PASS intervening legacy request gets snapshots at cutover
+NOTICE:  PASS cutover preserves intervening request timestamp
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:10: NOTICE:  PASS booking data and name snapshots preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:11: NOTICE:  PASS history preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:12: NOTICE:  PASS booking historical timestamps preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:13: NOTICE:  PASS favourites preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:14: NOTICE:  PASS entitlements preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:15: NOTICE:  PASS Storage rows preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:16: NOTICE:  PASS real ledger baseline preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:19: NOTICE:  PASS anonymous API discovery hides draft
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:20: NOTICE:  PASS anonymous API private accounts hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:21: NOTICE:  PASS anonymous API bookings hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:22: NOTICE:  PASS anonymous API cannot impersonate client
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:26: NOTICE:  PASS unrelated API booking isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:27: NOTICE:  PASS unrelated API conversation isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:28: NOTICE:  PASS unrelated API message isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:29: NOTICE:  PASS unrelated API cannot open accepted conversation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:32: NOTICE:  PASS API self onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:36: NOTICE:  PASS talent private self account
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:39: NOTICE:  PASS cannot edit another portfolio
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:40: NOTICE:  PASS API cannot grant entitlements
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:42: NOTICE:  PASS API cannot impersonate sender
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:47: NOTICE:  PASS talent cannot see client private media
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:48: NOTICE:  PASS cross-owner Storage upload denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:53: NOTICE:  PASS trigger blocks protected fields even with accidental wider column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:56: NOTICE:  PASS terminal status cannot reopen
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:57: NOTICE:  PASS direct API SQL send stops after cancellation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:58: NOTICE:  PASS participant history retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:61: NOTICE:  PASS Realtime participant SELECT retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:65: NOTICE:  PASS Realtime unrelated SELECT denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:69: NOTICE:  PASS API private favourites accessible
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:71: NOTICE:  PASS API favourite removal
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:74: NOTICE:  PASS client private Storage read retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:78: NOTICE:  PASS no table-wide API booking update
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:79: NOTICE:  PASS status-only API column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:80: NOTICE:  PASS no protected rate grant
+PASS castly_reconcile_rpcs: inventory, refusal gates, preparation preserving legacy M1, API/RLS/Storage actors, cutover, data and ledger preservation
+PASS reconciliation scenarios: 286 SQL assertions/catalog gates on disposable PostgreSQL; no hosted database contacted.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

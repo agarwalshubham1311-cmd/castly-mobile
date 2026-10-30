@@ -9,6 +9,7 @@ function run(args, input) {
 }
 try {
   run(['inspect', container]);
+  run(['start', container]);
 } catch {
   run([
     'run',
@@ -43,18 +44,30 @@ sql(
   'castly_spring_test',
 );
 
-for (const name of fs.readdirSync(path.join(root, 'supabase/migrations')).sort())
-  sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), 'castly_spring_test');
+const schemaPath = process.env.CASTLY_TEST_SCHEMA_PATH || 'repository';
+if (!['repository', 'reconciliation'].includes(schemaPath)) throw new Error('Unknown disposable schema path');
+if (schemaPath === 'repository') {
+  for (const name of fs.readdirSync(path.join(root, 'supabase/migrations')).sort())
+    sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), 'castly_spring_test');
+} else {
+  for (const name of ['20261022000100_accounts_and_marketplace.sql', '20261022000200_media_storage.sql'])
+    sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), 'castly_spring_test');
+  // Synthetic approximation of the reported baseline; never a claim of hosted equivalence.
+  sql("create schema supabase_migrations; create table supabase_migrations.schema_migrations(version text primary key); insert into supabase_migrations.schema_migrations values('20261027032615');", 'castly_spring_test');
+  run(['exec', container, 'mkdir', '-p', '/tmp/castly-sql']);
+  run(['cp', path.join(root, 'supabase') + '/.', container + ':/tmp/castly-sql']);
+  sql("set castly.reconciliation_schema_reviewed='issue-1-reviewed';\n\\i /tmp/castly-sql/reconciliation/issue-1/02-prepare.sql\n", 'castly_spring_test');
+}
 sql("alter role castly_api login password 'castly-api-local-test';", 'castly_spring_test');
-for (let n = 1; n <= 5; n++)
+for (let n = 1; n <= 100; n++)
   sql(
-    `insert into auth.users(id,email,raw_user_meta_data) values ('00000000-0000-0000-0000-00000000000${n}','user${n}@example.test','{"display_name":"Test user ${n}"}');`,
+    `insert into auth.users(id,email,raw_user_meta_data) values ('00000000-0000-0000-0000-${String(n).padStart(12, '0')}','user${n}@example.test','{"display_name":"Test user ${n}"}');`,
     'castly_spring_test',
   );
 sql(
-  "update public.users set primary_role='client' where id='00000000-0000-0000-0000-000000000001'; update public.users set primary_role='talent' where id in ('00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000005');",
+  "update public.users set primary_role='client' where id='00000000-0000-0000-0000-000000000001'; update public.users set primary_role='talent' where id in ('00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000005') or id>='00000000-0000-0000-0000-000000000006';",
   'castly_spring_test',
 );
 console.log(
-  'Prepared isolated castly_spring_test database. Application tests connect ONLY as castly_api.',
+  `Prepared isolated castly_spring_test database (${schemaPath}). Application tests connect ONLY as castly_api.`,
 );
