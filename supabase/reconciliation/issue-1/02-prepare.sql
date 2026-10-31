@@ -12,9 +12,23 @@ do $$begin
   create role castly_api nologin nosuperuser nocreatedb nocreaterole noinherit noreplication nobypassrls;
  end if;
  if exists(select 1 from pg_roles where rolname='castly_api' and (rolsuper or rolbypassrls or rolcreatedb or rolcreaterole or rolreplication or rolinherit))
- or exists(select 1 from pg_auth_members where member=(select oid from pg_roles where rolname='castly_api') or roleid=(select oid from pg_roles where rolname='castly_api'))
+ or exists(
+  select 1 from pg_auth_members m
+  join pg_roles granted on granted.oid=m.roleid
+  join pg_roles member_role on member_role.oid=m.member
+  join pg_roles grantor on grantor.oid=m.grantor
+  where (granted.rolname='castly_api' or member_role.rolname='castly_api')
+    and not (
+      granted.rolname='castly_api'
+      and member_role.rolname='postgres'
+      and grantor.rolname='supabase_admin'
+      and m.admin_option
+      and not m.inherit_option
+      and not m.set_option
+    )
+ )
  or exists(select 1 from pg_class where relowner=(select oid from pg_roles where rolname='castly_api')) then
-  raise exception 'castly_api must be a dedicated nonprivileged role with no role memberships';
+  raise exception 'castly_api must be nonprivileged, nonowner, and have no role memberships except the reviewed Supabase admin grant to postgres';
  end if;
  execute format('grant connect on database %I to castly_api',current_database());
 end$$;
