@@ -28,7 +28,7 @@ Reused Expo Router routes, guards, Supabase client/session persistence, Storage/
 
 ## Acceptance and validation
 
-Local implementation/regression: **PASS**. Hosted end-to-end/native readiness: **NOT VERIFIED**. Draft PR creation is attempted after pushing; see delivery section/final response for GitHub API outcome.
+Local implementation/regression: **PASS**. Hosted end-to-end/native readiness: **NOT VERIFIED**. Implementation is pushed; draft PR creation is blocked by GitHub API access, as detailed below.
 
 | Command / check | Actual result |
 |---|---|
@@ -103,4 +103,6 @@ Catalog traversal is bounded by the API offset limit and loads public metadata l
 
 ## Draft PR delivery
 
-The implementation, tests, logs and manual guide are ready for a draft review. GitHub API access was already returning Forbidden when reading issue #3; the issue was read through its public page. Draft creation will be attempted with GraphQL and REST after pushing, with base `fix/issue-1-booking-security`; the final handoff records the exact outcome. Prepared body: [pull-request.md](pull-request.md).
+Implementation commit `f58a259` is pushed to `feat/phase2-mobile-spring-integration`. The implementation, tests, logs and manual guide are ready for draft review, but **no draft PR was created**: `gh pr create --draft` returned `Post "https://api.github.com/graphql": Forbidden`; the REST fallback with `draft: true` returned `Post "https://api.github.com/repos/agarwalshubham1311-cmd/castly-mobile/pulls": Forbidden`. No PR number was issued. Git transport works; GitHub API access does not.
+
+[Open the correct base/head comparison](https://github.com/agarwalshubham1311-cmd/castly-mobile/compare/fix%2Fissue-1-booking-security...feat%2Fphase2-mobile-spring-integration?expand=1), paste [the prepared description](pull-request.md), and select **Create draft pull request**, not a ready-for-review PR or merge. Exact failure evidence: [pull-request.log](logs/pull-request.log). This is an access blocker, not a passing delivery criterion.
