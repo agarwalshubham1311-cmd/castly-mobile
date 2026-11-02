@@ -6,7 +6,21 @@ begin
  cutover := coalesce(current_setting('castly.reconciliation_verify_cutover',true),'')='yes';
  if not exists(select 1 from pg_roles where rolname='castly_api' and not rolsuper and not rolbypassrls
   and not rolcreatedb and not rolcreaterole and not rolreplication and not rolinherit)
- or exists(select 1 from pg_auth_members where member=to_regrole('castly_api') or roleid=to_regrole('castly_api'))
+ or exists(
+  select 1 from pg_auth_members m
+  join pg_roles granted on granted.oid=m.roleid
+  join pg_roles member_role on member_role.oid=m.member
+  join pg_roles grantor on grantor.oid=m.grantor
+  where (granted.rolname='castly_api' or member_role.rolname='castly_api')
+    and not (
+      granted.rolname='castly_api'
+      and member_role.rolname='postgres'
+      and grantor.rolname='supabase_admin'
+      and m.admin_option
+      and not m.inherit_option
+      and not m.set_option
+    )
+ )
  or exists(select 1 from pg_class where relowner=to_regrole('castly_api'))
  or has_schema_privilege('castly_api','public','CREATE')
  or has_database_privilege('castly_api',current_database(),'CREATE') then raise exception 'Unsafe API role';end if;
