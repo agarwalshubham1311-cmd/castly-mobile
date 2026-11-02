@@ -78,6 +78,7 @@ export function AuthScreen({ signup = false }: { signup?: boolean }) {
   };
   return (
     <Screen title={signup ? 'Create account' : 'Welcome back'}>
+      {!!auth.notice && <Label accessibilityRole="alert">{auth.notice}</Label>}
       <Text style={{ fontFamily: f.extrabold, fontSize: 32, color: c.text }}>
         castly<Text style={{ color: c.primary }}>✦</Text>
       </Text>

@@ -1,0 +1,10 @@
+
+> castly-mobile@0.1.0 test:browser
+> node tests/browser.cjs
+
+PASS: preserved category/search/filter/reset, profile navigation, synchronized save state, saved persistence/removal, Home shortcuts, active navigation, no overflow or browser errors.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

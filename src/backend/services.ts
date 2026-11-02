@@ -1,3 +1,4 @@
+import { createPlatformServices } from './platform.ts';
 import { talentPayload } from './validation.ts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Account, Database, Role, TalentDraft } from './types';
@@ -5,30 +6,7 @@ import { requireData } from './errors.ts';
 /** Services accept a scoped client. Authorization remains enforced by SQL, never by these filters alone. */
 export function createServices(db: SupabaseClient<Database>) {
   return {
-    auth: {
-      login: async (email: string, password: string) => {
-        const result = await db.auth.signInWithPassword({ email: email.trim(), password });
-        if (result.error) throw result.error;
-        return result.data;
-      },
-      signup: async (email: string, password: string, name: string, redirectTo: string) =>
-        requireData(
-          await db.auth.signUp({
-            email: email.trim(),
-            password,
-            options: { data: { display_name: name.trim() }, emailRedirectTo: redirectTo },
-          }),
-        ),
-      exchangeCode: async (code: string) => {
-        const result = await db.auth.exchangeCodeForSession(code);
-        if (result.error) throw result.error;
-        return result.data;
-      },
-      logout: async () => {
-        const { error } = await db.auth.signOut({ scope: 'local' });
-        if (error) throw error;
-      },
-    },
+    ...createPlatformServices(db),
     account: {
       get: async (id: string): Promise<Account> =>
         requireData(await db.from('users').select('*').eq('id', id).single())!,
@@ -48,15 +26,19 @@ export function createServices(db: SupabaseClient<Database>) {
       entitlements: async () => requireData(await db.from('subscription_entitlements').select('*')),
     },
     talent: {
-      published: async () =>
+      published: async (filters: { limit?: number; offset?: number } = {}) =>
         requireData(
           await db
             .from('talent_profiles')
             .select('*')
             .eq('published', true)
             .order('created_at', { ascending: false })
-            .limit(200),
+            .range(filters.offset || 0, (filters.offset || 0) + (filters.limit || 200) - 1),
         ),
+      get: async (id: string) =>
+        requireData(
+          await db.from('talent_profiles').select('*').eq('id', id).eq('published', true).single(),
+        )!,
       own: async (id: string) =>
         requireData(await db.from('talent_profiles').select('*').eq('id', id).maybeSingle()),
       create: async (id: string, draft: TalentDraft) =>
@@ -79,12 +61,19 @@ export function createServices(db: SupabaseClient<Database>) {
       categories: async () => requireData(await db.from('categories').select('*').order('name')),
     },
     portfolio: {
-      list: async (id: string) =>
+      list: async (id: string, _published = false) =>
         requireData(
           await db.from('portfolio_assets').select('*').eq('talent_id', id).order('position'),
         ),
-      published: async () =>
-        requireData(await db.from('portfolio_assets').select('*').order('position').limit(1000)),
+      published: async (offset = 0) =>
+        requireData(
+          await db
+            .from('portfolio_assets')
+            .select('*')
+            .order('position')
+            .order('id')
+            .range(offset, offset + 199),
+        ),
       add: async (talentId: string, path: string, label: string, position: number) =>
         requireData(
           await db
@@ -93,19 +82,18 @@ export function createServices(db: SupabaseClient<Database>) {
             .select()
             .single(),
         ),
+      edit: async (id: string, label: string, position: number) =>
+        requireData(
+          await db
+            .from('portfolio_assets')
+            .update({ label, position })
+            .eq('id', id)
+            .select()
+            .single(),
+        ),
       remove: async (id: string) => {
         requireData(await db.from('portfolio_assets').delete().eq('id', id));
       },
-    },
-    media: {
-      signedUrl: async (path: string) =>
-        requireData(await db.storage.from('portfolio').createSignedUrl(path, 60))!.signedUrl,
-      upload: async (path: string, body: ArrayBuffer, contentType: string) =>
-        requireData(
-          await db.storage.from('portfolio').upload(path, body, { contentType, upsert: false }),
-        ),
-      remove: async (path: string) =>
-        requireData(await db.storage.from('portfolio').remove([path])),
     },
     saved: {
       list: async () => requireData(await db.from('saved_talent').select('*')),

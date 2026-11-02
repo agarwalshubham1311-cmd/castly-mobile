@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { router } from 'expo-router';
-import { categories, defaultFilters, findTalents, money } from '../talent';
+import { defaultFilters, findTalents, money } from '../talent';
 import { useDemo } from '../store';
 import { c, f } from '../theme';
 import {
@@ -31,7 +31,7 @@ const skills = [
   'Brand films',
 ];
 export default function Filters() {
-  const { talents } = useCatalog();
+  const { talents, categories } = useCatalog();
   const store = useDemo();
   const [draft, setDraft] = useState({ ...store.filters });
   const [category, setCategory] = useState(store.category);

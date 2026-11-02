@@ -1,6 +1,6 @@
 # Castly — mobile and Spring business API
 
-Current development branch: `feat/phase2-bookings-messaging`. Spring Boot now owns Milestone 1 business operations and Milestone 2 booking/messaging workflows. Supabase remains the Auth, Storage and Realtime provider. See [backend setup and API contract](backend/README.md) and [validation results](artifacts/spring-api/report.md).
+Milestone 3 review branch: `feat/phase2-mobile-spring-integration` (based on the latest issue-1 fixes). See [Windows + Android Expo Go setup and manual smoke test](docs/MOBILE_SPRING_SETUP.md) and [Milestone 3 validation report](artifacts/issue-3/report.md). Spring Boot now owns Milestone 1 business operations and Milestone 2 booking/messaging workflows. Supabase remains the Auth, Storage and Realtime provider. See [backend setup and API contract](backend/README.md) and [validation results](artifacts/spring-api/report.md).
 
 No hosted migrations, production deployment, main merge or payment enablement is performed by this work. The direct Supabase business implementation is retained only as an explicit Metro development fallback against a pre-cutover development database.
 
@@ -89,6 +89,6 @@ Native exports verify bundling, not real-device rendering, native keyboards, scr
 - `src/TalentImage.tsx`, `src/talentMedia.ts`: bundled image rendering and registry.
 - `tests/`: pure logic/asset tests and Playwright UI checks.
 
-Work remains on `feat/initial-castly-mobile`. No merge, Supabase integration, backend development or billing is part of this implementation.
+The preceding Phase 1 preview notes are historical; current connected development uses the Spring integration described above. No merge, deployment, hosted mutation or billing is performed by this work.
 
 The UI/accessibility follow-up adds AA secondary text, 48px web control targets, a blended Discovery hero, compact/sticky profile content, local message timestamps/unread counts, platform date selection and Castly launcher assets. `test:accessibility` covers responsive controls, sticky tabs/footer, browser 150% text simulation, switch keyboard use and local interactions. Native TalkBack, system font scaling, calendar dialogs and launcher masking still require device testing. See [the implementation report and before/after comparisons](artifacts/ui-accessibility-fixes/report.md), and [branding exports](assets/branding/README.md).

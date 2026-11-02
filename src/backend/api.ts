@@ -25,10 +25,16 @@ export function createApiTransport(
   getToken: (refresh?: boolean) => Promise<string | null>,
   fetcher: typeof fetch = fetch,
   allowInsecureDevelopment = false,
+  expired: (subject: string | null) => void = () => {},
 ) {
   let base = baseUrl.trim().replace(/\/$/, '');
   if (base) {
-    const url = new URL(base);
+    let url: URL;
+    try {
+      url = new URL(base);
+    } catch {
+      throw new Error('Invalid Castly API URL. Use an origin without /api/v1.');
+    }
     if (
       (url.protocol !== 'https:' &&
         !(
@@ -36,6 +42,7 @@ export function createApiTransport(
           (allowInsecureDevelopment ||
             ['localhost', '127.0.0.1', '10.0.2.2', '::1', '[::1]'].includes(url.hostname))
         )) ||
+      url.pathname !== '/' ||
       url.username ||
       url.password ||
       url.search ||
@@ -43,7 +50,12 @@ export function createApiTransport(
     )
       throw new Error('Invalid Castly API URL');
   }
-  return async function request<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
+  return async function request<T>(
+    path: string,
+    method = 'GET',
+    body?: unknown,
+    options: { authenticated?: boolean; expectedSubject?: string } = {},
+  ): Promise<T> {
     if (!base) throw new Error('Castly API URL is not configured. Set EXPO_PUBLIC_API_URL.');
     let originalSubject: string | null = null;
     const subject = (token: string | null) => {
@@ -58,9 +70,23 @@ export function createApiTransport(
       }
     };
     for (let attempt = 0; attempt < 2; attempt++) {
-      const token = await getToken(attempt === 1);
-      if (attempt === 0) originalSubject = subject(token);
-      else if (originalSubject !== subject(token))
+      let token: string | null;
+      try {
+        token = options.authenticated === false ? null : await getToken(attempt === 1);
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          expired(originalSubject);
+          throw error;
+        }
+        throw new Error(
+          'Cannot reach Castly. Check your connection and retry. Changes have not been confirmed.',
+        );
+      }
+      if (attempt === 0) {
+        originalSubject = subject(token);
+        if (options.expectedSubject && originalSubject !== options.expectedSubject)
+          throw new ApiError(401, 'Your account changed. Retry from the current account.');
+      } else if (originalSubject !== subject(token))
         throw new ApiError(401, 'Your account changed. Retry from the current account.');
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
@@ -75,8 +101,10 @@ export function createApiTransport(
           signal: controller.signal,
         });
         if (response.status === 401 && token && attempt === 0) continue;
-        if (response.status === 401)
+        if (response.status === 401) {
+          if (options.authenticated !== false) expired(originalSubject);
           throw new ApiError(401, 'Your session has expired. Sign in again.');
+        }
         if (!response.ok) {
           let detail = 'Request failed. Please retry.';
           try {
@@ -87,8 +115,10 @@ export function createApiTransport(
           }
           throw new ApiError(response.status, detail);
         }
-        if (response.status === 204) return undefined as T;
-        return (await response.json()) as T;
+        const result = response.status === 204 ? undefined : await response.json();
+        if (options.authenticated !== false && originalSubject !== subject(await getToken(false)))
+          throw new ApiError(401, 'Your account changed. Retry from the current account.');
+        return result as T;
       } catch (error) {
         if (error instanceof ApiError) throw error;
         throw new Error(
@@ -101,6 +131,16 @@ export function createApiTransport(
     throw new ApiError(401, 'Your session has expired. Sign in again.');
   };
 }
+export type DiscoveryQuery = {
+  query?: string;
+  category?: string;
+  city?: string;
+  minRate?: number;
+  maxRate?: number;
+  available?: boolean;
+  limit?: number;
+  offset?: number;
+};
 export type BookingRequest = {
   talent_id: string;
   project_type: string;
@@ -113,87 +153,154 @@ export function createApiServices(request: ReturnType<typeof createApiTransport>
   return {
     account: {
       get: (id: string) => {
-        void id;
-        return request<Account>('account');
+        return request<Account>('account', 'GET', undefined, { expectedSubject: id });
       },
-      onboard: (role: Role, name: string) =>
-        request<Account>('account/onboarding', 'POST', { selected_role: role, account_name: name }),
+      onboard: (role: Role, name: string, actor?: string) =>
+        request<Account>(
+          'account/onboarding',
+          'POST',
+          { selected_role: role, account_name: name },
+          { expectedSubject: actor },
+        ),
       rename: (id: string, name: string) => {
-        void id;
-        return request<Account>('account', 'PATCH', { display_name: name.trim() });
+        return request<Account>(
+          'account',
+          'PATCH',
+          { display_name: name.trim() },
+          { expectedSubject: id },
+        );
       },
       entitlements: () => request<Entitlement[]>('account/entitlements'),
     },
     talent: {
-      published: (filters: Record<string, string | number | boolean> = {}) =>
+      published: (filters: DiscoveryQuery = {}) =>
         request<TalentProfile[]>(
-          `talents?${new URLSearchParams(Object.entries(filters).map(([key, value]) => [key, String(value)]))}`,
+          `talents?${new URLSearchParams(
+            Object.entries(filters)
+              .filter(([, value]) => value !== undefined)
+              .map(([key, value]) => [key, String(value)]),
+          )}`,
+          'GET',
+          undefined,
+          { authenticated: false },
         ),
+      get: (id: string) =>
+        request<TalentProfile>(`talents/${encodeURIComponent(id)}`, 'GET', undefined, {
+          authenticated: false,
+        }),
       own: async (id: string) => {
-        void id;
         try {
-          return await request<TalentProfile | null>('talents/me');
+          return await request<TalentProfile | null>('talents/me', 'GET', undefined, {
+            expectedSubject: id,
+          });
         } catch (error) {
           if (error instanceof ApiError && error.status === 404) return null;
           throw error;
         }
       },
       create: (id: string, draft: TalentDraft) => {
-        void id;
-        return request<TalentProfile>('talents/me', 'POST', talentPayload(draft));
+        return request<TalentProfile>('talents/me', 'POST', talentPayload(draft), {
+          expectedSubject: id,
+        });
       },
       update: (id: string, draft: TalentDraft) => {
-        void id;
-        return request<TalentProfile>('talents/me', 'PUT', talentPayload(draft));
+        return request<TalentProfile>('talents/me', 'PUT', talentPayload(draft), {
+          expectedSubject: id,
+        });
       },
-      categories: () => request<CategoryRow[]>('categories'),
+      categories: () =>
+        request<CategoryRow[]>('categories', 'GET', undefined, { authenticated: false }),
     },
     portfolio: {
-      list: (id: string) =>
-        request<PortfolioAsset[]>(`talents/${encodeURIComponent(id)}/portfolio`),
-      published: () => request<PortfolioAsset[]>('portfolio'),
-      add: (talentId: string, path: string, label: string, position: number) => {
-        void talentId;
-        return request<PortfolioAsset>('talents/me/portfolio', 'POST', { path, label, position });
-      },
-      edit: (id: string, label: string, position: number) =>
-        request<PortfolioAsset>(`portfolio/${encodeURIComponent(id)}`, 'PATCH', {
-          label,
-          position,
+      list: (id: string, published = false) =>
+        request<PortfolioAsset[]>(`talents/${encodeURIComponent(id)}/portfolio`, 'GET', undefined, {
+          authenticated: !published,
         }),
-      remove: (id: string) => request<void>(`portfolio/${encodeURIComponent(id)}`, 'DELETE'),
+      published: (offset = 0) =>
+        request<PortfolioAsset[]>(`portfolio?limit=200&offset=${offset}`, 'GET', undefined, {
+          authenticated: false,
+        }),
+      add: (talentId: string, path: string, label: string, position: number) => {
+        return request<PortfolioAsset>(
+          'talents/me/portfolio',
+          'POST',
+          { path, label, position },
+          { expectedSubject: talentId },
+        );
+      },
+      edit: (id: string, label: string, position: number, actor?: string) =>
+        request<PortfolioAsset>(
+          `portfolio/${encodeURIComponent(id)}`,
+          'PATCH',
+          {
+            label,
+            position,
+          },
+          { expectedSubject: actor },
+        ),
+      remove: (id: string, actor?: string) =>
+        request<void>(`portfolio/${encodeURIComponent(id)}`, 'DELETE', undefined, {
+          expectedSubject: actor,
+        }),
     },
     saved: {
       list: () => request<SavedRow[]>('favourites'),
       add: (userId: string, talentId: string) => {
-        void userId;
-        return request<void>(`favourites/${encodeURIComponent(talentId)}`, 'PUT');
+        return request<void>(`favourites/${encodeURIComponent(talentId)}`, 'PUT', undefined, {
+          expectedSubject: userId,
+        });
       },
       remove: (userId: string, talentId: string) => {
-        void userId;
-        return request<void>(`favourites/${encodeURIComponent(talentId)}`, 'DELETE');
+        return request<void>(`favourites/${encodeURIComponent(talentId)}`, 'DELETE', undefined, {
+          expectedSubject: userId,
+        });
       },
     },
     activity: {
       bookings: (offset = 0) => request<BookingRow[]>(`bookings?limit=100&offset=${offset}`),
       booking: (id: string) => request<BookingRow>(`bookings/${encodeURIComponent(id)}`),
-      createBooking: (body: BookingRequest) => request<BookingRow>('bookings', 'POST', body),
-      transition: (id: string, decision: 'accept' | 'reject' | 'cancel') =>
-        request<BookingRow>(`bookings/${encodeURIComponent(id)}/${decision}`, 'POST'),
+      createBooking: (body: BookingRequest, actor?: string) =>
+        request<BookingRow>(
+          'bookings',
+          'POST',
+          {
+            talent_id: body.talent_id,
+            project_type: body.project_type,
+            location: body.location,
+            requirements: body.requirements,
+            proposed_date: body.proposed_date,
+            indicative_budget: body.indicative_budget,
+          },
+          { expectedSubject: actor },
+        ),
+      transition: (id: string, decision: 'accept' | 'reject' | 'cancel', actor?: string) =>
+        request<BookingRow>(`bookings/${encodeURIComponent(id)}/${decision}`, 'POST', undefined, {
+          expectedSubject: actor,
+        }),
       conversations: (offset = 0) =>
         request<ConversationRow[]>(`conversations?limit=100&offset=${offset}`),
       conversation: (id: string) =>
         request<ConversationRow>(`conversations/${encodeURIComponent(id)}`),
-      openConversation: (bookingId: string) =>
-        request<ConversationRow>('conversations', 'POST', { booking_id: bookingId }),
+      openConversation: (bookingId: string, actor?: string) =>
+        request<ConversationRow>(
+          'conversations',
+          'POST',
+          { booking_id: bookingId },
+          { expectedSubject: actor },
+        ),
       messages: (id: string, before?: string) =>
         request<MessageRow[]>(
           `conversations/${encodeURIComponent(id)}/messages?limit=50${before ? '&before=' + encodeURIComponent(before) : ''}`,
         ),
-      sendMessage: (id: string, body: string) =>
-        request<MessageRow>(`conversations/${encodeURIComponent(id)}/messages`, 'POST', {
-          body: body.trim(),
-        }),
+      sendMessage: (id: string, body: string, actor?: string) =>
+        request<MessageRow>(
+          `conversations/${encodeURIComponent(id)}/messages`,
+          'POST',
+          {
+            body: body.trim(),
+          },
+          { expectedSubject: actor },
+        ),
     },
   };
 }
@@ -201,10 +308,11 @@ export function createApiServices(request: ReturnType<typeof createApiTransport>
 export function selectBusinessMode(
   value: string | undefined,
   development: boolean,
+  isolatedDevDatabase = false,
 ): 'spring' | 'supabase' {
   if (!value || value === 'spring') return 'spring';
-  if (value === 'supabase' && development) return 'supabase';
+  if (value === 'supabase' && development && isolatedDevDatabase) return 'supabase';
   throw new Error(
-    'Direct Supabase business access is a development-only fallback. Use spring for application builds.',
+    'Direct Supabase business access is a development-only fallback for an explicitly isolated DB (EXPO_PUBLIC_ISOLATED_SUPABASE_FALLBACK=true). Use spring for application builds.',
   );
 }

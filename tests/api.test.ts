@@ -28,7 +28,7 @@ test('API attaches verified session token and refreshes once after 401', async (
   );
   assert.deepEqual(await request('account'), { id: 'own' });
   assert.deepEqual(headers, ['Bearer old', 'Bearer fresh']);
-  assert.deepEqual(refresh, [false, true]);
+  assert.deepEqual(refresh, [false, true, false]);
 });
 test('API does not retry failed writes or silently fall back, and exposes server errors', async () => {
   let calls = 0;
@@ -110,7 +110,7 @@ test('message history merges duplicate POST/Realtime results in precise server o
 
 test('direct database fallback is opt-in and impossible in production mode', () => {
   assert.equal(selectBusinessMode(undefined, false), 'spring');
-  assert.equal(selectBusinessMode('supabase', true), 'supabase');
+  assert.equal(selectBusinessMode('supabase', true, true), 'supabase');
   assert.throws(() => selectBusinessMode('supabase', false), /development-only/);
   assert.throws(() => selectBusinessMode('invalid', true), /development-only/);
 });

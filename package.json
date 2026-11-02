@@ -58,7 +58,8 @@
     "export:all": "expo export --platform all --output-dir dist",
     "test:legacy-backend": "node tests/backend-browser.cjs",
     "test:jwt-config": "node backend/scripts/check-jwt-config.cjs",
-    "test:reconciliation": "node scripts/test-reconciliation.cjs"
+    "test:reconciliation": "node scripts/test-reconciliation.cjs",
+    "test:mobile-api": "node tests/mobile-spring-browser.cjs"
   },
   "private": true
 }

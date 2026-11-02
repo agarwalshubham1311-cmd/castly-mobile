@@ -636,4 +636,35 @@ class BusinessApiTest {
                           .update()));
     }
   }
+
+  @Test
+  void anonymousPortfolioPaginationIsStableAndValidated() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    for (String label : List.of("Page one", "Page two"))
+      call(
+              "POST",
+              "/api/v1/talents/me/portfolio",
+              talent,
+              "{\"path\":\""
+                  + talent
+                  + "/"
+                  + UUID.randomUUID()
+                  + ".jpg\",\"label\":\""
+                  + label
+                  + "\",\"position\":0}")
+          .andExpect(status().isOk());
+    var first =
+        call("GET", "/api/v1/portfolio?limit=1&offset=0", null, null)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    var second =
+        call("GET", "/api/v1/portfolio?limit=1&offset=1", null, null)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    assertNotEquals(
+        first.andReturn().getResponse().getContentAsString(),
+        second.andReturn().getResponse().getContentAsString());
+    call("GET", "/api/v1/portfolio?limit=1001", null, null).andExpect(status().isBadRequest());
+    call("GET", "/api/v1/portfolio?offset=-1", null, null).andExpect(status().isBadRequest());
+  }
 }

@@ -1,10 +1,10 @@
+import type { Category } from '../talent';
 import { BackendNotice } from '../components/BackendNotice';
 import { useCatalog } from '../backend/CatalogProvider';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { categories } from '../talent';
 import { c, f } from '../theme';
 import { imageSource, talentMedia } from '../talentMedia';
 import { TalentImage } from '../TalentImage';
@@ -21,16 +21,16 @@ import {
   TalentGrid,
   useLayout,
 } from '../components/ui';
-const categoryIcons: IconName[] = [
-  'grid-outline',
-  'film-outline',
-  'person-outline',
-  'camera-outline',
-  'musical-notes-outline',
-  'aperture-outline',
-];
+const categoryIcons: Record<Category, IconName> = {
+  'All talent': 'grid-outline',
+  Actors: 'film-outline',
+  Models: 'person-outline',
+  Creators: 'camera-outline',
+  Musicians: 'musical-notes-outline',
+  Photographers: 'aperture-outline',
+};
 export default function Discovery() {
-  const { talents, mock } = useCatalog();
+  const { talents, mock, categories } = useCatalog();
   const { fontScale } = useLayout();
   const [locationOpen, setLocationOpen] = useState(false);
   const { filters, setFilters, setCategory, setQuery } = useDemo();
@@ -89,7 +89,7 @@ export default function Discovery() {
         >
           <TalentImage
             source={imageSource(talents[0]?.portrait || '', talents[0]?.portraitUri)}
-            label="Editorial sample talent portrait"
+            label={mock ? 'Editorial sample talent portrait' : 'Published talent portrait'}
             style={{ height: '100%', borderRadius: 0 }}
           />
           <LinearGradient
@@ -145,7 +145,7 @@ export default function Discovery() {
                 },
               ]}
             >
-              <Icon name={categoryIcons[index]} color={index === 0 ? c.white : c.text} />
+              <Icon name={categoryIcons[category]} color={index === 0 ? c.white : c.text} />
             </View>
             <Text style={s.categoryLabel}>{category === 'All talent' ? 'All' : category}</Text>
           </Pressable>

@@ -101,6 +101,13 @@ async function mockApi(route) {
   }
   if (url.pathname === '/auth/v1/logout') return respond(null, 204);
   if (url.pathname === '/auth/v1/user') return respond(user(actor));
+  if (url.pathname === '/rest/v1/categories')
+    return respond(
+      ['actors', 'models', 'creators', 'musicians', 'photographers'].map((id) => ({
+        id,
+        name: id[0].toUpperCase() + id.slice(1),
+      })),
+    );
   if (url.pathname === '/rest/v1/users') {
     if (failAccount) return respond({ message: 'Account temporarily unavailable' }, 503);
     if (!actor) return respond({ message: 'Unauthorized' }, 401);

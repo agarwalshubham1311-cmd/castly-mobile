@@ -2,6 +2,12 @@
 
 Java 21 / Spring Boot 3.5.7 is the business API for Milestones 1 and 2. Supabase still owns Auth, Storage uploads/download signing and Realtime transport. The application never connects as a database owner, administrator or `service_role`, never handles a JWT signing secret, and never applies migrations at startup. No payments or production deployment is included.
 
+## Milestone 3 mobile integration
+
+See [Windows/JDK21/trusted CA + Android Expo Go setup](../docs/MOBILE_SPRING_SETUP.md) for exact LAN URLs, signing mode, CORS, isolated fallback and ordered smoke tests. Mobile business calls use Spring; Supabase remains Auth/Storage/Realtime. `npm run test:mobile-api` adds a deterministic browser fixture without hosted credentials; `npm run test:backend` tests the actual Java API including a same-user 401 refresh.
+
+Public `/portfolio` now accepts `limit` (1–1000, default 1000) and `offset` (0–100000), with stable position/id ordering, so metadata can be paged without truncating the catalog. Mobile traversal uses pages of 200; private lists use pages of 100. No SQL or cutover change is required.
+
 ## Local verification
 
 Install a **JDK 21** (a JRE alone cannot compile), Maven 3.9+, Node 22.13+ and Docker. From `backend/`:
@@ -107,7 +113,7 @@ EXPO_PUBLIC_BUSINESS_API_MODE=spring
 
 Use `http://10.0.2.2:8080` for the Android emulator; a physical device needs the developer machine's reachable address and an appropriate development CORS/origin setup. Nonlocal HTTP is allowed only in Metro development; production API URLs must use HTTPS. Never prefix backend database credentials or JWT secrets with `EXPO_PUBLIC_`.
 
-The existing direct Supabase implementation is retained **only** with `EXPO_PUBLIC_BUSINESS_API_MODE=supabase` and Metro `__DEV__=true`. It is rejected in production/exported builds. It is an explicit development mode, not an automatic fallback after API errors. It targets a **separate pre-cutover development database**: the approved cutover deliberately removes those old direct write grants. Do not restore direct client write privileges on the API-backed database to make fallback work. Mock mode without credentials remains unchanged.
+The existing direct Supabase implementation is retained **only** with `EXPO_PUBLIC_BUSINESS_API_MODE=supabase` and Metro `__DEV__=true`, plus `EXPO_PUBLIC_ISOLATED_SUPABASE_FALLBACK=true` acknowledging a separately isolated pre-cutover dev DB. It is rejected in production/exported builds. It is an explicit development mode, not an automatic fallback after API errors. It targets a **separate pre-cutover development database**: the approved cutover deliberately removes those old direct write grants. Do not restore direct client write privileges on the API-backed database to make fallback work. Mock mode without credentials remains unchanged.
 
 Realtime subscriptions send the current Supabase user JWT, filter by booking participant/conversation, refresh auth when sessions change, and remove channels/listeners/timers on cleanup. Only INSERT and booking UPDATE events are subscribed; DELETE events are deliberately excluded. Event payloads only invalidate authorized Spring reads. RLS is the final delivery boundary. Reconnect/foreground/manual refresh and 15-second foreground polling recover API state if Realtime is unavailable. The interface explicitly reports unavailable live updates. **Actual hosted Realtime delivery is not validated**: no approved hosted migration or gateway access was available. Native AppState/deep-link/device behavior also needs device tests.
 
@@ -129,6 +135,6 @@ npm run test:backend
 
 The browser suite starts a local Auth/JWKS fixture, the actual packaged Java API and PostgreSQL. It exercises real Spring HTTP/signature validation/RLS from the rendered application. It stops its Java/Auth fixture on completion; the static preview and disposable DB can be stopped separately. Set `CASTLY_JAVA` if Java is not on PATH. Keep test ports free. The fixture does not implement Supabase Realtime; manual/poll recovery is tested, not hosted WebSocket delivery.
 
-The original M1 HTTP contract suite remains `npm run test:legacy-backend`, run against a Metro development web server configured for the explicit Supabase fallback and `https://castly-test.supabase.co`/test publishable key. Its requests are intercepted; it does not mutate a hosted project. `npm run test:sql` now runs cutover policies; the old M1 policy file is preserved as history for pre-cutover development.
+The original M1 HTTP contract suite remains `npm run test:legacy-backend`, run against a Metro development web server configured for the explicit Supabase fallback and `https://castly-test.supabase.co`/test publishable key. The isolated fallback acknowledgement must also be set for that Metro fixture. Its requests are intercepted; it does not mutate a hosted project. `npm run test:sql` now runs cutover policies; the old M1 policy file is preserved as history for pre-cutover development.
 
 No main merge, production deployment, hosted migration or payment enablement is part of this work.

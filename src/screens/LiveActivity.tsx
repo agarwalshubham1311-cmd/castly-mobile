@@ -1,3 +1,6 @@
+import { loadPagesThrough } from '../backend/catalog';
+import { ApiError } from '../backend/api';
+import { usePublishedTalent } from '../backend/usePublishedTalent';
 import { mergeMessages, messageWindow } from '../backend/messages';
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, ScrollView } from 'react-native';
@@ -6,8 +9,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { services } from '../backend';
 import { readableError } from '../backend/errors';
 import { useLiveRefresh } from '../backend/useLiveRefresh';
-import type { BookingRow, ConversationRow, MessageRow } from '../backend/types';
-import { useCatalog } from '../backend/CatalogProvider';
+import type { BookingRow, MessageRow } from '../backend/types';
 import { localDateISO } from '../dates';
 import DateField from '../components/DateField';
 import { validateBooking, type BookingForm } from '../demo';
@@ -23,7 +25,7 @@ import {
   Chips,
 } from '../components/ui';
 function useResource<T>(load: () => Promise<T>, revision: number) {
-  const [data, setData] = useState<T | null>(null);
+  const [snapshot, setSnapshot] = useState<{ load: typeof load; data: T | null } | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [local, setLocal] = useState(0);
@@ -32,12 +34,15 @@ function useResource<T>(load: () => Promise<T>, revision: number) {
     load()
       .then((value) => {
         if (active) {
-          setData(value);
+          setSnapshot({ load, data: value });
           setError('');
         }
       })
       .catch((e) => {
-        if (active) setError(readableError(e));
+        if (active) {
+          setSnapshot({ load, data: null });
+          setError(readableError(e));
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -47,9 +52,9 @@ function useResource<T>(load: () => Promise<T>, revision: number) {
     };
   }, [load, revision, local]);
   return {
-    data,
-    error,
-    loading,
+    data: snapshot?.load === load ? snapshot.data : null,
+    error: snapshot?.load === load ? error : '',
+    loading: loading || snapshot?.load !== load,
     refresh: () => {
       setLoading(true);
       setLocal((value) => value + 1);
@@ -111,16 +116,16 @@ export function LiveBookings() {
   const live = useLiveRefresh('bookings');
   const [tab, setTab] = useState('All');
   const [offset, setOffset] = useState(0);
-  const [previous, setPrevious] = useState<BookingRow[]>([]);
-  const load = useCallback(() => services!.activity.bookings(offset), [offset]);
+  const load = useCallback(
+    () => loadPagesThrough((at) => services!.activity.bookings(at), offset),
+    [offset],
+  );
   const state = useResource(load, live.revision);
-  const rows = [
-    ...new Map([...previous, ...(state.data || [])].map((row) => [row.id, row])).values(),
-  ];
+  const rows = state.data?.rows || [];
   return (
     <Screen title="Bookings" back={false}>
       <Chips>
-        {['All', 'requested', 'accepted', 'declined', 'cancelled'].map((value) => (
+        {['All', 'requested', 'accepted', 'declined', 'cancelled', 'completed'].map((value) => (
           <CategoryChip
             key={value}
             title={value === 'All' ? value : value[0].toUpperCase() + value.slice(1)}
@@ -134,7 +139,6 @@ export function LiveBookings() {
         title="Refresh bookings"
         secondary
         onPress={() => {
-          setPrevious([]);
           setOffset(0);
           state.refresh();
         }}
@@ -160,12 +164,11 @@ export function LiveBookings() {
           onPress={() => router.push('/search')}
         />
       )}
-      {state.data?.length === 100 && (
+      {state.data?.hasMore && (
         <PrimaryButton
           title="Load more bookings"
           secondary
           onPress={() => {
-            setPrevious(rows);
             setOffset((value) => value + 100);
           }}
         />
@@ -181,17 +184,18 @@ export function LiveBookingDetail() {
   const state = useResource(load, live.revision);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const booking = state.data;
+  const booking = !state.loading && !state.error ? state.data : null;
   const talent = booking?.talent_id === auth.session?.user.id;
   const client = booking?.client_id === auth.session?.user.id;
   const transition = async (decision: 'accept' | 'reject' | 'cancel') => {
     setBusy(true);
     setError('');
     try {
-      await services!.activity.transition(id, decision);
+      await services!.activity.transition(id, decision, auth.session!.user.id);
       state.refresh();
     } catch (e) {
       setError(readableError(e));
+      if (e instanceof ApiError && [403, 404, 409].includes(e.status)) state.refresh();
     } finally {
       setBusy(false);
     }
@@ -200,10 +204,11 @@ export function LiveBookingDetail() {
     setBusy(true);
     setError('');
     try {
-      const conversation = await services!.activity.openConversation(id);
+      const conversation = await services!.activity.openConversation(id, auth.session!.user.id);
       router.push(`/chat/${conversation.id}`);
     } catch (e) {
       setError(readableError(e));
+      if (e instanceof ApiError && [403, 404, 409].includes(e.status)) state.refresh();
     } finally {
       setBusy(false);
     }
@@ -236,7 +241,8 @@ export function LiveBookingDetail() {
               />
             </>
           )}
-          {(booking.status === 'accepted' || (booking.status === 'requested' && client)) && (
+          {((booking.status === 'accepted' && (client || talent)) ||
+            (booking.status === 'requested' && client)) && (
             <PrimaryButton
               title="Cancel booking"
               secondary
@@ -246,7 +252,7 @@ export function LiveBookingDetail() {
               }}
             />
           )}
-          {booking.status === 'accepted' && (
+          {booking.status === 'accepted' && (client || talent) && (
             <PrimaryButton
               title="Open conversation"
               disabled={busy}
@@ -268,8 +274,8 @@ export function LiveBookingDetail() {
 export function LiveBookingRequest() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const auth = useAuth();
-  const catalog = useCatalog();
-  const talent = catalog.talents.find((row) => row.id === id);
+  const profile = usePublishedTalent(id);
+  const { talent } = profile;
   const [form, setForm] = useState<BookingForm>({
     project: '',
     date: '',
@@ -291,14 +297,17 @@ export function LiveBookingRequest() {
     if (Object.keys(issues).length) return;
     setBusy(true);
     try {
-      const booking = await services!.activity.createBooking({
-        talent_id: id,
-        project_type: form.project.trim(),
-        proposed_date: form.date,
-        location: form.location.trim(),
-        requirements: form.requirements.trim(),
-        indicative_budget: Number(form.budget),
-      });
+      const booking = await services!.activity.createBooking(
+        {
+          talent_id: id,
+          project_type: form.project.trim(),
+          proposed_date: form.date,
+          location: form.location.trim(),
+          requirements: form.requirements.trim(),
+          indicative_budget: Number(form.budget),
+        },
+        auth.session!.user.id,
+      );
       router.replace(`/booking-detail/${booking.id}`);
     } catch (e) {
       setError(readableError(e));
@@ -313,6 +322,21 @@ export function LiveBookingRequest() {
           title="Client account required"
           detail="Booking requests can be created by Client accounts."
         />
+      </Screen>
+    );
+  if (profile.loading || profile.error || !talent)
+    return (
+      <Screen title="Request booking">
+        {profile.loading ? (
+          <Label>Loading talent…</Label>
+        ) : (
+          <EmptyState
+            title="Talent unavailable"
+            detail={profile.error || 'This talent is unpublished or unavailable.'}
+            action="Retry talent"
+            onPress={profile.retry}
+          />
+        )}
       </Screen>
     );
   return (
@@ -373,12 +397,12 @@ export function LiveConversations() {
   const { talent } = useLocalSearchParams<{ talent?: string }>();
   const live = useLiveRefresh('conversations');
   const [offset, setOffset] = useState(0);
-  const [previous, setPrevious] = useState<ConversationRow[]>([]);
-  const load = useCallback(() => services!.activity.conversations(offset), [offset]);
+  const load = useCallback(
+    () => loadPagesThrough((at) => services!.activity.conversations(at), offset),
+    [offset],
+  );
   const state = useResource(load, live.revision);
-  const rows = [
-    ...new Map([...previous, ...(state.data || [])].map((row) => [row.id, row])).values(),
-  ].filter((row) => !talent || row.talent_id === talent);
+  const rows = (state.data?.rows || []).filter((row) => !talent || row.talent_id === talent);
   return (
     <Screen title="Messages" back={false}>
       <Label>{live.status}</Label>
@@ -386,7 +410,6 @@ export function LiveConversations() {
         title="Refresh conversations"
         secondary
         onPress={() => {
-          setPrevious([]);
           setOffset(0);
           state.refresh();
         }}
@@ -415,16 +438,23 @@ export function LiveConversations() {
         <EmptyState
           title="No conversations yet"
           detail="A conversation becomes available after a booking is accepted."
-          action={talent ? 'Request booking' : 'View bookings'}
-          onPress={() => router.push(talent ? `/booking/${talent}` : '/bookings')}
+          action={
+            talent && auth.account?.primary_role === 'client' ? 'Request booking' : 'View bookings'
+          }
+          onPress={() =>
+            router.push(
+              talent && auth.account?.primary_role === 'client'
+                ? `/booking/${talent}`
+                : '/bookings',
+            )
+          }
         />
       )}
-      {state.data?.length === 100 && (
+      {state.data?.hasMore && (
         <PrimaryButton
           title="Load more conversations"
           secondary
           onPress={() => {
-            setPrevious(rows);
             setOffset((value) => value + 100);
           }}
         />
@@ -449,20 +479,21 @@ function ChatThread({ id }: { id: string }) {
   const [error, setError] = useState('');
   const [history, setHistory] = useState<MessageRow[]>([]);
   const [more, setMore] = useState(true);
-  const conversation = state.data?.[0];
+  const conversation = !state.loading && !state.error ? state.data?.[0] : null;
   const window = messageWindow(history, state.data?.[1] || []);
-  const rows = window.rows;
+  const rows = state.error ? [] : window.rows;
   const send = async () => {
-    if (!text.trim() || busy) return;
+    if (!text.trim() || busy || !conversation?.can_send) return;
     setBusy(true);
     setError('');
     try {
-      const message = await services!.activity.sendMessage(id, text);
+      const message = await services!.activity.sendMessage(id, text, auth.session!.user.id);
       setHistory(mergeMessages(rows, [message]));
       setText('');
       state.refresh();
     } catch (e) {
       setError(readableError(e));
+      if (e instanceof ApiError && [403, 404, 409].includes(e.status)) state.refresh();
     } finally {
       setBusy(false);
     }
@@ -542,7 +573,7 @@ function ChatThread({ id }: { id: string }) {
         )}
         <PrimaryButton title="Refresh messages" secondary onPress={state.refresh} />
         <Feedback {...state} retry={state.refresh} />
-        {more && (state.data?.[1]?.length || 0) >= 50 && (
+        {(more || window.reset) && (state.data?.[1]?.length || 0) >= 50 && (
           <PrimaryButton
             title="Load older messages"
             secondary

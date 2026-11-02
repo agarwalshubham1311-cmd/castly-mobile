@@ -1,63 +1,40 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { talents as fixtures, type Talent, type Category } from '../talent';
+import { talents as fixtures, categories as fixtureCategories, type Talent } from '../talent';
 import { configuration, services } from './index';
+import { collectPages, mapTalent, supportedCategories } from './catalog';
 import { readableError } from './errors';
 import { useAuth } from '../auth/AuthProvider';
-const names: Record<string, Category> = {
-  actors: 'Actors',
-  models: 'Models',
-  creators: 'Creators',
-  musicians: 'Musicians',
-  photographers: 'Photographers',
-};
 function useCatalogState() {
   const auth = useAuth();
   const mock = configuration.mode === 'mock';
   const [talents, setTalents] = useState<Talent[]>(mock ? fixtures : []);
+  const [categories, setCategories] = useState([...fixtureCategories]);
   const [loading, setLoading] = useState(!mock);
   const [error, setError] = useState('');
+  const [mediaWarning, setMediaWarning] = useState('');
   const request = useRef(0);
   const refresh = useCallback(async () => {
     if (!services) return;
     const token = ++request.current;
+    setLoading(true);
     try {
-      const [profiles, assets] = await Promise.all([
-        services.talent.published(),
-        services.portfolio.published(),
+      const [profiles, assets, categoryRows] = await Promise.all([
+        collectPages((offset) => services!.talent.published({ limit: 200, offset })),
+        collectPages((offset) => services!.portfolio.published(offset)),
+        services.talent.categories(),
       ]);
       const rows = await Promise.all(
-        (profiles || []).map(async (profile): Promise<Talent> => {
-          const portraitUri = profile.portrait_path
-            ? await services!.media.signedUrl(profile.portrait_path)
-            : undefined;
-          const portfolio = await Promise.all(
-            (assets || [])
-              .filter((asset) => asset.talent_id === profile.id)
-              .map(async (asset) => ({
-                image: asset.id,
-                label: asset.label,
-                uri: await services!.media.signedUrl(asset.path),
-              })),
-          );
-          return {
-            id: profile.id,
-            name: profile.display_name,
-            city: profile.city,
-            category: names[profile.category_id] || 'Creators',
-            rate: profile.day_rate,
-            bio: profile.bio,
-            skills: profile.skills,
-            available: profile.available,
-            portrait: '',
-            portraitUri,
-            portfolio,
-            remote: true,
-          };
-        }),
+        profiles.map((profile) => mapTalent(profile, assets, services!.media.signedUrl)),
       );
       if (token === request.current) {
-        setTalents(rows);
+        setTalents(rows.map((row) => row.talent));
+        setCategories(supportedCategories(categoryRows || []));
+        setMediaWarning(
+          rows.some((row) => row.mediaUnavailable)
+            ? 'Some photographs are unavailable. Retry discovery to reload them.'
+            : '',
+        );
         setError('');
       }
     } catch (e) {
@@ -75,13 +52,17 @@ function useCatalogState() {
     const timer = setInterval(() => {
       if (AppState.currentState === 'active' || AppState.currentState == null) void refresh();
     }, 45000);
+    const foreground = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void refresh();
+    });
     return () => {
       clearInterval(timer);
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- request is a generation counter, not a DOM ref.
+      foreground.remove();
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- request is an invalidation generation.
       request.current++;
     };
   }, [mock, refresh, auth.session?.user.id]);
-  return { talents, loading, error, refresh, mock };
+  return { talents, categories, loading, error, mediaWarning, refresh, mock };
 }
 type Catalog = ReturnType<typeof useCatalogState>;
 const Context = createContext<Catalog | null>(null);

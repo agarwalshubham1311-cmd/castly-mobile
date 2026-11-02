@@ -1,4 +1,4 @@
-import { useCatalog } from '../backend/CatalogProvider';
+import { usePublishedTalent } from '../backend/usePublishedTalent';
 import React, { useState } from 'react';
 import { Modal, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -11,25 +11,29 @@ import {
   Chips,
   EmptyState,
   IconButton,
+  Label,
+  PrimaryButton,
   PortfolioGrid,
   SampleNote,
   Screen,
 } from '../components/ui';
 import { c, f } from '../theme';
 export default function Gallery() {
-  const { talents, mock } = useCatalog();
   const { id, image } = useLocalSearchParams<{ id: string; image?: string }>();
-  const talent = talents.find((t) => t.id === id);
+  const profile = usePublishedTalent(id);
+  const { talent, mock } = profile;
   const [tab, setTab] = useState('Photos');
   const [selected, setSelected] = useState<number | null>(() => {
     const index = Number(image);
-    return image !== undefined &&
-      Number.isInteger(index) &&
-      index >= 0 &&
-      index < (talent ? talent.portfolio.length + 1 : 0)
-      ? index
-      : null;
+    return image !== undefined && Number.isInteger(index) && index >= 0 ? index : null;
   });
+  if (!mock && (profile.loading || profile.error))
+    return (
+      <Screen title="Portfolio gallery">
+        <Label>{profile.loading ? 'Loading portfolio…' : profile.error}</Label>
+        {!!profile.error && <PrimaryButton title="Retry portfolio" onPress={profile.retry} />}
+      </Screen>
+    );
   const images = talent
     ? [
         {
@@ -59,6 +63,9 @@ export default function Gallery() {
             : 'Published portfolio'
         }
       />
+      {profile.mediaUnavailable && (
+        <PrimaryButton title="Retry portfolio photographs" secondary onPress={profile.retry} />
+      )}
       {tab === 'Photos' && images.length ? (
         <PortfolioGrid images={images} onOpen={setSelected} />
       ) : (
@@ -72,7 +79,7 @@ export default function Gallery() {
         />
       )}
       <Modal
-        visible={selected !== null}
+        visible={selected !== null && selected < images.length}
         animationType="fade"
         onRequestClose={() => setSelected(null)}
       >

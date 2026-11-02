@@ -1,5 +1,4 @@
-import { BackendNotice } from '../components/BackendNotice';
-import { useCatalog } from '../backend/CatalogProvider';
+import { usePublishedTalent } from '../backend/usePublishedTalent';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -25,19 +24,27 @@ import {
   useLayout,
 } from '../components/ui';
 export default function TalentProfile() {
-  const catalog = useCatalog();
-  const { talents, mock } = catalog;
   const { width, padding, fontScale } = useLayout();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const talent = talents.find((t) => t.id === id);
+  const profile = usePublishedTalent(id);
+  const { talent, mock } = profile;
   const [tab, setTab] = useState('Portfolio');
   const [expanded, setExpanded] = useState(false);
   const [shareLink, setShareLink] = useState('');
   const { saved, toggleSaved, hydrated, openConversation } = useDemo();
-  if (!talent && !mock && (catalog.loading || catalog.error))
+  if (!talent && !mock && (profile.loading || profile.error))
     return (
       <Screen title="Talent profile">
-        <BackendNotice />
+        {profile.loading ? (
+          <Label>Loading talent profile…</Label>
+        ) : (
+          <EmptyState
+            title="Talent unavailable"
+            detail={profile.error}
+            action="Retry profile"
+            onPress={profile.retry}
+          />
+        )}
       </Screen>
     );
   if (!talent)
@@ -71,7 +78,9 @@ export default function TalentProfile() {
     const url = Linking.createURL(`/talent/${talent.id}`);
     setShareLink(url);
     try {
-      await Share.share({ message: `Castly sample talent: ${talent.name}. ${url}` });
+      await Share.share({
+        message: `Castly ${mock ? 'sample talent' : 'talent'}: ${talent.name}. ${url}`,
+      });
     } catch {
       /* The selectable link remains available on platforms without a share sheet. */
     }
@@ -154,9 +163,15 @@ export default function TalentProfile() {
                 : 'Talent profile · indicative pricing'
             }
           />
+          {profile.mediaUnavailable && (
+            <View style={{ gap: 8 }}>
+              <Label>Some photographs are unavailable.</Label>
+              <PrimaryButton title="Retry profile photographs" secondary onPress={profile.retry} />
+            </View>
+          )}
           {!!shareLink && (
             <View style={{ backgroundColor: c.lavender, padding: 12, borderRadius: 12 }}>
-              <Label>Share this sample profile</Label>
+              <Label>Share this profile</Label>
               <Text selectable style={{ color: c.primaryDark, fontFamily: f.medium, fontSize: 12 }}>
                 {shareLink}
               </Text>

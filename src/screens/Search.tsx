@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useDemo } from '../store';
-import { categories, defaultFilters, money, searchTalents, SortOrder } from '../talent';
+import { defaultFilters, money, searchTalents, SortOrder } from '../talent';
 import { c, f } from '../theme';
 import {
   CategoryChip,
@@ -20,6 +20,7 @@ import {
 } from '../components/ui';
 export default function Search() {
   const catalog = useCatalog();
+  const { categories } = catalog;
   const store = useDemo();
   const { query, setQuery, category, setCategory, filters, setFilters, sort, setSort } = store;
   const [sortOpen, setSortOpen] = useState(false);

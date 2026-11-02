@@ -1,6 +1,7 @@
 import * as Linking from 'expo-linking';
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { AppState, Platform } from 'react-native';
+import { onSessionExpired } from '../backend/sessionEvents';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../backend/client';
 import { configuration, services } from '../backend';
@@ -12,7 +13,25 @@ function useAuthState() {
   const [loading, setLoading] = useState(configuration.mode === 'supabase');
   const [error, setError] = useState(configuration.mode === 'invalid' ? configuration.error : '');
   const [revision, setRevision] = useState(0);
+  const [notice, setNotice] = useState('');
   const acceptedUser = useRef<string | null | undefined>(undefined);
+
+  useEffect(
+    () =>
+      onSessionExpired((subject) => {
+        // An unidentified/stale request cannot invalidate a different, newer account.
+        if (!subject || (acceptedUser.current && subject !== acceptedUser.current)) return;
+        acceptedUser.current = null;
+        setSession(null);
+        setAccount(null);
+        setError('');
+        setLoading(false);
+        setNotice('Your session has expired. Sign in again.');
+        // UI/session identity is invalidated immediately, even if Auth's logout endpoint is offline.
+        void supabase?.auth.signOut({ scope: 'local' }).catch(() => {});
+      }),
+    [],
+  );
 
   useEffect(() => {
     if (!supabase) return;
@@ -27,6 +46,7 @@ function useAuthState() {
         setLoading(!!next);
         setError('');
       }
+      if (next) setNotice('');
       setSession(next);
     };
     const {
@@ -77,16 +97,16 @@ function useAuthState() {
     services.account
       .get(userId)
       .then((row) => {
-        if (active) {
+        if (active && acceptedUser.current === userId) {
           setAccount(row);
           setError('');
         }
       })
       .catch((e) => {
-        if (active) setError(readableError(e));
+        if (active && acceptedUser.current === userId) setError(readableError(e));
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (active && acceptedUser.current === userId) setLoading(false);
       });
     return () => {
       active = false;
@@ -99,6 +119,7 @@ function useAuthState() {
     account,
     loading,
     error,
+    notice,
     login: async (email: string, password: string) => {
       if (!services) throw new Error('Authentication is unavailable in mock mode.');
       await services.auth.login(email, password);
@@ -110,15 +131,22 @@ function useAuthState() {
     logout: async () => {
       if (!services) return;
       await services.auth.logout();
+      acceptedUser.current = null;
       setSession(null);
       setAccount(null);
+      setNotice('');
       setError('');
       setLoading(false);
     },
     onboard: async (role: Role, name: string) => {
       if (!services) throw new Error('Authentication required');
-      const row = await services.account.onboard(role, name);
-      setAccount(row);
+      const owner = acceptedUser.current;
+      const row = await services.account.onboard(
+        role,
+        name,
+        typeof owner === 'string' ? owner : undefined,
+      );
+      if (owner === acceptedUser.current) setAccount(row);
       return row;
     },
     refresh: () => {

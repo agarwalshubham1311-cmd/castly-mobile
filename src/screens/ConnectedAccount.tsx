@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../auth/AuthProvider';
+import { collectPages } from '../backend/catalog';
 import { services } from '../backend';
 import { readableError } from '../backend/errors';
 import { useDemo } from '../store';
@@ -27,8 +28,7 @@ export default function ConnectedAccount() {
   const load = () => {
     setCounts(null);
     setError('');
-    services!.activity
-      .bookings()
+    collectPages((offset) => services!.activity.bookings(offset), 100)
       .then((rows) =>
         setCounts({
           bookings: rows?.length || 0,
@@ -39,8 +39,7 @@ export default function ConnectedAccount() {
   };
   useEffect(() => {
     let active = true;
-    services!.activity
-      .bookings()
+    collectPages((offset) => services!.activity.bookings(offset), 100)
       .then((rows) => {
         if (active)
           setCounts({
@@ -196,6 +195,7 @@ export function ConnectedSettings() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [entitlements, setEntitlements] = useState<Entitlement[] | null>(null);
+  const [revision, setRevision] = useState(0);
   useEffect(() => {
     let active = true;
     if (section === 'subscription')
@@ -210,13 +210,24 @@ export function ConnectedSettings() {
     return () => {
       active = false;
     };
-  }, [section]);
+  }, [section, revision]);
   if (section === 'subscription')
     return (
       <Screen title="Subscription">
         <Heading>Your entitlements</Heading>
         {error ? (
-          <Label accessibilityRole="alert">{error}</Label>
+          <View style={{ gap: 10 }}>
+            <Label accessibilityRole="alert">{error}</Label>
+            <PrimaryButton
+              title="Retry entitlements"
+              secondary
+              onPress={() => {
+                setError('');
+                setEntitlements(null);
+                setRevision((v) => v + 1);
+              }}
+            />
+          </View>
         ) : entitlements === null ? (
           <Label>Loading entitlements…</Label>
         ) : !entitlements.length ? (
