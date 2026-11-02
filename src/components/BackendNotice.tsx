@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCatalog } from '../backend/CatalogProvider';
-import { EmptyState, LoadingSkeleton } from './ui';
+import { EmptyState, LoadingSkeleton, Label, PrimaryButton } from './ui';
 export function BackendNotice() {
   const catalog = useCatalog();
   if (catalog.mock) return null;
@@ -24,5 +24,16 @@ export function BackendNotice() {
         detail="No talent profiles have been published yet."
       />
     );
-  return null;
+  return catalog.mediaWarning ? (
+    <>
+      <Label accessibilityRole="alert">{catalog.mediaWarning}</Label>
+      <PrimaryButton
+        title="Retry photographs"
+        secondary
+        onPress={() => {
+          void catalog.refresh();
+        }}
+      />
+    </>
+  ) : null;
 }

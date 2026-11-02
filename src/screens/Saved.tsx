@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useDemo } from '../store';
-import { categories } from '../talent';
 import { TalentImage } from '../TalentImage';
 import { imageSource } from '../talentMedia';
 import { c, f } from '../theme';
@@ -20,7 +19,7 @@ import {
   useLayout,
 } from '../components/ui';
 export default function Saved() {
-  const { talents, mock, error: catalogError, loading: catalogLoading } = useCatalog();
+  const { talents, mock, categories, error: catalogError, loading: catalogLoading } = useCatalog();
   const { saved, toggleSaved, hydrated, storageError, restoreFailed } = useDemo();
   const { padding } = useLayout();
   const [category, setCategory] = useState('All talent');
@@ -76,7 +75,7 @@ export default function Saved() {
             >
               <TalentImage
                 source={imageSource(item.portrait, item.portraitUri)}
-                label={`Sample portrait for ${item.name}`}
+                label={`${mock ? 'Sample portrait for' : 'Portrait of'} ${item.name}`}
                 style={{ height: 76, width: 64, borderRadius: 12 }}
               />
               <View style={{ flex: 1, gap: 5 }}>

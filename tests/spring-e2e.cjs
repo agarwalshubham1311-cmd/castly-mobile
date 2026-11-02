@@ -65,7 +65,11 @@ const auth = http.createServer(async (req, res) => {
     return;
   }
   if (url.pathname.endsWith('/token')) {
-    const id = body.email === 'client@example.test' ? client : talent;
+    const id = body.refresh_token
+      ? body.refresh_token.replace('fixture-', '')
+      : body.email === 'client@example.test'
+        ? client
+        : talent;
     res.end(
       JSON.stringify({
         access_token: token(id),
@@ -97,7 +101,9 @@ async function until(url) {
   let browser;
   let java;
   await new Promise((r) => auth.listen(8098, '127.0.0.1', r));
-  const folder = path.resolve(__dirname, '../artifacts/spring-api');
+  const folder = path.resolve(
+    process.env.CASTLY_SCREENSHOT_DIR || path.join(__dirname, '../artifacts/spring-api'),
+  );
   fs.mkdirSync(folder, { recursive: true });
   const log = fs.openSync('/tmp/castly-spring-e2e-java.log', 'w');
   try {
@@ -127,11 +133,17 @@ async function until(url) {
     await until('http://127.0.0.1:8080/actuator/health');
     browser = await launch();
     const errors = [];
+    const bypass = [];
     const contextA = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const contextB = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const a = await contextA.newPage(),
       b = await contextB.newPage();
-    for (const page of [a, b]) page.on('pageerror', (e) => errors.push(e.message));
+    for (const page of [a, b]) {
+      page.on('pageerror', (e) => errors.push(e.message));
+      page.on('request', (request) => {
+        if (new URL(request.url()).pathname.startsWith('/rest/v1')) bypass.push(true);
+      });
+    }
     async function login(page, email) {
       await go(page, '/login', 'Welcome back');
       await page.getByRole('textbox', { name: 'Email', exact: true }).fill(email);
@@ -156,7 +168,23 @@ async function until(url) {
     await b.getByRole('switch', { name: 'Published in discovery', exact: true }).click();
     await b.getByRole('button', { name: 'Save talent profile', exact: true }).click();
     await b.getByText('Talent profile published.', { exact: true }).waitFor();
+    let expiredOnce = false;
+    await a.route('**/api/v1/account', async (route) => {
+      if (!expiredOnce && route.request().method() === 'GET') {
+        expiredOnce = true;
+        await route.fulfill({
+          status: 401,
+          contentType: 'application/problem+json',
+          body: '{"status":401}',
+        });
+      } else await route.continue();
+    });
     await login(a, 'client@example.test');
+    assert.equal(
+      expiredOnce,
+      true,
+      'Private API 401 must refresh the same Auth user and restore the account',
+    );
     await go(a, '/search', 'Search talent');
     await a.getByRole('button', { name: 'Save Spring API Talent', exact: true }).click();
     await a.getByRole('button', { name: 'Unsave Spring API Talent', exact: true }).waitFor();
@@ -172,8 +200,10 @@ async function until(url) {
     await a.getByRole('textbox', { name: 'Indicative budget (INR)', exact: true }).fill('18000');
     await a.getByRole('button', { name: 'Send booking request', exact: true }).click();
     await a.getByText('Requested', { exact: true }).waitFor();
+    assert.equal(await a.getByRole('button', { name: 'Accept booking', exact: true }).count(), 0);
     const bookingId = new URL(a.url()).pathname.split('/').pop();
     await go(b, '/booking-detail/' + bookingId, 'Booking details');
+    assert.equal(await b.getByRole('button', { name: 'Cancel booking', exact: true }).count(), 0);
     await b.getByRole('button', { name: 'Accept booking', exact: true }).click();
     await b.getByRole('button', { name: 'Open conversation', exact: true }).waitFor();
     await ready(b);
@@ -213,9 +243,40 @@ async function until(url) {
       await b.getByRole('button', { name: 'Send message', exact: true }).isDisabled(),
       true,
     );
+    // Additional decisions through the rendered UI; setup requests still use the real API.
+    async function request(project) {
+      const response = await fetch(api + '/bookings', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token(client), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          talent_id: talent,
+          project_type: project,
+          location: 'Mumbai studio',
+          requirements: 'Additional UI decision regression',
+          proposed_date: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
+          indicative_budget: 18000,
+        }),
+      });
+      assert.equal(response.status, 201);
+      return (await response.json()).id;
+    }
+    const rejected = await request('Rejected editorial');
+    await go(b, '/booking-detail/' + rejected, 'Booking details');
+    await b.getByRole('button', { name: 'Reject booking', exact: true }).click();
+    await b.getByText('Declined', { exact: true }).waitFor();
+    const pending = await request('Cancelled pending editorial');
+    await go(a, '/booking-detail/' + pending, 'Booking details');
+    await a.getByRole('button', { name: 'Cancel booking', exact: true }).click();
+    await a.getByText('Cancelled', { exact: true }).waitFor();
+    const accepted = await request('Talent cancellation editorial');
+    await go(b, '/booking-detail/' + accepted, 'Booking details');
+    await b.getByRole('button', { name: 'Accept booking', exact: true }).click();
+    await b.getByRole('button', { name: 'Cancel booking', exact: true }).click();
+    await b.getByText('Cancelled', { exact: true }).waitFor();
+    assert.deepEqual(bypass, []);
     assert.deepEqual(errors, []);
     console.log(
-      'PASS: real Java HTTP/JWT/JWKS + PostgreSQL + browser: talent create/edit/publish, favourites, booking creation/acceptance/cancellation, conversation creation, two-party sending/history, outsider denial, paused sending. Supabase Auth/JWKS are local fixtures; hosted Realtime is not tested.',
+      'PASS: real Java HTTP/JWT/JWKS + PostgreSQL + browser: talent create/edit/publish, favourites, booking creation/acceptance/cancellation, conversation creation, two-party sending/history, outsider denial, paused sending, requested/accepted cancellation and rejection UI, and no direct PostgREST writes. Supabase Auth/JWKS are local fixtures; hosted Realtime is not tested.',
     );
   } finally {
     if (browser) await browser.close();

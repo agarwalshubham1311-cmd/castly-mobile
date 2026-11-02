@@ -194,15 +194,20 @@ public class MarketplaceController {
   }
 
   @GetMapping("/portfolio")
-  public List<Map<String, Object>> portfolio(@AuthenticationPrincipal Jwt jwt) {
+  public List<Map<String, Object>> portfolio(
+      @AuthenticationPrincipal Jwt jwt,
+      @RequestParam(defaultValue = "1000") @Min(1) @Max(1000) int limit,
+      @RequestParam(defaultValue = "0") @Min(0) @Max(100000) int offset) {
     return data.as(
         actor(jwt),
         db ->
             rows(
                 db.sql(
-                    "select a.* from public.portfolio_assets a join public.talent_profiles t on"
-                        + " t.id=a.talent_id where t.published order by a.position,a.id limit"
-                        + " 1000")));
+                        "select a.* from public.portfolio_assets a join public.talent_profiles t on"
+                            + " t.id=a.talent_id where t.published order by a.position,a.id limit"
+                            + " :limit offset :offset")
+                    .param("limit", limit)
+                    .param("offset", offset)));
   }
 
   @GetMapping("/talents/{id}/portfolio")

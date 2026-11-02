@@ -1,0 +1,18 @@
+[
+  {
+    "file": "accepted-booking-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 29161,
+    "sha256": "c61641fcb4e28e3391dc5b27b71240c034f611171ba8c8e698c02c9f96688697"
+  },
+  {
+    "file": "conversation-390x844.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 844,
+    "bytes": 27561,
+    "sha256": "b3e13b97deecd12cdc3a24a175356945256f19930921434628c0170ed9a2dd60"
+  }
+]

@@ -151,7 +151,8 @@ export default function TalentEditor() {
           setMessage('Portfolio photograph added.');
           await catalog.refresh();
         } catch (e) {
-          await services!.media.remove(path).catch(() => {});
+          // A lost response may follow a committed metadata write. Preserve the private
+          // uploaded object; reload metadata before retrying instead of deleting confirmed media.
           throw e;
         }
       }
@@ -165,7 +166,7 @@ export default function TalentEditor() {
     setBusy(true);
     setError('');
     try {
-      await services!.portfolio.remove(asset.id);
+      await services!.portfolio.remove(asset.id, auth.session!.user.id);
       setAssets((current) => current.filter((row) => row.id !== asset.id));
       await services!.media.remove(asset.path);
       await catalog.refresh();
@@ -224,14 +225,17 @@ export default function TalentEditor() {
         maxLength={100}
       />
       <Chips>
-        {['actors', 'models', 'creators', 'musicians', 'photographers'].map((category) => (
-          <CategoryChip
-            key={category}
-            title={category[0].toUpperCase() + category.slice(1)}
-            active={draft.category_id === category}
-            onPress={() => update('category_id', category)}
-          />
-        ))}
+        {catalog.categories
+          .filter((name) => name !== 'All talent')
+          .map((name) => name.toLowerCase())
+          .map((category) => (
+            <CategoryChip
+              key={category}
+              title={category[0].toUpperCase() + category.slice(1)}
+              active={draft.category_id === category}
+              onPress={() => update('category_id', category)}
+            />
+          ))}
       </Chips>
       <Field
         label="Indicative daily rate (INR)"
@@ -313,18 +317,42 @@ export default function TalentEditor() {
             }}
           />
           {assets.map((asset) => (
-            <View key={asset.id} style={{ gap: 8 }}>
-              <Label>{asset.label}</Label>
-              <MediaPreview path={asset.path} />
-              <PrimaryButton
-                title={`Remove photograph ${asset.position + 1}`}
-                secondary
-                disabled={busy}
-                onPress={() => {
-                  void remove(asset);
-                }}
-              />
-            </View>
+            <PortfolioDetails
+              key={asset.id}
+              asset={asset}
+              busy={busy}
+              save={async (label, position) => {
+                setBusy(true);
+                setError('');
+                setMessage('');
+                try {
+                  const updated = await services!.portfolio.edit(
+                    asset.id,
+                    label,
+                    position,
+                    auth.session!.user.id,
+                  );
+                  if (!updated)
+                    throw new Error(
+                      'Portfolio update was not confirmed. Reload saved profile before retrying.',
+                    );
+                  setAssets((current) =>
+                    current
+                      .map((row) => (row.id === asset.id ? updated : row))
+                      .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id)),
+                  );
+                  setMessage('Portfolio details saved.');
+                  await catalog.refresh();
+                } catch (e) {
+                  setError(readableError(e));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              remove={() => {
+                void remove(asset);
+              }}
+            />
           ))}
           {!assets.length && <Label>No portfolio photographs yet.</Label>}
         </>
@@ -360,5 +388,59 @@ function MediaPreview({ path }: { path: string }) {
     />
   ) : (
     <Label>Loading photograph…</Label>
+  );
+}
+
+function PortfolioDetails({
+  asset,
+  busy,
+  save,
+  remove,
+}: {
+  asset: PortfolioAsset;
+  busy: boolean;
+  save: (label: string, position: number) => Promise<void>;
+  remove: () => void;
+}) {
+  const [label, setLabel] = useState(asset.label);
+  const [position, setPosition] = useState(String(asset.position));
+  const [error, setError] = useState('');
+  const submit = () => {
+    if (!label.trim() || !/^\d+$/.test(position) || Number(position) > 2147483647) {
+      setError('Enter a caption and a whole-number position of zero or greater.');
+      return;
+    }
+    setError('');
+    void save(label.trim(), Number(position));
+  };
+  return (
+    <View style={{ gap: 8 }}>
+      <MediaPreview path={asset.path} />
+      <Field
+        label={`Photograph caption ${asset.position + 1}`}
+        value={label}
+        onChangeText={setLabel}
+        maxLength={160}
+      />
+      <Field
+        label={`Photograph position ${asset.position + 1}`}
+        value={position}
+        onChangeText={setPosition}
+        keyboardType="numeric"
+      />
+      {!!error && <Label accessibilityRole="alert">{error}</Label>}
+      <PrimaryButton
+        title={`Save photograph details ${asset.position + 1}`}
+        secondary
+        disabled={busy}
+        onPress={submit}
+      />
+      <PrimaryButton
+        title={`Remove photograph ${asset.position + 1}`}
+        secondary
+        disabled={busy}
+        onPress={remove}
+      />
+    </View>
   );
 }

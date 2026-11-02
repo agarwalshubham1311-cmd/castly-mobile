@@ -46,5 +46,5 @@ export function AuthGuard({ children, role }: { children: React.ReactNode; role?
         />
       </Screen>
     );
-  return <>{children}</>;
+  return <React.Fragment key={auth.session.user.id}>{children}</React.Fragment>;
 }

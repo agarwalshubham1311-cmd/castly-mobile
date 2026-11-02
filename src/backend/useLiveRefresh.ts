@@ -42,6 +42,18 @@ export function useLiveRefresh(
             { event: 'UPDATE', schema: 'public', table, filter },
             refresh,
           );
+        // Conversation availability changes on booking cancellation/acceptance as well as messages.
+        if (table !== 'bookings')
+          channel.on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'bookings',
+              filter: `${role === 'talent' ? 'talent_id' : 'client_id'}=eq.${subject}`,
+            },
+            refresh,
+          );
         channel.subscribe((state) => {
           if (!active) return;
           setStatus(
