@@ -7,6 +7,8 @@ import { useFonts } from 'expo-font';
 import { DemoProvider } from '../src/store';
 import { c } from '../src/theme';
 import { AuthProvider } from '../src/auth/AuthProvider';
+import { LiveProvider } from '../src/backend/LiveProvider';
+import { NotificationProvider } from '../src/backend/NotificationProvider';
 import { CatalogProvider } from '../src/backend/CatalogProvider';
 import { configuration } from '../src/backend';
 export default function RootLayout() {
@@ -45,30 +47,34 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <CatalogProvider>
-          <DemoProvider>
-            <StatusBar style="dark" />
-            <View style={{ flex: 1, backgroundColor: c.lavender }}>
-              <View
-                style={{
-                  flex: 1,
-                  width: '100%',
-                  maxWidth: 600,
-                  alignSelf: 'center',
-                  backgroundColor: c.background,
-                }}
-              >
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: c.background },
-                    animation: 'slide_from_right',
-                  }}
-                />
-              </View>
-            </View>
-          </DemoProvider>
-        </CatalogProvider>
+        <LiveProvider>
+          <NotificationProvider>
+            <CatalogProvider>
+              <DemoProvider>
+                <StatusBar style="dark" />
+                <View style={{ flex: 1, backgroundColor: c.lavender }}>
+                  <View
+                    style={{
+                      flex: 1,
+                      width: '100%',
+                      maxWidth: 600,
+                      alignSelf: 'center',
+                      backgroundColor: c.background,
+                    }}
+                  >
+                    <Stack
+                      screenOptions={{
+                        headerShown: false,
+                        contentStyle: { backgroundColor: c.background },
+                        animation: 'slide_from_right',
+                      }}
+                    />
+                  </View>
+                </View>
+              </DemoProvider>
+            </CatalogProvider>
+          </NotificationProvider>
+        </LiveProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

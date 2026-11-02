@@ -8,6 +8,10 @@ See [Windows/JDK21/trusted CA + Android Expo Go setup](../docs/MOBILE_SPRING_SET
 
 Public `/portfolio` now accepts `limit` (1–1000, default 1000) and `offset` (0–100000), with stable position/id ordering, so metadata can be paged without truncating the catalog. Mobile traversal uses pages of 200; private lists use pages of 100. No SQL or cutover change is required.
 
+## Milestone 5 review
+
+See [acceptance diagnostics, optional notifications and Expo Go steps](../docs/milestone5/README.md). `CASTLY_NOTIFICATIONS_ENABLED` defaults to false; the additive notification migration requires explicit owner approval on hosted Supabase. No old policy/migration is rewritten. Acceptance reuses existing authorized conversations before INSERT, and database failures return an operation/reference for safe diagnosis. The reported hosted SQL step is not confirmed without its correlated server evidence.
+
 ## Local verification
 
 Install a **JDK 21** (a JRE alone cannot compile), Maven 3.9+, Node 22.13+ and Docker. From `backend/`:

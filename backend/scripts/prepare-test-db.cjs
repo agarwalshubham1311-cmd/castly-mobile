@@ -45,19 +45,43 @@ sql(
 );
 
 const schemaPath = process.env.CASTLY_TEST_SCHEMA_PATH || 'repository';
-if (!['repository', 'reconciliation'].includes(schemaPath)) throw new Error('Unknown disposable schema path');
+if (!['repository', 'reconciliation'].includes(schemaPath))
+  throw new Error('Unknown disposable schema path');
 if (schemaPath === 'repository') {
   for (const name of fs.readdirSync(path.join(root, 'supabase/migrations')).sort())
-    sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), 'castly_spring_test');
+    sql(
+      fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
+      'castly_spring_test',
+    );
 } else {
-  for (const name of ['20261022000100_accounts_and_marketplace.sql', '20261022000200_media_storage.sql'])
-    sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), 'castly_spring_test');
+  for (const name of [
+    '20261022000100_accounts_and_marketplace.sql',
+    '20261022000200_media_storage.sql',
+  ])
+    sql(
+      fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
+      'castly_spring_test',
+    );
   // Synthetic approximation of the reported baseline; never a claim of hosted equivalence.
-  sql("create schema supabase_migrations; create table supabase_migrations.schema_migrations(version text primary key); insert into supabase_migrations.schema_migrations values('20261027032615');", 'castly_spring_test');
+  sql(
+    "create schema supabase_migrations; create table supabase_migrations.schema_migrations(version text primary key); insert into supabase_migrations.schema_migrations values('20261027032615');",
+    'castly_spring_test',
+  );
   run(['exec', container, 'mkdir', '-p', '/tmp/castly-sql']);
   run(['cp', path.join(root, 'supabase') + '/.', container + ':/tmp/castly-sql']);
-  sql("set castly.reconciliation_schema_reviewed='issue-1-reviewed';\n\\i /tmp/castly-sql/reconciliation/issue-1/02-prepare.sql\n", 'castly_spring_test');
+  sql(
+    "set castly.reconciliation_schema_reviewed='issue-1-reviewed';\n\\i /tmp/castly-sql/reconciliation/issue-1/02-prepare.sql\n",
+    'castly_spring_test',
+  );
 }
+if (schemaPath === 'reconciliation')
+  sql(
+    fs.readFileSync(
+      path.join(root, 'supabase/migrations/20261102100000_in_app_notifications.sql'),
+      'utf8',
+    ),
+    'castly_spring_test',
+  );
 sql("alter role castly_api login password 'castly-api-local-test';", 'castly_spring_test');
 for (let n = 1; n <= 100; n++)
   sql(

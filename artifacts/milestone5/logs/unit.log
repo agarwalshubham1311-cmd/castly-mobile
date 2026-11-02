@@ -1,0 +1,101 @@
+
+> castly-mobile@0.1.0 test
+> node --experimental-strip-types --test tests/*.test.ts
+
+(node:129772) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-milestone5/tests/accessibility.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-milestone5/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ normal text meets AA on actual Lavender Pearl surfaces without changing primary colors (1.535499ms)
+✔ date selection preserves the device calendar day and rejects impossible dates (18.658615ms)
+(node:129773) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-milestone5/tests/api.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-milestone5/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ API attaches verified session token and refreshes once after 401 (33.179813ms)
+✔ API does not retry failed writes or silently fall back, and exposes server errors (1.146765ms)
+✔ typed business service excludes caller identities and protected talent fields (0.644632ms)
+✔ missing own profile is empty while other API failures remain errors (0.295076ms)
+✔ message history merges duplicate POST/Realtime results in precise server order (7.790893ms)
+✔ direct database fallback is opt-in and impossible in production mode (0.301095ms)
+✔ a refreshed token cannot retry a request under a different account (0.606816ms)
+✔ history recovery never joins stale pages across an unseen reconnect gap (0.217782ms)
+(node:129774) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-milestone5/tests/backend.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-milestone5/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ backend mode preserves mock without credentials and fails closed for partial or privileged configuration (2.483441ms)
+✔ Expo build guard rejects service-role/secret credentials in public variables and dotenv files (2.753499ms)
+✔ talent validation rejects invalid rates/names/skills and strips server-managed columns from writes (0.479388ms)
+✔ portfolio upload detects supported image content and rejects oversized or unsupported files (0.315225ms)
+✔ network failures remain explicit errors and never resolve as successful writes (0.378279ms)
+(node:129794) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-milestone5/tests/branding.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-milestone5/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ launcher PNGs decode at platform sizes with opaque app icons and padded adaptive silhouettes (346.383018ms)
+(node:129800) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-milestone5/tests/demo.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-milestone5/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ booking validation accepts a complete future local request (1.904074ms)
+✔ booking validation rejects impossible dates, past dates and incomplete fields (0.328515ms)
+✔ saved restoration deduplicates and removes obsolete or malformed IDs (3.137296ms)
+✔ search applies minimum budget and skills while sorting without mutating fixtures (0.504616ms)
+(node:129807) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-milestone5/tests/milestone5.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-milestone5/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ one authorized base channel, reference-counted chat, deduplicated events and cleanup/reconnect (1.987838ms)
+✔ booking and notification events in the same burst coalesce; unrelated chat events do not update it (0.772822ms)
+✔ notification navigation/dedup and DTOs are recipient-owned API operations (1.214204ms)
+✔ chat scrolling preserves older-page position and avoids jumping while reading history (0.410807ms)
+✔ Realtime auth failure falls back safely and disposal before auth resolves creates no channels (0.335015ms)
+✔ database denials expose a safe support reference without SQL or credentials (27.367715ms)
+✔ notification page merging preserves descending PostgreSQL microsecond order (6.289134ms)
+(node:129819) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-milestone5/tests/mobile-api.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-milestone5/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Spring composition never constructs or accesses Supabase business services, including errors (27.447812ms)
+✔ public discovery/categories/profile do not depend on or transmit an expired account token (2.260981ms)
+✔ terminal 401 expires only its subject; 403/conflict/offline are explicit and never retried (3.925361ms)
+✔ refresh rejection expires the request subject while Auth outages do not log a user out (0.857988ms)
+✔ late successful private response is discarded after account switch without expiring the new account (0.404347ms)
+✔ session refresh rotation is shared across simultaneous 401s (0.678953ms)
+✔ catalog pagination traverses beyond the first page, deduplicates and fails on nonadvancing/truncated results (0.519688ms)
+✔ refreshing a paginated activity list fetches every loaded page and replaces stale statuses (0.222138ms)
+✔ a full last page retains Load more even when concurrent offset pages overlap (0.238462ms)
+✔ snake_case talent metadata maps to UI without invented claims; one failed image does not hide talent (0.565105ms)
+✔ booking DTO excludes protected fields, portfolio edit and message cursor match Spring contracts (0.387152ms)
+✔ device URLs and isolated fallback are explicit, with no credential-bearing API URLs (0.357979ms)
+✔ session notice subscription carries only subject identity and cleans up (0.123192ms)
+✔ a form bound to another user cannot send its private write after the session changes (0.29825ms)
+(node:129827) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-milestone5/tests/portraits.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-milestone5/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 11 distinct local JPEGs match source hashes and license metadata (3.892322ms)
+✔ every talent has a bundled portrait and gallery; every photograph is used (0.409905ms)
+(node:129835) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/castly-milestone5/tests/talent.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/castly-milestone5/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ discovery returns the full catalog without constraints (0.965427ms)
+✔ search matches skills and trims case-insensitively (0.810307ms)
+✔ category, location, budget and availability combine (0.20296ms)
+✔ unknown searches have no results (0.176741ms)
+✔ sample catalog does not advertise fabricated reputation claims (0.183812ms)
+ℹ tests 48
+ℹ suites 0
+ℹ pass 48
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 602.831644
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

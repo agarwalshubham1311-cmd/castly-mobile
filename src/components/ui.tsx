@@ -638,11 +638,12 @@ export function BottomNavigation({
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const title = descriptors[route.key].options.title || route.name;
+        const badge = descriptors[route.key].options.tabBarBadge;
         return (
           <Pressable
             key={route.key}
             accessibilityRole="tab"
-            accessibilityLabel={title}
+            accessibilityLabel={badge ? `${title}, ${badge} unread message notifications` : title}
             accessibilityState={{ selected: focused }}
             aria-selected={focused}
             onPress={() => {
@@ -656,6 +657,20 @@ export function BottomNavigation({
             style={styles.navItem}
           >
             <View style={[styles.navIcon, focused && { backgroundColor: c.lavender }]}>
+              {badge != null && (
+                <Text
+                  style={{
+                    position: 'absolute',
+                    top: -2,
+                    right: -8,
+                    color: c.primaryDark,
+                    fontFamily: f.bold,
+                    fontSize: 10,
+                  }}
+                >
+                  {badge}
+                </Text>
+              )}
               <Icon
                 name={icons[route.name] || 'ellipse-outline'}
                 color={focused ? c.primaryDark : c.secondary}

@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.*;
       "castly.jwt.issuer=http://127.0.0.1:59999/auth/v1",
       "castly.jwt.audience=authenticated",
       "castly.jwt.mode=jwks",
+      "castly.notifications.enabled=true",
       "castly.cors-origins=http://localhost:8081"
     })
 @AutoConfigureMockMvc
@@ -666,5 +667,249 @@ class BusinessApiTest {
         second.andReturn().getResponse().getContentAsString());
     call("GET", "/api/v1/portfolio?limit=1001", null, null).andExpect(status().isBadRequest());
     call("GET", "/api/v1/portfolio?offset=-1", null, null).andExpect(status().isBadRequest());
+  }
+
+  private void localOwner(String sql) throws Exception {
+    var process =
+        new ProcessBuilder(
+                "docker",
+                "exec",
+                "castly-spring-test-db",
+                "psql",
+                "-X",
+                "-U",
+                "postgres",
+                "-d",
+                "castly_spring_test",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-c",
+                sql)
+            .redirectErrorStream(true)
+            .start();
+    String output = new String(process.getInputStream().readAllBytes());
+    assertEquals(0, process.waitFor(), output);
+  }
+
+  @Test
+  void acceptanceReusesLegacyConversationWithoutUnnecessaryInsertAndDenialRollsBack()
+      throws Exception {
+    String id = newBooking(), talent = talentFor(id);
+    call("POST", "/api/v1/bookings/" + id + "/accept", CLIENT, null)
+        .andExpect(status().isForbidden());
+    call("POST", "/api/v1/bookings/" + id + "/accept", "00000000-0000-0000-0000-000000000005", null)
+        .andExpect(status().isNotFound());
+    localOwner("drop policy api_conversation_create on public.conversations");
+    try {
+      call("POST", "/api/v1/bookings/" + id + "/accept", talent, null)
+          .andExpect(status().isForbidden())
+          .andExpect(jsonPath("$.detail").value("Not permitted"))
+          .andExpect(jsonPath("$.operation").value("conversation.insert"))
+          .andExpect(jsonPath("$.reference").isString());
+      call("GET", "/api/v1/bookings/" + id, CLIENT, null)
+          .andExpect(jsonPath("$.status").value("requested"));
+      assertEquals(
+          (Object) 0,
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql(
+                          "select count(*)::int from public.notifications where booking_id=:id and"
+                              + " kind='booking_accepted'")
+                      .param("id", UUID.fromString(id))
+                      .query(Integer.class)
+                      .single()));
+      localOwner(
+          "insert into public.conversations(client_id,talent_id) values('"
+              + CLIENT
+              + "','"
+              + talent
+              + "')");
+      call("POST", "/api/v1/bookings/" + id + "/accept", talent, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.status").value("accepted"));
+      call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
+      assertEquals(
+          (Object) 1,
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql("select count(*)::int from public.conversations where talent_id=:id")
+                      .param("id", UUID.fromString(talent))
+                      .query(Integer.class)
+                      .single()));
+      assertEquals(
+          (Object) 1,
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql(
+                          "select count(*)::int from public.notifications where booking_id=:id and"
+                              + " kind='booking_accepted'")
+                      .param("id", UUID.fromString(id))
+                      .query(Integer.class)
+                      .single()));
+    } finally {
+      localOwner(
+          "create policy api_conversation_create on public.conversations for insert to castly_api"
+              + " with check((client_id=(select auth.uid()) or talent_id=(select auth.uid())) and"
+              + " exists(select 1 from public.bookings b where b.client_id=conversations.client_id"
+              + " and b.talent_id=conversations.talent_id and b.status='accepted'))");
+    }
+  }
+
+  @Test
+  void notificationsAreTransactionalRecipientOnlyDeduplicatedAndNotReadReceipts() throws Exception {
+    String id = newBooking(), talent = talentFor(id);
+    var notification =
+        data.as(
+            UUID.fromString(talent),
+            db ->
+                com.castly.api.ActorDatabase.one(
+                    db.sql(
+                            "select id from public.notifications where booking_id=:id and"
+                                + " kind='booking_requested'")
+                        .param("id", UUID.fromString(id))));
+    String notice = notification.get("id").toString();
+    call("GET", "/api/v1/notifications", null, null).andExpect(status().isUnauthorized());
+    call("POST", "/api/v1/notifications/" + notice + "/read", OUTSIDER, null)
+        .andExpect(status().isNotFound());
+    call("POST", "/api/v1/notifications/" + notice + "/read", talent, null)
+        .andExpect(status().isNoContent());
+    call("POST", "/api/v1/notifications/" + notice + "/read", talent, null)
+        .andExpect(status().isNoContent());
+    call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
+    var conversation =
+        object(call("POST", "/api/v1/conversations", CLIENT, "{\"booking_id\":\"" + id + "\"}"));
+    String conv = conversation.get("id").toString();
+    call(
+            "POST",
+            "/api/v1/conversations/" + conv + "/messages",
+            CLIENT,
+            "{\"body\":\"Notification test message\"}")
+        .andExpect(status().isCreated());
+    call("GET", "/api/v1/conversations/" + conv, talent, null)
+        .andExpect(jsonPath("$.unread_notifications").value(1));
+    call("GET", "/api/v1/notifications/unread-count", talent, null)
+        .andExpect(jsonPath("$.enabled").value(true))
+        .andExpect(jsonPath("$.message_unread_count").value(1));
+    call("GET", "/api/v1/conversations/" + conv, CLIENT, null)
+        .andExpect(jsonPath("$.unread_notifications").value(0));
+    call("POST", "/api/v1/conversations/" + conv + "/notifications/read", OUTSIDER, null)
+        .andExpect(status().isNotFound());
+    call("POST", "/api/v1/conversations/" + conv + "/notifications/read", talent, null)
+        .andExpect(status().isNoContent());
+    call("GET", "/api/v1/conversations/" + conv, talent, null)
+        .andExpect(jsonPath("$.unread_notifications").value(0));
+    call("GET", "/api/v1/conversations/" + conv + "/messages", CLIENT, null)
+        .andExpect(jsonPath("$[0].read_at").doesNotExist());
+    call("GET", "/api/v1/notifications?limit=1", talent, null)
+        .andExpect(jsonPath("$.length()").value(1));
+    call("GET", "/api/v1/notifications?before=" + notice, OUTSIDER, null)
+        .andExpect(status().isNotFound());
+    assertThrows(
+        org.springframework.dao.DataAccessException.class,
+        () ->
+            data.as(
+                UUID.fromString(talent),
+                db ->
+                    db.sql(
+                            "insert into"
+                                + " public.notifications(recipient_id,kind,event_key,booking_id)"
+                                + " values(auth.uid(),'booking_accepted','forged',:id)")
+                        .param("id", UUID.fromString(id))
+                        .update()));
+    var disabled =
+        new com.castly.api.NotificationController(
+            data, new com.castly.api.NotificationService(false));
+    var jwt =
+        org.springframework.security.oauth2.jwt.Jwt.withTokenValue("fixture")
+            .header("alg", "RS256")
+            .subject(CLIENT)
+            .build();
+    assertEquals(Map.of("enabled", false), disabled.unread(jwt));
+  }
+
+  @Test
+  void rejectionAndCancellationNotifyOnlyTheCounterpartyOnce() throws Exception {
+    for (String action : List.of("reject", "cancel")) {
+      String id = newBooking(),
+          talent = talentFor(id),
+          actor = action.equals("reject") ? talent : CLIENT;
+      call("POST", "/api/v1/bookings/" + id + "/" + action, actor, null).andExpect(status().isOk());
+      call("POST", "/api/v1/bookings/" + id + "/" + action, actor, null).andExpect(status().isOk());
+      UUID recipient = UUID.fromString(action.equals("reject") ? CLIENT : talent);
+      assertEquals(
+          (Object) 1,
+          data.as(
+              recipient,
+              db ->
+                  db.sql(
+                          "select count(*)::int from public.notifications where booking_id=:id and"
+                              + " kind=:kind")
+                      .param("id", UUID.fromString(id))
+                      .param(
+                          "kind",
+                          action.equals("reject") ? "booking_declined" : "booking_cancelled")
+                      .query(Integer.class)
+                      .single()));
+    }
+  }
+
+  @Test
+  void acceptanceNeedsOnlyConversationColumnInsertGrantsAndTriggerExecuteIsNotRequired()
+      throws Exception {
+    String id = newBooking(), talent = talentFor(id);
+    data.as(
+        UUID.fromString(talent),
+        db -> {
+          assertFalse(
+              db.sql("select has_table_privilege(current_user,'public.conversations','INSERT')")
+                  .query(Boolean.class)
+                  .single());
+          assertTrue(
+              db.sql(
+                      "select"
+                          + " has_column_privilege(current_user,'public.conversations','client_id','INSERT')"
+                          + " and has_column_privilege(current_user,'public.conversations','talent_id','INSERT')")
+                  .query(Boolean.class)
+                  .single());
+          assertFalse(
+              db.sql(
+                      "select"
+                          + " has_function_privilege(current_user,'public.api_booking_transition_guard()','EXECUTE')")
+                  .query(Boolean.class)
+                  .single());
+          return null;
+        });
+    call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
+    call("POST", "/api/v1/conversations", talent, "{\"booking_id\":\"" + id + "\"}")
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void permissionDiagnosticsDistinguishBookingLockFromNewRowRlsUpdateFailure() throws Exception {
+    String id = newBooking(), talent = talentFor(id);
+    localOwner("revoke update(status) on public.bookings from castly_api");
+    try {
+      call("POST", "/api/v1/bookings/" + id + "/accept", talent, null)
+          .andExpect(status().isForbidden())
+          .andExpect(jsonPath("$.operation").value("booking.accepted.lock"));
+    } finally {
+      localOwner("grant update(status) on public.bookings to castly_api");
+    }
+    localOwner(
+        "create policy test_restrict_booking on public.bookings as restrictive for update to"
+            + " castly_api using(true) with check(status='requested')");
+    try {
+      call("POST", "/api/v1/bookings/" + id + "/accept", talent, null)
+          .andExpect(status().isForbidden())
+          .andExpect(jsonPath("$.operation").value("booking.accepted.update"));
+      call("GET", "/api/v1/bookings/" + id, CLIENT, null)
+          .andExpect(jsonPath("$.status").value("requested"));
+    } finally {
+      localOwner("drop policy test_restrict_booking on public.bookings");
+    }
+    call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
   }
 }

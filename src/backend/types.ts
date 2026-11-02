@@ -59,6 +59,7 @@ export type BookingRow = {
   updated_at: string;
 };
 export type ConversationRow = {
+  unread_notifications?: number;
   client_name?: string;
   talent_name?: string;
   can_send?: boolean;
@@ -91,6 +92,7 @@ type Table<Row, Insert = Partial<Row>, Update = Partial<Insert>> = {
 export type Database = {
   public: {
     Tables: {
+      notifications: Table<NotificationRow & { event_key: string }, never, never>;
       users: Table<Account, never, Pick<Account, 'display_name'>>;
       categories: Table<CategoryRow, never, never>;
       talent_profiles: Table<TalentProfile, TalentDraft & { id: string }, Partial<TalentDraft>>;
@@ -133,3 +135,22 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
+
+export type NotificationRow = {
+  id: string;
+  recipient_id: string;
+  kind:
+    | 'booking_requested'
+    | 'booking_accepted'
+    | 'booking_declined'
+    | 'booking_cancelled'
+    | 'message_received';
+  booking_id: string | null;
+  conversation_id: string | null;
+  message_id: string | null;
+  created_at: string;
+  read_at: string | null;
+};
+export type NotificationStats =
+  | { enabled: false }
+  | { enabled: true; unread_count: number; message_unread_count: number };

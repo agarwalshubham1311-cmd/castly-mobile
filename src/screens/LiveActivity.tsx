@@ -1,9 +1,13 @@
+import { DecisionDialog, type Decision } from '../components/DecisionDialog';
+import { BookingStatus } from '../components/BookingStatus';
+import { useNotifications } from '../backend/NotificationProvider';
+import { isNearBottom, chatScrollTarget } from '../backend/chatScroll';
 import { loadPagesThrough } from '../backend/catalog';
 import { ApiError } from '../backend/api';
 import { usePublishedTalent } from '../backend/usePublishedTalent';
 import { mergeMessages, messageWindow } from '../backend/messages';
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, TextInput, ScrollView } from 'react-native';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { View, Text, TextInput, ScrollView, type ScrollViewInstance } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../auth/AuthProvider';
 import { services } from '../backend';
@@ -106,13 +110,12 @@ function BookingSummary({ booking }: { booking: BookingRow }) {
         {booking.proposed_date} · {booking.location}
       </Label>
       <Label>₹{booking.indicative_budget.toLocaleString('en-IN')} indicative budget</Label>
-      <Label style={{ color: c.primaryDark }}>
-        {booking.status[0].toUpperCase() + booking.status.slice(1)}
-      </Label>
+      <BookingStatus status={booking.status} />
     </View>
   );
 }
 export function LiveBookings() {
+  const auth = useAuth();
   const live = useLiveRefresh('bookings');
   const [tab, setTab] = useState('All');
   const [offset, setOffset] = useState(0);
@@ -124,15 +127,22 @@ export function LiveBookings() {
   const rows = state.data?.rows || [];
   return (
     <Screen title="Bookings" back={false}>
+      <Label>
+        {auth.account?.primary_role === 'talent'
+          ? 'Incoming requests and booking history'
+          : 'Your submitted requests and booking history'}
+      </Label>
       <Chips>
-        {['All', 'requested', 'accepted', 'declined', 'cancelled', 'completed'].map((value) => (
-          <CategoryChip
-            key={value}
-            title={value === 'All' ? value : value[0].toUpperCase() + value.slice(1)}
-            active={tab === value}
-            onPress={() => setTab(value)}
-          />
-        ))}
+        {['All', 'requested', 'accepted', 'declined', 'cancelled', 'completed', 'History'].map(
+          (value) => (
+            <CategoryChip
+              key={value}
+              title={value === 'All' ? value : value[0].toUpperCase() + value.slice(1)}
+              active={tab === value}
+              onPress={() => setTab(value)}
+            />
+          ),
+        )}
       </Chips>
       <Label>{live.status}</Label>
       <PrimaryButton
@@ -145,7 +155,13 @@ export function LiveBookings() {
       />
       <Feedback {...state} retry={state.refresh} />
       {rows
-        .filter((row) => tab === 'All' || row.status === tab)
+        .filter(
+          (row) =>
+            tab === 'All' ||
+            (tab === 'History'
+              ? ['declined', 'cancelled', 'completed'].includes(row.status)
+              : row.status === tab),
+        )
         .map((row) => (
           <View key={row.id} style={{ gap: 8 }}>
             <BookingSummary booking={row} />
@@ -184,6 +200,7 @@ export function LiveBookingDetail() {
   const state = useResource(load, live.revision);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [decision, setDecision] = useState<Decision | null>(null);
   const booking = !state.loading && !state.error ? state.data : null;
   const talent = booking?.talent_id === auth.session?.user.id;
   const client = booking?.client_id === auth.session?.user.id;
@@ -192,6 +209,7 @@ export function LiveBookingDetail() {
     setError('');
     try {
       await services!.activity.transition(id, decision, auth.session!.user.id);
+      setDecision(null);
       state.refresh();
     } catch (e) {
       setError(readableError(e));
@@ -215,6 +233,16 @@ export function LiveBookingDetail() {
   };
   return (
     <Screen title="Booking details">
+      <DecisionDialog
+        decision={decision}
+        busy={busy}
+        disabled={!booking || !!state.error || state.loading}
+        error={error}
+        onClose={() => setDecision(null)}
+        onConfirm={() => {
+          if (decision && booking) void transition(decision);
+        }}
+      />
       <Feedback {...state} retry={state.refresh} />
       {booking && (
         <>
@@ -228,7 +256,8 @@ export function LiveBookingDetail() {
                 title="Accept booking"
                 disabled={busy}
                 onPress={() => {
-                  void transition('accept');
+                  setError('');
+                  setDecision('accept');
                 }}
               />
               <PrimaryButton
@@ -236,7 +265,8 @@ export function LiveBookingDetail() {
                 secondary
                 disabled={busy}
                 onPress={() => {
-                  void transition('reject');
+                  setError('');
+                  setDecision('reject');
                 }}
               />
             </>
@@ -248,7 +278,8 @@ export function LiveBookingDetail() {
               secondary
               disabled={busy}
               onPress={() => {
-                void transition('cancel');
+                setError('');
+                setDecision('cancel');
               }}
             />
           )}
@@ -427,6 +458,11 @@ export function LiveConversations() {
               ? 'Continue your conversation'
               : 'Message history · no active accepted booking'}
           </Label>
+          {typeof row.unread_notifications === 'number' && row.unread_notifications > 0 && (
+            <Label accessibilityLiveRegion="polite">
+              {row.unread_notifications} unread message notifications
+            </Label>
+          )}
           <PrimaryButton
             title="Open conversation"
             secondary
@@ -468,7 +504,16 @@ export function LiveChat() {
 }
 function ChatThread({ id }: { id: string }) {
   const auth = useAuth();
+  const { stats: notificationStats, refresh: refreshNotifications } = useNotifications();
   const live = useLiveRefresh('messages', id);
+  const scroll = useRef<ScrollViewInstance>(null);
+  const height = useRef(0),
+    offset = useRef(0),
+    prepend = useRef(false),
+    forceBottom = useRef(true);
+  const [nearBottom, setNearBottom] = useState(true),
+    [newMessages, setNewMessages] = useState(false);
+  const lastSeen = useRef('');
   const load = useCallback(
     () => Promise.all([services!.activity.conversation(id), services!.activity.messages(id)]),
     [id],
@@ -488,6 +533,7 @@ function ChatThread({ id }: { id: string }) {
     setError('');
     try {
       const message = await services!.activity.sendMessage(id, text, auth.session!.user.id);
+      forceBottom.current = true;
       setHistory(mergeMessages(rows, [message]));
       setText('');
       state.refresh();
@@ -503,15 +549,44 @@ function ChatThread({ id }: { id: string }) {
     setBusy(true);
     setError('');
     try {
+      prepend.current = true;
       const page = await services!.activity.messages(id, rows[0].id);
       setHistory(mergeMessages(rows, page || []));
+      if (!page?.length) prepend.current = false;
       setMore((page?.length || 0) === 50);
     } catch (e) {
+      prepend.current = false;
       setError(readableError(e));
     } finally {
       setBusy(false);
     }
   };
+  const newest = rows[rows.length - 1]?.id;
+  useEffect(() => {
+    if (
+      !nearBottom ||
+      !newest ||
+      state.error ||
+      !notificationStats.enabled ||
+      lastSeen.current === newest
+    )
+      return;
+    lastSeen.current = newest;
+    services!.notifications
+      .readConversation(id, auth.session!.user.id)
+      .then(() => refreshNotifications())
+      .catch(() => {
+        lastSeen.current = '';
+      });
+  }, [
+    nearBottom,
+    newest,
+    id,
+    state.error,
+    notificationStats.enabled,
+    refreshNotifications,
+    auth.session,
+  ]);
   const peer =
     conversation?.client_id === auth.session?.user.id
       ? conversation?.talent_name
@@ -563,7 +638,50 @@ function ChatThread({ id }: { id: string }) {
         </View>
       }
     >
+      {newMessages && (
+        <PrimaryButton
+          title="Jump to latest messages"
+          secondary
+          onPress={() => {
+            scroll.current?.scrollToEnd({ animated: true });
+            setNearBottom(true);
+            setNewMessages(false);
+          }}
+        />
+      )}
       <ScrollView
+        ref={scroll}
+        onScroll={(event) => {
+          const native = event.nativeEvent;
+          offset.current = native.contentOffset.y;
+          const bottom = isNearBottom(
+            offset.current,
+            native.layoutMeasurement.height,
+            native.contentSize.height,
+          );
+          setNearBottom(bottom);
+          if (bottom) setNewMessages(false);
+        }}
+        scrollEventThrottle={100}
+        onContentSizeChange={(_width, next) => {
+          const target = chatScrollTarget(
+            height.current,
+            next,
+            offset.current,
+            prepend.current,
+            nearBottom,
+            forceBottom.current,
+          );
+          if (target.kind === 'offset') scroll.current?.scrollTo({ y: target.y, animated: false });
+          else if (target.kind === 'end') {
+            scroll.current?.scrollToEnd({ animated: !forceBottom.current });
+            setNearBottom(true);
+            setNewMessages(false);
+          } else if (next > height.current) setNewMessages(true);
+          height.current = next;
+          prepend.current = false;
+          forceBottom.current = false;
+        }}
         style={{ flex: 1, minHeight: 0 }}
         contentContainerStyle={{ padding: 20, gap: 14 }}
       >

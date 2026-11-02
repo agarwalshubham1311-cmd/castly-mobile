@@ -1,5 +1,7 @@
 # Castly — mobile and Spring business API
 
+Milestone 5 review: [booking acceptance diagnostics, notifications and manual steps](docs/milestone5/README.md). Notifications are disabled by default pending schema approval; no hosted migration or deployment is performed.
+
 Milestone 3 review branch: `feat/phase2-mobile-spring-integration` (based on the latest issue-1 fixes). See [Windows + Android Expo Go setup and manual smoke test](docs/MOBILE_SPRING_SETUP.md) and [Milestone 3 validation report](artifacts/issue-3/report.md). Spring Boot now owns Milestone 1 business operations and Milestone 2 booking/messaging workflows. Supabase remains the Auth, Storage and Realtime provider. See [backend setup and API contract](backend/README.md) and [validation results](artifacts/spring-api/report.md).
 
 No hosted migrations, production deployment, main merge or payment enablement is performed by this work. The direct Supabase business implementation is retained only as an explicit Metro development fallback against a pre-cutover development database.

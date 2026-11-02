@@ -17,9 +17,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1")
 public class ActivityController {
   private final ActorDatabase data;
+  private final NotificationService notifications;
 
-  public ActivityController(ActorDatabase data) {
+  public ActivityController(ActorDatabase data, NotificationService notifications) {
     this.data = data;
+    this.notifications = notifications;
   }
 
   private Map<String, Object> booking(JdbcClient db, UUID id, boolean lock) {
@@ -102,40 +104,47 @@ public class ActivityController {
   }
 
   private Map<String, Object> transition(Jwt jwt, UUID id, String target) {
-    return data.as(
-        actor(jwt),
-        db -> {
-          var row = booking(db, id, true);
-          UUID me = actor(jwt);
-          requireParticipant(me, row);
-          String status = (String) row.get("status");
-          boolean talent = me.equals(participantId(row, "talent_id"));
-          boolean client = me.equals(participantId(row, "client_id"));
-          if (!target.equals("cancelled") && !talent)
-            throw new ResponseStatusException(
-                HttpStatus.FORBIDDEN, "Only the relevant talent can decide this request");
-          if (target.equals(status)) {
-            if (target.equals("accepted")) ensureConversation(db, row);
-            return row;
-          }
-          boolean allowed =
-              target.equals("cancelled")
-                  ? (status.equals("requested") && client)
-                      || (status.equals("accepted") && (client || talent))
-                  : status.equals("requested") && talent;
-          if (!allowed)
-            throw new ResponseStatusException(
-                HttpStatus.CONFLICT, "Booking is no longer eligible for this action");
-          var changed =
-              one(
-                  db.sql(
-                          "update public.bookings set status=cast(:status as public.booking_status)"
-                              + " where id=:id returning *")
-                      .param("status", target)
-                      .param("id", id));
-          if (target.equals("accepted")) ensureConversation(db, changed);
-          return changed;
-        });
+    return DatabaseStep.run(
+        "booking." + target + ".transaction",
+        () ->
+            data.as(
+                actor(jwt),
+                db -> {
+                  var row =
+                      DatabaseStep.run("booking." + target + ".lock", () -> booking(db, id, true));
+                  UUID me = actor(jwt);
+                  requireParticipant(me, row);
+                  String status = (String) row.get("status");
+                  boolean talent = me.equals(participantId(row, "talent_id"));
+                  boolean client = me.equals(participantId(row, "client_id"));
+                  if (!target.equals("cancelled") && !talent)
+                    throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Only the relevant talent can decide this request");
+                  if (target.equals(status)) {
+                    if (target.equals("accepted")) ensureConversation(db, row);
+                    return row;
+                  }
+                  boolean allowed =
+                      target.equals("cancelled")
+                          ? (status.equals("requested") && client)
+                              || (status.equals("accepted") && (client || talent))
+                          : status.equals("requested") && talent;
+                  if (!allowed)
+                    throw new ResponseStatusException(
+                        HttpStatus.CONFLICT, "Booking is no longer eligible for this action");
+                  var changed =
+                      DatabaseStep.run(
+                          "booking." + target + ".update",
+                          () ->
+                              one(
+                                  db.sql(
+                                          "update public.bookings set status=cast(:status as"
+                                              + " public.booking_status) where id=:id returning *")
+                                      .param("status", target)
+                                      .param("id", id)));
+                  if (target.equals("accepted")) ensureConversation(db, changed);
+                  return changed;
+                }));
   }
 
   // JDBC UUIDs and the JSON row mapper's UUID strings must authorize identically.
@@ -152,16 +161,37 @@ public class ActivityController {
 
   private Map<String, Object> ensureConversation(JdbcClient db, Map<String, Object> booking) {
     UUID client = participantId(booking, "client_id"), talent = participantId(booking, "talent_id");
-    db.sql(
-            "insert into public.conversations(client_id,talent_id) values(:client,:talent) on"
-                + " conflict(client_id,talent_id) do nothing")
-        .param("client", client)
-        .param("talent", talent)
-        .update();
-    return one(
-        db.sql("select * from public.conversations where client_id=:client and talent_id=:talent")
-            .param("client", client)
-            .param("talent", talent));
+    // INSERT RLS is evaluated even for ON CONFLICT DO NOTHING. Reuse an already
+    // authorized conversation without attempting an unnecessary insert.
+    var existing =
+        DatabaseStep.run(
+            "conversation.reuse",
+            () ->
+                rows(
+                    db.sql(
+                            "select * from public.conversations where client_id=:client and"
+                                + " talent_id=:talent")
+                        .param("client", client)
+                        .param("talent", talent)));
+    if (!existing.isEmpty()) return existing.getFirst();
+    DatabaseStep.run(
+        "conversation.insert",
+        () ->
+            db.sql(
+                    "insert into public.conversations(client_id,talent_id) values(:client,:talent)"
+                        + " on conflict(client_id,talent_id) do nothing")
+                .param("client", client)
+                .param("talent", talent)
+                .update());
+    return DatabaseStep.run(
+        "conversation.lookup",
+        () ->
+            one(
+                db.sql(
+                        "select * from public.conversations where client_id=:client and"
+                            + " talent_id=:talent")
+                    .param("client", client)
+                    .param("talent", talent)));
   }
 
   private static final String CONVERSATIONS =
@@ -181,18 +211,24 @@ public class ActivityController {
     return data.as(
         actor(jwt),
         db ->
-            rows(
-                db.sql(
-                        CONVERSATIONS
-                            + " order by c.created_at desc,c.id desc limit :limit offset :offset")
-                    .param("limit", limit)
-                    .param("offset", offset)));
+            notifications.decorate(
+                db,
+                rows(
+                    db.sql(
+                            CONVERSATIONS
+                                + " order by c.created_at desc,c.id desc limit :limit offset"
+                                + " :offset")
+                        .param("limit", limit)
+                        .param("offset", offset))));
   }
 
   @GetMapping("/conversations/{id}")
   public Map<String, Object> conversation(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
     return data.as(
-        actor(jwt), db -> one(db.sql(CONVERSATIONS + " where c.id=:id").param("id", id)));
+        actor(jwt),
+        db ->
+            notifications.decorate(
+                db, one(db.sql(CONVERSATIONS + " where c.id=:id").param("id", id))));
   }
 
   @PostMapping("/conversations")

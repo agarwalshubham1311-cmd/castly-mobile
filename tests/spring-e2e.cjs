@@ -1,6 +1,6 @@
 process.env.TEST_URL ||= 'http://127.0.0.1:8086';
 // Real Spring HTTP + PostgreSQL; only Supabase Auth/JWKS are local test fixtures. No hosted requests.
-const { assert, launch, go, ready } = require('./browser-utils.cjs');
+const { assert, launch, go, ready, noOverflow } = require('./browser-utils.cjs');
 const http = require('node:http');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
@@ -124,7 +124,8 @@ async function until(url) {
           DATABASE_PASSWORD: 'castly-api-local-test',
           SUPABASE_JWT_ISSUER: issuer,
           JWT_SIGNING_MODE: 'jwks',
-          CORS_ALLOWED_ORIGINS: 'http://127.0.0.1:8086',
+          CASTLY_NOTIFICATIONS_ENABLED: 'true',
+          CORS_ALLOWED_ORIGINS: new URL(process.env.TEST_URL).origin,
           PORT: '8080',
         },
         stdio: ['ignore', log, log],
@@ -143,6 +144,31 @@ async function until(url) {
       page.on('request', (request) => {
         if (new URL(request.url()).pathname.startsWith('/rest/v1')) bypass.push(true);
       });
+    }
+    async function responsiveCapture(page, name) {
+      for (const [width, height] of [
+        [360, 800],
+        [390, 844],
+        [430, 932],
+      ]) {
+        await page.setViewportSize({ width, height });
+        await ready(page);
+        await noOverflow(page);
+        if (name === 'booking-confirmation') {
+          const button = await page
+            .getByRole('button', { name: 'Confirm accept booking', exact: true })
+            .boundingBox();
+          assert.ok(
+            button && button.y >= 0 && button.y + button.height <= height,
+            'Confirmation action stays accessible',
+          );
+        }
+        await page.screenshot({
+          path: path.join(folder, `${name}-${width}x${height}.png`),
+          animations: 'disabled',
+        });
+      }
+      await page.setViewportSize({ width: 390, height: 844 });
     }
     async function login(page, email) {
       await go(page, '/login', 'Welcome back');
@@ -202,17 +228,40 @@ async function until(url) {
     await a.getByText('Requested', { exact: true }).waitFor();
     assert.equal(await a.getByRole('button', { name: 'Accept booking', exact: true }).count(), 0);
     const bookingId = new URL(a.url()).pathname.split('/').pop();
-    await go(b, '/booking-detail/' + bookingId, 'Booking details');
+    await go(b, '/notifications', 'Notifications');
+    await b.getByText('New booking request', { exact: true }).waitFor();
+    await responsiveCapture(b, 'notifications');
+    await b.getByRole('button', { name: 'View booking', exact: true }).click();
     assert.equal(await b.getByRole('button', { name: 'Cancel booking', exact: true }).count(), 0);
     await b.getByRole('button', { name: 'Accept booking', exact: true }).click();
+    await responsiveCapture(b, 'booking-confirmation');
+    await b.getByRole('button', { name: 'Confirm accept booking', exact: true }).click();
     await b.getByRole('button', { name: 'Open conversation', exact: true }).waitFor();
     await ready(b);
-    await b.screenshot({ path: path.join(folder, 'accepted-booking-390x844.png') });
-    await a.reload();
+    await b.screenshot({ path: path.join(folder, 'accepted-booking-390x844.png'), animations: 'disabled' });
+    await go(a, '/notifications', 'Notifications');
+    await a.getByText('Booking accepted', { exact: true }).waitFor();
+    await a.getByRole('button', { name: 'View booking', exact: true }).click();
     await a.getByRole('button', { name: 'Open conversation', exact: true }).click();
     await a
       .getByRole('textbox', { name: 'Message', exact: true })
       .fill('Hello from the client via Spring.');
+    let disconnected = false;
+    await a.route('**/api/v1/conversations/*/messages', async (route) => {
+      if (route.request().method() === 'POST' && !disconnected) {
+        disconnected = true;
+        await route.abort('internetdisconnected');
+      } else await route.continue();
+    });
+    await a.getByRole('button', { name: 'Send message', exact: true }).click();
+    await a
+      .getByText(/Cannot reach Castly/)
+      .first()
+      .waitFor();
+    assert.equal(
+      await a.getByRole('textbox', { name: 'Message', exact: true }).inputValue(),
+      'Hello from the client via Spring.',
+    );
     await a.getByRole('button', { name: 'Send message', exact: true }).click();
     await a.getByText('Hello from the client via Spring.', { exact: true }).waitFor();
     await b.getByRole('button', { name: 'Open conversation', exact: true }).click();
@@ -225,13 +274,14 @@ async function until(url) {
     await a.getByRole('button', { name: 'Refresh messages', exact: true }).click();
     await a.getByText('Hello from talent via Spring.', { exact: true }).waitFor();
     await ready(a);
-    await a.screenshot({ path: path.join(folder, 'conversation-390x844.png') });
+    await a.screenshot({ path: path.join(folder, 'conversation-390x844.png'), animations: 'disabled' });
     const denied = await fetch(api + '/bookings/' + bookingId, {
       headers: { Authorization: 'Bearer ' + token(outsider) },
     });
     assert.equal(denied.status, 404);
     await go(a, '/booking-detail/' + bookingId, 'Booking details');
     await a.getByRole('button', { name: 'Cancel booking', exact: true }).click();
+    await a.getByRole('button', { name: 'Confirm cancel booking', exact: true }).click();
     await a.getByText('Cancelled', { exact: true }).waitFor();
     await b.reload();
     await b
@@ -263,20 +313,24 @@ async function until(url) {
     const rejected = await request('Rejected editorial');
     await go(b, '/booking-detail/' + rejected, 'Booking details');
     await b.getByRole('button', { name: 'Reject booking', exact: true }).click();
+    await b.getByRole('button', { name: 'Confirm reject booking', exact: true }).click();
     await b.getByText('Declined', { exact: true }).waitFor();
     const pending = await request('Cancelled pending editorial');
     await go(a, '/booking-detail/' + pending, 'Booking details');
     await a.getByRole('button', { name: 'Cancel booking', exact: true }).click();
+    await a.getByRole('button', { name: 'Confirm cancel booking', exact: true }).click();
     await a.getByText('Cancelled', { exact: true }).waitFor();
     const accepted = await request('Talent cancellation editorial');
     await go(b, '/booking-detail/' + accepted, 'Booking details');
     await b.getByRole('button', { name: 'Accept booking', exact: true }).click();
+    await b.getByRole('button', { name: 'Confirm accept booking', exact: true }).click();
     await b.getByRole('button', { name: 'Cancel booking', exact: true }).click();
+    await b.getByRole('button', { name: 'Confirm cancel booking', exact: true }).click();
     await b.getByText('Cancelled', { exact: true }).waitFor();
     assert.deepEqual(bypass, []);
     assert.deepEqual(errors, []);
     console.log(
-      'PASS: real Java HTTP/JWT/JWKS + PostgreSQL + browser: talent create/edit/publish, favourites, booking creation/acceptance/cancellation, conversation creation, two-party sending/history, outsider denial, paused sending, requested/accepted cancellation and rejection UI, and no direct PostgREST writes. Supabase Auth/JWKS are local fixtures; hosted Realtime is not tested.',
+      'PASS: real Java HTTP/JWT/JWKS + PostgreSQL + browser: talent create/edit/publish, favourites, booking creation/acceptance/cancellation, conversation creation, two-party sending/history, recipient notifications/navigation, offline draft recovery, outsider denial, paused sending, requested/accepted cancellation and rejection UI, and no direct PostgREST writes. Supabase Auth/JWKS are local fixtures; hosted Realtime is not tested.',
     );
   } finally {
     if (browser) await browser.close();

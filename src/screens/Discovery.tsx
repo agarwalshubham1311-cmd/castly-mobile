@@ -1,3 +1,4 @@
+import { NotificationBell } from '../components/NotificationBell';
 import type { Category } from '../talent';
 import { BackendNotice } from '../components/BackendNotice';
 import { useCatalog } from '../backend/CatalogProvider';
@@ -13,7 +14,6 @@ import {
   ChoiceModal,
   FeaturedTalentCard,
   Icon,
-  IconButton,
   IconName,
   SampleNote,
   Screen,
@@ -54,11 +54,7 @@ export default function Discovery() {
             </Text>
             <Icon name="chevron-down" size={12} />
           </Pressable>
-          <IconButton
-            name="notifications-outline"
-            label="Notifications"
-            onPress={() => router.push('/notifications')}
-          />
+          <NotificationBell />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Open account profile"

@@ -31,9 +31,11 @@
     "@expo/image-utils": "^0.12.5",
     "@types/node": "^26.6.5",
     "@types/react": "~19.3.0",
+    "@types/react-test-renderer": "19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-expo": "^58.0.4",
     "playwright": "^1.64.1",
+    "react-test-renderer": "19.3.0",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -59,7 +61,8 @@
     "test:legacy-backend": "node tests/backend-browser.cjs",
     "test:jwt-config": "node backend/scripts/check-jwt-config.cjs",
     "test:reconciliation": "node scripts/test-reconciliation.cjs",
-    "test:mobile-api": "node tests/mobile-spring-browser.cjs"
+    "test:mobile-api": "node tests/mobile-spring-browser.cjs",
+    "test:components": "node --experimental-strip-types --test tests/components.test.cjs"
   },
   "private": true
 }

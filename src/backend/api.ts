@@ -10,6 +10,8 @@ import type {
   ConversationRow,
   MessageRow,
   Role,
+  NotificationRow,
+  NotificationStats,
 } from './types.ts';
 import { talentPayload } from './validation.ts';
 export class ApiError extends Error {
@@ -110,6 +112,8 @@ export function createApiTransport(
           try {
             const data = await response.json();
             if (typeof data.detail === 'string') detail = data.detail;
+            if (typeof data.reference === 'string' && /^[0-9a-f-]{36}$/i.test(data.reference))
+              detail += ` Share reference ${data.reference} with support if the problem persists.`;
           } catch {
             /* Not a JSON API response. */
           }
@@ -255,6 +259,24 @@ export function createApiServices(request: ReturnType<typeof createApiTransport>
           expectedSubject: userId,
         });
       },
+    },
+    notifications: {
+      stats: () => request<NotificationStats>('notifications/unread-count'),
+      list: (before?: string) =>
+        request<NotificationRow[]>(
+          `notifications?limit=50${before ? '&before=' + encodeURIComponent(before) : ''}`,
+        ),
+      read: (id: string, actor?: string) =>
+        request<void>(`notifications/${encodeURIComponent(id)}/read`, 'POST', undefined, {
+          expectedSubject: actor,
+        }),
+      readConversation: (id: string, actor?: string) =>
+        request<void>(
+          `conversations/${encodeURIComponent(id)}/notifications/read`,
+          'POST',
+          undefined,
+          { expectedSubject: actor },
+        ),
     },
     activity: {
       bookings: (offset = 0) => request<BookingRow[]>(`bookings?limit=100&offset=${offset}`),

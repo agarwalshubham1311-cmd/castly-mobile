@@ -40,6 +40,26 @@ public class ApiErrors {
     return result;
   }
 
+  @ExceptionHandler(DatabaseStep.class)
+  ProblemDetail databaseStep(DatabaseStep error) {
+    String reference = java.util.UUID.randomUUID().toString();
+    var result = database(error.failure());
+    result.setProperty("operation", error.operation());
+    result.setProperty("reference", reference);
+    var cause = error.failure().getMostSpecificCause();
+    String state = cause instanceof java.sql.SQLException sql ? sql.getSQLState() : "unknown";
+    org.slf4j.LoggerFactory.getLogger(ApiErrors.class)
+        .warn(
+            "Business DB failure reference={} operation={} sqlstate={} exception_class={}"
+                + " cause_class={}",
+            reference,
+            error.operation(),
+            state,
+            error.failure().getClass().getSimpleName(),
+            cause.getClass().getSimpleName());
+    return result;
+  }
+
   @ExceptionHandler(DataAccessException.class)
   ProblemDetail database(DataAccessException e) {
     if (e instanceof DataIntegrityViolationException)
