@@ -1,31 +1,31 @@
 [INFO] Scanning for projects...
-[INFO] 
+[INFO]
 [INFO] -----------------------< com.castly:castly-api >------------------------
 [INFO] Building castly-api 0.1.0-SNAPSHOT
 [INFO]   from pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
-[INFO] 
+[INFO]
 [INFO] --- clean:3.4.1:clean (default-clean) @ castly-api ---
 [INFO] Deleting /workspace/castly-milestone5/backend/target
-[INFO] 
+[INFO]
 [INFO] --- resources:3.3.1:resources (default-resources) @ castly-api ---
 [INFO] Copying 1 resource from src/main/resources to target/classes
 [INFO] Copying 0 resource from src/main/resources to target/classes
-[INFO] 
+[INFO]
 [INFO] --- compiler:3.14.1:compile (default-compile) @ castly-api ---
 [INFO] Recompiling the module because of changed source code.
 [INFO] Compiling 13 source files with javac [debug parameters release 21] to target/classes
-[INFO] 
+[INFO]
 [INFO] --- resources:3.3.1:testResources (default-testResources) @ castly-api ---
 [INFO] skip non existing resourceDirectory /workspace/castly-milestone5/backend/src/test/resources
-[INFO] 
+[INFO]
 [INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ castly-api ---
 [INFO] Recompiling the module because of changed dependency.
 [INFO] Compiling 5 source files with javac [debug parameters release 21] to target/test-classes
-[INFO] 
+[INFO]
 [INFO] --- surefire:3.5.4:test (default-test) @ castly-api ---
 [INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
-[INFO] 
+[INFO]
 [INFO] -------------------------------------------------------
 [INFO]  T E S T S
 [INFO] -------------------------------------------------------
@@ -73,16 +73,16 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
 [INFO] Running com.castly.api.BookingDiagnosticsTest
 2026-11-03T05:40:23.839Z  WARN 206956 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=394e70b8-2c30-44c9-a41b-14229913ae07 operation=booking.accepted.update sqlstate=42501 exception_class=DataAccessResourceFailureException cause_class=SQLException reason=booking_guard_account_role booking_diagnostics=Evidence[probe=ok, identityPresent=true, identityMatches=true, accountVisible=false, roleMatches=false, callerIsTalent=true, priorRequested=true]
 [INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.castly.api.BookingDiagnosticsTest
-[INFO] 
+[INFO]
 [INFO] Results:
-[INFO] 
+[INFO]
 [INFO] Tests run: 78, Failures: 0, Errors: 0, Skipped: 0
-[INFO] 
+[INFO]
 [WARNING] Corrupted channel by directly writing to native stream in forked JVM 1. See FAQ web page and the dump file /workspace/castly-milestone5/backend/target/surefire-reports/2026-11-03T05-40-05_208-jvmRun1.dumpstream
-[INFO] 
+[INFO]
 [INFO] --- jar:3.4.2:jar (default-jar) @ castly-api ---
 [INFO] Building jar: /workspace/castly-milestone5/backend/target/castly-api-0.1.0-SNAPSHOT.jar
-[INFO] 
+[INFO]
 [INFO] --- spring-boot:3.5.7:repackage (repackage) @ castly-api ---
 [INFO] Replacing main artifact /workspace/castly-milestone5/backend/target/castly-api-0.1.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
 [INFO] The original artifact has been renamed to /workspace/castly-milestone5/backend/target/castly-api-0.1.0-SNAPSHOT.jar.original
