@@ -51,12 +51,14 @@ public class ApiErrors {
     org.slf4j.LoggerFactory.getLogger(ApiErrors.class)
         .warn(
             "Business DB failure reference={} operation={} sqlstate={} exception_class={}"
-                + " cause_class={}",
+                + " cause_class={} reason={} booking_diagnostics={}",
             reference,
             error.operation(),
             state,
             error.failure().getClass().getSimpleName(),
-            cause.getClass().getSimpleName());
+            cause.getClass().getSimpleName(),
+            SqlFailureKind.of(error.failure()),
+            error.evidence() == null ? "disabled_or_not_applicable" : error.evidence());
     return result;
   }
 

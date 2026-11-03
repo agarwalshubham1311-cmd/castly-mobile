@@ -1,0 +1,94 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.castly:castly-api >------------------------
+[INFO] Building castly-api 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ castly-api ---
+[INFO] Deleting /workspace/castly-milestone5/backend/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ castly-api ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ castly-api ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 13 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ castly-api ---
+[INFO] skip non existing resourceDirectory /workspace/castly-milestone5/backend/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ castly-api ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ castly-api ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.castly.ConfigurationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s -- in com.castly.ConfigurationTest
+[INFO] Running com.castly.BusinessApiTest
+05:38:52.930 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.castly.BusinessApiTest]: BusinessApiTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+05:38:53.029 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.castly.CastlyApplication for test class com.castly.BusinessApiTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2026-11-03T05:39:01.664Z  INFO 202858 --- [           main] com.castly.BusinessApiTest               : Starting BusinessApiTest using Java 21.0.12.1 with PID 202858 (started by agent in /workspace/castly-milestone5/backend)
+2026-11-03T05:39:01.666Z  INFO 202858 --- [           main] com.castly.BusinessApiTest               : No active profile set, falling back to 1 default profile: "default"
+2026-11-03T05:39:02.652Z  INFO 202858 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Starting...
+2026-11-03T05:39:02.890Z  INFO 202858 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-business - Added connection org.postgresql.jdbc.PgConnection@42cf6349
+2026-11-03T05:39:02.892Z  INFO 202858 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Start completed.
+2026-11-03T05:39:03.398Z  INFO 202858 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-03T05:39:03.869Z  INFO 202858 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-03T05:39:03.870Z  INFO 202858 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-03T05:39:03.871Z  INFO 202858 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-03T05:39:03.944Z  INFO 202858 --- [           main] com.castly.BusinessApiTest               : Started BusinessApiTest in 10.814 seconds (process running for 11.698)
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (/workspace/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+2026-11-03T05:39:08.630Z  WARN 202858 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=ffb89b9c-6395-4cd7-bb8e-469375d96b79 operation=booking.accepted.update sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=postgres_privilege_denied booking_diagnostics=Evidence[probe=postgres_privilege_denied, identityPresent=null, identityMatches=null, accountVisible=null, roleMatches=null, callerIsTalent=true, priorRequested=true]
+2026-11-03T05:39:08.858Z  WARN 202858 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=ecf3e8d9-4935-4f71-bf49-523bc6fe6db2 operation=conversation.insert sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=postgres_rls_denied booking_diagnostics=disabled_or_not_applicable
+2026-11-03T05:39:09.250Z  WARN 202858 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=d0ed518a-c73c-4764-b9c0-7f17ec78c0b9 operation=booking.accepted.lock sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=postgres_privilege_denied booking_diagnostics=disabled_or_not_applicable
+2026-11-03T05:39:09.409Z  WARN 202858 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=d638f830-78cf-46cd-a589-c8f7af0bc78e operation=booking.accepted.update sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=postgres_rls_denied booking_diagnostics=Evidence[probe=ok, identityPresent=true, identityMatches=true, accountVisible=true, roleMatches=true, callerIsTalent=true, priorRequested=true]
+2026-11-03T05:39:09.656Z  WARN 202858 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=05e8e003-7d7d-46e9-8de8-6bc4a8c77a25 operation=booking.accepted.update sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=booking_guard_account_role booking_diagnostics=Evidence[probe=ok, identityPresent=true, identityMatches=true, accountVisible=false, roleMatches=false, callerIsTalent=true, priorRequested=true]
+[INFO] Tests run: 63, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.28 s -- in com.castly.BusinessApiTest
+[INFO] Running com.castly.JwtSecurityTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.993 s -- in com.castly.JwtSecurityTest
+[INFO] Running com.castly.api.ActivityAuthorizationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in com.castly.api.ActivityAuthorizationTest
+[INFO] Running com.castly.api.BookingDiagnosticsTest
+2026-11-03T05:39:12.098Z  WARN 202858 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=83c2640e-9801-4fbb-8277-c94cf2f52731 operation=booking.accepted.update sqlstate=42501 exception_class=DataAccessResourceFailureException cause_class=SQLException reason=booking_guard_account_role booking_diagnostics=Evidence[probe=ok, identityPresent=true, identityMatches=true, accountVisible=false, roleMatches=false, callerIsTalent=true, priorRequested=true]
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in com.castly.api.BookingDiagnosticsTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 78, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[WARNING] Corrupted channel by directly writing to native stream in forked JVM 1. See FAQ web page and the dump file /workspace/castly-milestone5/backend/target/surefire-reports/2026-11-03T05-38-52_139-jvmRun1.dumpstream
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ castly-api ---
+[INFO] Building jar: /workspace/castly-milestone5/backend/target/castly-api-0.1.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:3.5.7:repackage (repackage) @ castly-api ---
+[INFO] Replacing main artifact /workspace/castly-milestone5/backend/target/castly-api-0.1.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /workspace/castly-milestone5/backend/target/castly-api-0.1.0-SNAPSHOT.jar.original
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  23.692 s
+[INFO] Finished at: 2026-11-03T05:39:12Z
+[INFO] ------------------------------------------------------------------------

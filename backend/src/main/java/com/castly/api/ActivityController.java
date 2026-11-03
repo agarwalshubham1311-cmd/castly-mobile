@@ -18,10 +18,15 @@ import org.springframework.web.server.ResponseStatusException;
 public class ActivityController {
   private final ActorDatabase data;
   private final NotificationService notifications;
+  private final BookingUpdateDiagnostics bookingDiagnostics;
 
-  public ActivityController(ActorDatabase data, NotificationService notifications) {
+  public ActivityController(
+      ActorDatabase data,
+      NotificationService notifications,
+      BookingUpdateDiagnostics bookingDiagnostics) {
     this.data = data;
     this.notifications = notifications;
+    this.bookingDiagnostics = bookingDiagnostics;
   }
 
   private Map<String, Object> booking(JdbcClient db, UUID id, boolean lock) {
@@ -132,9 +137,11 @@ public class ActivityController {
                   if (!allowed)
                     throw new ResponseStatusException(
                         HttpStatus.CONFLICT, "Booking is no longer eligible for this action");
+                  var evidence = bookingDiagnostics.capture(db, me, row);
                   var changed =
                       DatabaseStep.run(
                           "booking." + target + ".update",
+                          evidence,
                           () ->
                               one(
                                   db.sql(

@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.*;
       "castly.jwt.audience=authenticated",
       "castly.jwt.mode=jwks",
       "castly.notifications.enabled=true",
+      "castly.booking-diagnostics.enabled=true",
       "castly.cors-origins=http://localhost:8081"
     })
 @AutoConfigureMockMvc
@@ -884,6 +885,162 @@ class BusinessApiTest {
         });
     call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
     call("POST", "/api/v1/conversations", talent, "{\"booking_id\":\"" + id + "\"}")
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void bothInvokerBookingTriggersWorkWithOnlyStatusUpdateAndNoTriggerExecuteGrant()
+      throws Exception {
+    String id = newBooking(), talent = talentFor(id);
+    data.as(
+        UUID.fromString(talent),
+        db -> {
+          assertFalse(
+              db.sql("select has_table_privilege(current_user,'public.bookings','UPDATE')")
+                  .query(Boolean.class)
+                  .single());
+          assertTrue(
+              db.sql(
+                      "select"
+                          + " has_column_privilege(current_user,'public.bookings','status','UPDATE')")
+                  .query(Boolean.class)
+                  .single());
+          assertFalse(
+              db.sql(
+                      "select"
+                          + " has_column_privilege(current_user,'public.bookings','updated_at','UPDATE')")
+                  .query(Boolean.class)
+                  .single());
+          for (String function :
+              List.of("public.api_booking_transition_guard()", "public.stamp_updated_at()")) {
+            var metadata =
+                db.sql(
+                        "select prosecdef,has_function_privilege(current_user,oid,'EXECUTE') as"
+                            + " can_execute from pg_proc where oid=cast(:function as regprocedure)")
+                    .param("function", function)
+                    .query()
+                    .singleRow();
+            assertEquals(false, metadata.get("prosecdef"));
+            assertEquals(false, metadata.get("can_execute"));
+          }
+          return null;
+        });
+    // Uses the real SELECT FOR UPDATE -> UPDATE(status) RETURNING * -> conversation flow.
+    call("POST", "/api/v1/bookings/" + id + "/accept", talent, null)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("accepted"))
+        .andExpect(jsonPath("$.updated_at").isNotEmpty());
+  }
+
+  @Test
+  void invokerGuardFailsClosedWhenActorAccountIsHiddenByUsersRls() throws Exception {
+    String id = newBooking(), talent = talentFor(id);
+    // Disposable local fixture only: reproduce the guard's role lookup returning no row.
+    localOwner(
+        "create policy test_hide_guard_account on public.users as restrictive for select to"
+            + " castly_api using(false)");
+    try {
+      var evidence =
+          data.as(
+              UUID.fromString(talent),
+              db ->
+                  new com.castly.api.BookingUpdateDiagnostics(true)
+                      .capture(
+                          db,
+                          UUID.fromString(talent),
+                          ActorDatabase.one(
+                              db.sql("select * from public.bookings where id=:id")
+                                  .param("id", UUID.fromString(id)))));
+      assertEquals("ok", evidence.probe());
+      assertEquals(true, evidence.identityMatches());
+      assertEquals(false, evidence.accountVisible());
+      assertEquals(false, evidence.roleMatches());
+      var failure =
+          assertThrows(
+              org.springframework.dao.DataAccessException.class,
+              () ->
+                  data.as(
+                      UUID.fromString(talent),
+                      db ->
+                          db.sql(
+                                  "update public.bookings set status='accepted' where id=:id"
+                                      + " returning *")
+                              .param("id", UUID.fromString(id))
+                              .query()
+                              .singleRow()));
+      var sql = assertInstanceOf(java.sql.SQLException.class, failure.getMostSpecificCause());
+      assertEquals("42501", sql.getSQLState());
+      assertTrue(sql.getMessage().contains("Booking account role mismatch"));
+      assertTrue(sql.getMessage().contains("api_booking_transition_guard"));
+      call("POST", "/api/v1/bookings/" + id + "/accept", talent, null)
+          .andExpect(status().isForbidden())
+          .andExpect(jsonPath("$.detail").value("Not permitted"))
+          .andExpect(jsonPath("$.operation").value("booking.accepted.update"))
+          .andExpect(jsonPath("$.reason").doesNotExist());
+      call("GET", "/api/v1/bookings/" + id, talent, null)
+          .andExpect(jsonPath("$.status").value("requested"));
+    } finally {
+      localOwner("drop policy test_hide_guard_account on public.users");
+    }
+    call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
+  }
+
+  @Test
+  void diagnosticProbeVerifiesTalentInSameTransactionAndRecoversFromItsOwnPermissionError()
+      throws Exception {
+    String id = newBooking(), talent = talentFor(id);
+    data.as(
+        UUID.fromString(talent),
+        db -> {
+          String transaction = db.sql("select txid_current()::text").query(String.class).single();
+          var booking =
+              ActorDatabase.one(
+                  db.sql("select * from public.bookings where id=:id")
+                      .param("id", UUID.fromString(id)));
+          var diagnostics = new com.castly.api.BookingUpdateDiagnostics(true);
+          var evidence = diagnostics.capture(db, UUID.fromString(talent), booking);
+          assertEquals("ok", evidence.probe());
+          assertEquals(true, evidence.identityPresent());
+          assertEquals(true, evidence.identityMatches());
+          assertEquals(true, evidence.accountVisible());
+          assertEquals(true, evidence.roleMatches());
+          var mismatch = diagnostics.capture(db, UUID.fromString(CLIENT), booking);
+          assertEquals(false, mismatch.identityMatches());
+          assertEquals(false, mismatch.roleMatches());
+          db.sql("update public.bookings set status='accepted' where id=:id")
+              .param("id", UUID.fromString(id))
+              .update();
+          assertEquals(
+              transaction, db.sql("select txid_current()::text").query(String.class).single());
+          return null;
+        });
+    String denied = newBooking();
+    String deniedTalent = talentFor(denied);
+    localOwner("revoke select on public.users from castly_api");
+    try {
+      data.as(
+          UUID.fromString(deniedTalent),
+          db -> {
+            var booking =
+                ActorDatabase.one(
+                    db.sql("select * from public.bookings where id=:id")
+                        .param("id", UUID.fromString(denied)));
+            var evidence =
+                new com.castly.api.BookingUpdateDiagnostics(true)
+                    .capture(db, UUID.fromString(deniedTalent), booking);
+            assertEquals("postgres_privilege_denied", evidence.probe());
+            assertNull(evidence.identityMatches());
+            // If the probe left this transaction aborted, even this read would fail with 25P02.
+            assertEquals(1, db.sql("select 1").query(Integer.class).single());
+            return null;
+          });
+      call("POST", "/api/v1/bookings/" + denied + "/accept", deniedTalent, null)
+          .andExpect(status().isForbidden())
+          .andExpect(jsonPath("$.operation").value("booking.accepted.update"));
+    } finally {
+      localOwner("grant select on public.users to castly_api");
+    }
+    call("POST", "/api/v1/bookings/" + denied + "/accept", deniedTalent, null)
         .andExpect(status().isOk());
   }
 
