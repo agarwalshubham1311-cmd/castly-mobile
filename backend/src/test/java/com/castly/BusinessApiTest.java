@@ -72,6 +72,34 @@ class BusinessApiTest {
   }
 
   @Test
+  void renderHealthIsPublicMinimalAndConnectionCheckIsReadOnly() throws Exception {
+    mvc.perform(get("/actuator/health"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("UP"))
+        .andExpect(jsonPath("$.components").doesNotExist())
+        .andExpect(jsonPath("$.details").doesNotExist());
+    call("GET", "/api/v1/account", null, null).andExpect(status().isUnauthorized());
+    mvc.perform(get("/actuator/env")).andExpect(status().isUnauthorized());
+    try (var connection = pool.getConnection()) {
+      var result = com.castly.tools.DatabaseConnectionCheck.inspect(connection);
+      assertEquals(true, result.get("role_verified"));
+      assertEquals(true, result.get("private_identity_ready"));
+      assertEquals(true, result.get("read_only"));
+      assertEquals(true, result.get("notification_schema_ready"));
+    }
+    assertEquals(
+        (Object) 1,
+        data.as(
+            UUID.fromString(CLIENT),
+            db ->
+                db.sql(
+                        "update public.users set display_name=display_name where"
+                            + " id=private.request_user_id()")
+                    .update()));
+    call("GET", "/api/v1/categories", null, null).andExpect(status().isOk());
+  }
+
+  @Test
   void privateEndpointsRequireAuthenticationAndCorsIsExact() throws Exception {
     call("GET", "/api/v1/account", null, null).andExpect(status().isUnauthorized());
     mvc.perform(
@@ -1456,10 +1484,14 @@ class BusinessApiTest {
     var before =
         json.readTree(
             java.nio.file.Files.readString(
-                java.nio.file.Path.of("/tmp/castly-identity-before-" + variant + ".json")));
+                java.nio.file.Path.of(
+                    System.getProperty("java.io.tmpdir"),
+                    "castly-identity-before-" + variant + ".json")));
     String afterJson =
         java.nio.file.Files.readString(
-            java.nio.file.Path.of("/tmp/castly-identity-after-" + variant + ".json"));
+            java.nio.file.Path.of(
+                System.getProperty("java.io.tmpdir"),
+                "castly-identity-after-" + variant + ".json"));
     var after = json.readTree(afterJson);
     var expected = before.deepCopy();
     for (var policy : expected.get("policies")) {

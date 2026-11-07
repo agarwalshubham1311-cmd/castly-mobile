@@ -1,0 +1,35 @@
+# Review checkpoint required before applying this Blueprint: service creation can deploy.
+# No migration/pre-deploy command. Configure the trusted CA as a Render Secret File manually.
+services:
+  - type: web
+    name: castly-api
+    runtime: docker
+    repo: https://github.com/agarwalshubham1311-cmd/castly-mobile
+    branch: feat/milestone5-booking-messaging-notifications
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: singapore
+    numInstances: 1
+    autoDeployTrigger: "off"
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_USERNAME
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: SUPABASE_JWT_ISSUER
+        sync: false
+      - key: SUPABASE_JWT_AUDIENCE
+        value: authenticated
+      - key: JWT_SIGNING_MODE
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: CASTLY_NOTIFICATIONS_ENABLED
+        value: "false"
+      - key: CASTLY_BOOKING_DIAGNOSTICS_ENABLED
+        value: "false"

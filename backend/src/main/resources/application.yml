@@ -1,9 +1,16 @@
 server:
   port: ${PORT:8080}
+  address: 0.0.0.0
+  shutdown: graceful
   error:
     include-message: never
     include-stacktrace: never
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  sql:
+    init:
+      mode: never
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME:castly_api}
@@ -35,3 +42,4 @@ management:
   endpoint:
     health:
       show-details: never
+      show-components: never

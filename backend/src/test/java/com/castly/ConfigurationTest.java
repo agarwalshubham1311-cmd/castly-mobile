@@ -11,6 +11,40 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 class ConfigurationTest {
+  @Test
+  void deploymentAndStartupShareFailClosedRoleValidation() {
+    var role = new java.util.HashMap<String, Object>();
+    role.put("name", "castly_api");
+    var flags =
+        java.util.List.of(
+            "rolsuper",
+            "rolbypassrls",
+            "rolcreatedb",
+            "rolcreaterole",
+            "rolreplication",
+            "schema_create",
+            "db_create",
+            "memberships",
+            "owns_tables");
+    flags.forEach(key -> role.put(key, false));
+    assertDoesNotThrow(() -> com.castly.api.DatabaseRoleSafety.requireRestricted(role));
+    for (String flag : flags) {
+      role.put(flag, true);
+      assertThrows(
+          IllegalStateException.class,
+          () -> com.castly.api.DatabaseRoleSafety.requireRestricted(role));
+      role.remove(flag);
+      assertThrows(
+          IllegalStateException.class,
+          () -> com.castly.api.DatabaseRoleSafety.requireRestricted(role));
+      role.put(flag, false);
+    }
+    role.put("name", "postgres");
+    assertThrows(
+        IllegalStateException.class,
+        () -> com.castly.api.DatabaseRoleSafety.requireRestricted(role));
+  }
+
   @Configuration(proxyBeanMethods = false)
   static class NoNetworkConfiguration extends DatabaseConfiguration {
     @Bean

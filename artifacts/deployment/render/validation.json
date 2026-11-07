@@ -1,0 +1,50 @@
+{
+  "branch": "feat/milestone5-booking-messaging-notifications",
+  "base_commit": "2a8951be007a2343073b56daa697da2d4115f27e",
+  "notifications_enabled": false,
+  "hosted_changes_applied": false,
+  "notification_migration": "20261107170000_invoker_notifications.sql",
+  "notification_migration_sha256": "787120cbd2ff0bae50bc000c00cf289b73753199df6e52921907be693d4d0d95",
+  "java_fresh": {
+    "tests": 90,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "java_reconciled": {
+    "tests": 90,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "sql_security_assertions": 53,
+  "reconciliation_assertions": 286,
+  "mobile_unit_tests": 53,
+  "component_tests": 4,
+  "decoded_screenshots": 30,
+  "screenshot_widths": [
+    360,
+    390,
+    430
+  ],
+  "docker": {
+    "default_builder": "maven:3.9.11-eclipse-temurin-21",
+    "runtime": "eclipse-temurin:21-jre-jammy",
+    "user": "10001:10001",
+    "local_image": "sha256:76f0c75daa98efdcff86885d553b7cec9ee1acb0ffe9de267fa886f259d14877",
+    "cache_seeded_build": "PASS",
+    "clean_network_build": "BLOCKED: Maven build-container DNS cannot resolve repo.maven.apache.org",
+    "tls_read_only_check": "PASS with disposable PostgreSQL and local CA",
+    "hostname_and_ca_negative_checks": "PASS: both exit 1, SQLSTATE 08006"
+  },
+  "release_export": "PASS using synthetic HTTPS endpoints and public fixture key",
+  "eas_config": "PASS using synthetic project/package; no cloud build",
+  "not_run": [
+    "actual hosted pooler connection: credentials/endpoint not supplied",
+    "actual project public JWKS compatibility probe: issuer not supplied",
+    "Render deployment and provider Blueprint validation: no deployment approval; schema download HTTP 403",
+    "hosted Realtime WebSocket transport",
+    "native Android/iOS device testing",
+    "EAS APK/AAB builds and signing"
+  ]
+}

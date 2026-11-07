@@ -150,3 +150,7 @@ The browser suite starts a local Auth/JWKS fixture, the actual packaged Java API
 The original M1 HTTP contract suite remains `npm run test:legacy-backend`, run against a Metro development web server configured for the explicit Supabase fallback and `https://castly-test.supabase.co`/test publishable key. The isolated fallback acknowledgement must also be set for that Metro fixture. Its requests are intercepted; it does not mutate a hosted project. `npm run test:sql` now runs cutover policies; the old M1 policy file is preserved as history for pre-cutover development.
 
 No main merge, production deployment, hosted migration or payment enablement is part of this work.
+
+## Render release preparation
+
+Use the [Render/EAS release runbook](../docs/deployment/RENDER_RELEASE.md) for the Java 21 multi-stage image, restricted-role read-only connection checker, verified TLS/CA setup, environment variables and initial notification-disabled deployment. `render.yaml` deploys only the API; no database migrations or hosted configuration changes run automatically. Creation of a Render service still requires the release checkpoint even though future auto-deploys are off.

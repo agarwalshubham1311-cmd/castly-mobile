@@ -1,0 +1,1 @@
+FAIL database connection reason=other_database_error sqlstate=08006 exception_class=PSQLException

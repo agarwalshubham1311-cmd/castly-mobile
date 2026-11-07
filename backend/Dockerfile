@@ -1,19 +1,19 @@
 # syntax=docker/dockerfile:1
-# Build from the backend directory (Render Root Directory: backend).
-FROM maven:3.9-eclipse-temurin-21 AS build
-WORKDIR /workspace
+ARG MAVEN_IMAGE=maven:3.9.11-eclipse-temurin-21
+ARG RUNTIME_IMAGE=eclipse-temurin:21-jre-jammy
+FROM ${MAVEN_IMAGE} AS build
+WORKDIR /build
 COPY pom.xml ./
-COPY src ./src
-RUN mvn -B -ntp -DskipTests package && \
-    find target -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*.original' -print -quit | grep -q . && \
-    cp "$(find target -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*.original' -print -quit)" /workspace/app.jar
+COPY src/main/ ./src/main/
+# Docker-requiring security tests run at the reviewed release checkpoint, not inside image build.
+RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp -Dmaven.test.skip=true package
 
-FROM eclipse-temurin:21-jre
+FROM ${RUNTIME_IMAGE} AS runtime
 WORKDIR /app
-RUN groupadd --system --gid 10001 castly && \
-    useradd --system --uid 10001 --gid 10001 --no-create-home castly
-COPY --from=build --chown=10001:10001 /workspace/app.jar /app/app.jar
+RUN groupadd --gid 10001 castly \
+    && useradd --uid 10001 --gid castly --no-create-home --shell /usr/sbin/nologin castly
+COPY --from=build --chown=10001:10001 /build/target/castly-api-0.1.0-SNAPSHOT.jar /app/castly-api.jar
 USER 10001:10001
-EXPOSE 10000
-ENV PORT=10000
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Render supplies PORT; Spring reads it directly. EXPOSE documents the local default only.
+EXPOSE 8080
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=65.0", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/castly-api.jar"]

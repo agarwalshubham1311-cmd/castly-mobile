@@ -1,6 +1,7 @@
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 const container = 'castly-spring-test-db';
 function run(args, input) {
   const r = spawnSync('docker', args, { input, encoding: 'utf8' });
@@ -62,7 +63,7 @@ function beforeIdentityMigration() {
   );
   JSON.parse(snapshot);
   fs.writeFileSync(
-    `/tmp/castly-identity-before-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`,
+    path.join(os.tmpdir(), `castly-identity-before-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`),
     snapshot,
   );
 }
@@ -86,7 +87,7 @@ function afterIdentityMigration() {
   );
   JSON.parse(snapshot);
   fs.writeFileSync(
-    `/tmp/castly-identity-after-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`,
+    path.join(os.tmpdir(), `castly-identity-after-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`),
     snapshot,
   );
 }
