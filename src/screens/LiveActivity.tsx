@@ -573,7 +573,7 @@ function ChatThread({ id }: { id: string }) {
       return;
     lastSeen.current = newest;
     services!.notifications
-      .readConversation(id, auth.session!.user.id)
+      .readConversation(id, auth.session!.user.id, newest)
       .then(() => refreshNotifications())
       .catch(() => {
         lastSeen.current = '';

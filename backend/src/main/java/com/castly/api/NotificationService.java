@@ -19,7 +19,12 @@ public class NotificationService {
 
   public boolean available(JdbcClient db) {
     return enabled
-        && db.sql("select to_regclass('public.notifications') is not null")
+        && db.sql(
+                "select to_regclass('public.notifications') is not null and (select count(*)=3 from"
+                    + " pg_proc p join pg_namespace n on n.oid=p.pronamespace where"
+                    + " n.nspname='public' and p.pronargs=0 and not p.prosecdef and"
+                    + " p.prorettype='trigger'::regtype and p.proname in"
+                    + " ('castly_booking_notification','castly_message_notification','castly_notification_insert_guard'))")
             .query(Boolean.class)
             .single();
   }

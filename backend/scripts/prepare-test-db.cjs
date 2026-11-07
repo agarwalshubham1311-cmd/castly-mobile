@@ -40,16 +40,53 @@ function sql(text, db = 'postgres') {
 sql('drop database if exists castly_spring_test; create database castly_spring_test;');
 const root = path.resolve(__dirname, '../..');
 const identityMigration = '20261107150000_private_request_identity.sql';
+const notificationMigration = '20261107170000_invoker_notifications.sql';
 function beforeIdentityMigration() {
   sql('revoke usage on schema auth from castly_api;', 'castly_spring_test');
   const snapshot = run(
-    ['exec', '-i', container, 'psql', '-X', '-At', '-U', 'postgres',
-      '-d', 'castly_spring_test', '-v', 'ON_ERROR_STOP=1'],
+    [
+      'exec',
+      '-i',
+      container,
+      'psql',
+      '-X',
+      '-At',
+      '-U',
+      'postgres',
+      '-d',
+      'castly_spring_test',
+      '-v',
+      'ON_ERROR_STOP=1',
+    ],
     fs.readFileSync(path.join(__dirname, 'identity-catalog.sql'), 'utf8'),
   );
   JSON.parse(snapshot);
   fs.writeFileSync(
     `/tmp/castly-identity-before-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`,
+    snapshot,
+  );
+}
+function afterIdentityMigration() {
+  const snapshot = run(
+    [
+      'exec',
+      '-i',
+      container,
+      'psql',
+      '-X',
+      '-At',
+      '-U',
+      'postgres',
+      '-d',
+      'castly_spring_test',
+      '-v',
+      'ON_ERROR_STOP=1',
+    ],
+    fs.readFileSync(path.join(__dirname, 'identity-catalog.sql'), 'utf8'),
+  );
+  JSON.parse(snapshot);
+  fs.writeFileSync(
+    `/tmp/castly-identity-after-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`,
     snapshot,
   );
 }
@@ -68,6 +105,7 @@ if (schemaPath === 'repository') {
       fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
       'castly_spring_test',
     );
+    if (name === identityMigration) afterIdentityMigration();
   }
 } else {
   for (const name of [
@@ -90,18 +128,15 @@ if (schemaPath === 'repository') {
     'castly_spring_test',
   );
 }
-if (schemaPath === 'reconciliation')
-  sql(
-    fs.readFileSync(
-      path.join(root, 'supabase/migrations/20261102100000_in_app_notifications.sql'),
-      'utf8',
-    ),
-    'castly_spring_test',
-  );
 if (schemaPath === 'reconciliation') {
   beforeIdentityMigration();
   sql(
     fs.readFileSync(path.join(root, 'supabase/migrations', identityMigration), 'utf8'),
+    'castly_spring_test',
+  );
+  afterIdentityMigration();
+  sql(
+    fs.readFileSync(path.join(root, 'supabase/migrations', notificationMigration), 'utf8'),
     'castly_spring_test',
   );
 }

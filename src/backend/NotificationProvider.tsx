@@ -11,10 +11,14 @@ function useNotificationsState() {
   const [error, setError] = useState('');
   const generation = useRef(0);
   const pending = useRef<Promise<void> | null>(null);
+  const dirty = useRef(false);
   const owner = auth.session?.user.id;
   const refresh = useCallback(() => {
     if (!owner || businessMode !== 'spring' || !services) return Promise.resolve();
-    if (pending.current) return pending.current;
+    if (pending.current) {
+      dirty.current = true;
+      return pending.current;
+    }
     const token = ++generation.current;
     const work = services.notifications
       .stats()
@@ -29,11 +33,18 @@ function useNotificationsState() {
         if (token === generation.current) {
           setError(readableError(e));
           setStats({ enabled: false });
+          hub?.enableNotifications(false);
         }
       });
     pending.current = work;
     void work.finally(() => {
-      if (pending.current === work) pending.current = null;
+      if (pending.current === work) {
+        pending.current = null;
+        if (dirty.current) {
+          dirty.current = false;
+          hub?.invalidate('notifications');
+        }
+      }
     });
     return work;
   }, [owner, hub]);
@@ -47,6 +58,7 @@ function useNotificationsState() {
       off?.(); // eslint-disable-next-line react-hooks/exhaustive-deps -- generation is an async-request counter, not a DOM ref.
       generation.current++;
       pending.current = null;
+      dirty.current = false;
     };
   }, [owner, hub, refresh]);
   return { stats, error, refresh };

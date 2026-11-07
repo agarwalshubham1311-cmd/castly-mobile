@@ -1,0 +1,58 @@
+[
+  {
+    "file": "accepted-booking-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 29647,
+    "sha256": "d764b8254779e02fb4c16aa47a1b4fbf55bf4a1f6575361ab888bc2409ee9d44"
+  },
+  {
+    "file": "booking-confirmation-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 32300,
+    "sha256": "eddf3696cf401944dfb020a70a3d2e57a12719ce561236dc51f082b52d9b4836"
+  },
+  {
+    "file": "booking-confirmation-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 31889,
+    "sha256": "55b3a666d819a2dc087d8b2e72c38b6955d0f186a035f7613a547a3b4e6f6cb3"
+  },
+  {
+    "file": "booking-confirmation-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 36856,
+    "sha256": "d8423cb16da0ccaa504d5b33274b10b333cab2b8de25643448d6c80e72e9ae26"
+  },
+  {
+    "file": "conversation-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 27710,
+    "sha256": "efe5cd8ed11726e69d3c36c285db79744d81736caa63545fbec10f12ce424486"
+  },
+  {
+    "file": "notifications-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 30351,
+    "sha256": "5843ca5cb62bc20bd819c49464f08b8e428041770ee326cff09f38f7e9c5dcf3"
+  },
+  {
+    "file": "notifications-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 30916,
+    "sha256": "401187333f65c3e057493cd789cd183f8c3b8587303bccb24386632fdb9563a7"
+  },
+  {
+    "file": "notifications-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 30984,
+    "sha256": "c76f4def6dadb4c92dea7e7acd644f1483ffdfe5f9671e7318f6a582271457e6"
+  }
+]

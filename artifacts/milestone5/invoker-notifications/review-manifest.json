@@ -1,0 +1,16 @@
+{
+  "migration": "supabase/migrations/20261107170000_invoker_notifications.sql",
+  "migration_sha256": "787120cbd2ff0bae50bc000c00cf289b73753199df6e52921907be693d4d0d95",
+  "hosted_applied": false,
+  "tests": {
+    "java_fresh": 88,
+    "java_reconciled": 88,
+    "sql_assertions": 53,
+    "service_tests": 50,
+    "component_tests": 4,
+    "typecheck": "pass",
+    "lint": "pass",
+    "browser_e2e": "pass"
+  },
+  "png_count": 8
+}

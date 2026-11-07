@@ -115,6 +115,9 @@ export class LiveHub {
   private subscribeBase() {
     if (!this.ready || !this.active) return;
     const generation = ++this.baseGeneration;
+    const onEvent = (event: Payload) => {
+      if (generation === this.baseGeneration) this.event(event);
+    };
     if (this.base) this.remove(this.base);
     const filter = `${this.role === 'talent' ? 'talent_id' : 'client_id'}=eq.${this.subject}`;
     const channel = this.client.channel(
@@ -124,12 +127,12 @@ export class LiveHub {
       channel.on(
         'postgres_changes',
         { event, schema: 'public', table: 'bookings', filter },
-        this.event,
+        onEvent,
       );
     channel.on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'conversations', filter },
-      this.event,
+      onEvent,
     );
     if (this.notifications)
       for (const event of ['INSERT', 'UPDATE'] as const)
@@ -141,7 +144,7 @@ export class LiveHub {
             table: 'notifications',
             filter: `recipient_id=eq.${this.subject}`,
           },
-          this.event,
+          onEvent,
         );
     this.base = channel;
     channel.subscribe((status) => {
@@ -217,6 +220,9 @@ export class LiveHub {
   poll() {
     if (this.active)
       for (const listener of this.listeners) this.queue(listener.topic, listener.conversation);
+  }
+  invalidate(topic: LiveTopic) {
+    if (this.active) this.queue(topic);
   }
   dispose() {
     this.active = false;

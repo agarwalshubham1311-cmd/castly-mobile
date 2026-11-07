@@ -10,21 +10,23 @@ update public.users set primary_role='client',display_name='Client fixture' wher
 update public.users set primary_role='talent',display_name='Talent fixture' where id='b0000000-0000-0000-0000-000000000002';
 insert into public.talent_profiles(id,display_name,category_id,city,day_rate,published) values('b0000000-0000-0000-0000-000000000002','Talent fixture','actors','Mumbai',1000,true);
 select set_config('request.jwt.claim.sub','b0000000-0000-0000-0000-000000000001',true);
--- Owner creates deterministic fixture IDs; API has no INSERT(id) privilege.
-insert into public.bookings(id,client_id,talent_id,project_type,proposed_date,location,requirements,indicative_budget) values('b1000000-0000-0000-0000-000000000001',auth.uid(),'b0000000-0000-0000-0000-000000000002','Shoot',current_date+1,'Mumbai','A detailed fixture project',1000);
+-- API creates the event with a generated ID; an owner import is not a participant action.
 set local role castly_api;
+insert into public.bookings(client_id,talent_id,project_type,proposed_date,location,requirements,indicative_budget)
+ values(private.request_user_id(),'b0000000-0000-0000-0000-000000000002','Shoot',current_date+1,'Mumbai','A detailed fixture project',1000)
+ returning id as notification_booking \gset
 select notification_test.eq((select count(*) from public.notifications),0,'client cannot see talent request notification');
-select notification_test.denied($$insert into public.notifications(recipient_id,kind,event_key,booking_id) values(auth.uid(),'booking_accepted','forged','b1000000-0000-0000-0000-000000000001')$$,'API cannot forge notification events');
+select notification_test.denied($$insert into public.notifications(recipient_id,kind,event_key,booking_id) values(private.request_user_id(),'booking_accepted','forged','b1000000-0000-0000-0000-000000000001')$$,'API cannot forge notification events');
 reset role;
 select set_config('request.jwt.claim.sub','b0000000-0000-0000-0000-000000000002',true);
 set local role castly_api;
 select notification_test.eq((select count(*) from public.notifications where kind='booking_requested'),1,'talent receives one request notification');
-update public.bookings set status='accepted' where id='b1000000-0000-0000-0000-000000000001';
-update public.bookings set status='accepted' where id='b1000000-0000-0000-0000-000000000001';
+update public.bookings set status='accepted' where id=:'notification_booking';
+update public.bookings set status='accepted' where id=:'notification_booking';
 reset role;
-insert into public.conversations(id,client_id,talent_id) values('b2000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001',auth.uid());
+insert into public.conversations(id,client_id,talent_id) values('b2000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001',private.request_user_id());
 set local role castly_api;
-insert into public.messages(conversation_id,sender_id,body) values('b2000000-0000-0000-0000-000000000001',auth.uid(),'Message fixture');
+insert into public.messages(conversation_id,sender_id,body) values('b2000000-0000-0000-0000-000000000001',private.request_user_id(),'Message fixture');
 select notification_test.denied($$update public.notifications set recipient_id='b0000000-0000-0000-0000-000000000003'$$,'API cannot reassign notification recipient');
 reset role;
 select set_config('request.jwt.claim.sub','b0000000-0000-0000-0000-000000000001',true);

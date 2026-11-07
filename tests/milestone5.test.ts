@@ -2,7 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { LiveHub, type LivePort } from '../src/backend/liveHub.ts';
 import { chatScrollTarget, isNearBottom } from '../src/backend/chatScroll.ts';
-import { notificationRoute, mergeNotifications } from '../src/backend/notifications.ts';
+import {
+  notificationRoute,
+  mergeNotifications,
+  loadNotificationWindow,
+} from '../src/backend/notifications.ts';
 import { createApiTransport, createApiServices } from '../src/backend/api.ts';
 import type { NotificationRow } from '../src/backend/types.ts';
 function fixture() {
@@ -208,4 +212,58 @@ test('notification page merging preserves descending PostgreSQL microsecond orde
     mergeNotifications([whole], [micro, later, whole]).map((n) => n.id),
     ['b', 'a', 'z'],
   );
+});
+
+test('notification refresh reloads the visible history window and rejects a nonadvancing cursor', async () => {
+  const row = (n: number) =>
+    ({ id: String(n), created_at: new Date(200000 - n * 1000).toISOString() }) as NotificationRow;
+  const head = Array.from({ length: 50 }, (_, n) => row(n));
+  const cursors: (string | undefined)[] = [];
+  const page = await loadNotificationWindow(async (cursor) => {
+    cursors.push(cursor);
+    return cursor ? [row(50)] : head;
+  }, 2);
+  assert.deepEqual(cursors, [undefined, '49']);
+  assert.equal(page.rows.length, 51);
+  assert.equal(page.rows[50].id, '50');
+  assert.equal(page.more, false);
+  await assert.rejects(
+    loadNotificationWindow(async () => head, 3),
+    /did not advance/,
+  );
+});
+
+test('replaced notification channels ignore late events and read calls carry a message cutoff', async () => {
+  const fake = fixture();
+  const hub = new LiveHub(fake.port, 'recipient', 'client', 'test-token', () => {});
+  let updates = 0;
+  hub.watch('notifications', undefined, () => updates++);
+  await hub.start();
+  hub.enableNotifications(true);
+  const old = fake.channels[1];
+  const notification = old.handlers.find((h) => h.filter.table === 'notifications')!;
+  assert.equal(notification.filter.filter, 'recipient_id=eq.recipient');
+  hub.enableNotifications(false);
+  notification.callback({ table: 'notifications', eventType: 'INSERT', new: { id: 'late' } });
+  hub.flush();
+  assert.equal(updates, 0);
+  hub.enableNotifications(true);
+  const active = fake.channels[fake.channels.length - 1];
+  active.handlers
+    .find((h) => h.filter.table === 'notifications')!
+    .callback({
+      table: 'notifications',
+      eventType: 'UPDATE',
+      new: { id: 'fresh', read_at: 'now' },
+    });
+  hub.flush();
+  assert.equal(updates, 1);
+  hub.dispose();
+  let path = '';
+  const services = createApiServices(async <T>(value: string) => {
+    path = value;
+    return undefined as T;
+  });
+  await services.notifications.readConversation('conversation', 'recipient', 'message/id');
+  assert.equal(path, 'conversations/conversation/notifications/read?through=message%2Fid');
 });

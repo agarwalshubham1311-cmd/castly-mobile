@@ -23,3 +23,25 @@ export function mergeNotifications(previous: NotificationRow[], page: Notificati
       (b.id < a.id ? -1 : b.id > a.id ? 1 : 0),
   );
 }
+
+/** Reload the visible cursor window so a live refresh does not discard loaded history. */
+export async function loadNotificationWindow(
+  list: (before?: string) => Promise<NotificationRow[]>,
+  pages: number,
+) {
+  let rows: NotificationRow[] = [],
+    before: string | undefined,
+    more = false;
+  const seen = new Set<string>();
+  for (let index = 0; index < pages; index++) {
+    const page = await list(before);
+    rows = mergeNotifications(rows, page);
+    more = page.length === 50;
+    if (!more) break;
+    const cursor = page[page.length - 1].id;
+    if (seen.has(cursor)) throw new Error('Notification history did not advance. Please retry.');
+    seen.add(cursor);
+    before = cursor;
+  }
+  return { rows, more };
+}

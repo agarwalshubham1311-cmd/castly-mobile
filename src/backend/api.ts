@@ -270,9 +270,9 @@ export function createApiServices(request: ReturnType<typeof createApiTransport>
         request<void>(`notifications/${encodeURIComponent(id)}/read`, 'POST', undefined, {
           expectedSubject: actor,
         }),
-      readConversation: (id: string, actor?: string) =>
+      readConversation: (id: string, actor?: string, through?: string) =>
         request<void>(
-          `conversations/${encodeURIComponent(id)}/notifications/read`,
+          `conversations/${encodeURIComponent(id)}/notifications/read${through ? '?through=' + encodeURIComponent(through) : ''}`,
           'POST',
           undefined,
           { expectedSubject: actor },

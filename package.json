@@ -62,7 +62,7 @@
     "test:jwt-config": "node backend/scripts/check-jwt-config.cjs",
     "test:reconciliation": "node scripts/test-reconciliation.cjs",
     "test:mobile-api": "node tests/mobile-spring-browser.cjs",
-    "test:components": "node --experimental-strip-types --test tests/components.test.cjs"
+    "test:components": "node --experimental-strip-types --test tests/*components.test.cjs"
   },
   "private": true
 }

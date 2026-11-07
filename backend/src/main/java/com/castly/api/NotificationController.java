@@ -91,7 +91,10 @@ public class NotificationController {
 
   @PostMapping("/conversations/{id}/notifications/read")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void readConversation(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
+  public void readConversation(
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable UUID id,
+      @RequestParam(required = false) UUID through) {
     data.as(
         actor(jwt),
         db -> {
@@ -99,12 +102,26 @@ public class NotificationController {
               one(db.sql("select * from public.conversations where id=:id").param("id", id));
           ActivityController.requireParticipant(actor(jwt), conversation);
           notifications.require(db);
-          db.sql(
-                  "update public.notifications set read_at=now() where conversation_id=:id and"
-                      + " recipient_id=private.request_user_id() and kind='message_received' and"
-                      + " read_at is null")
-              .param("id", id)
-              .update();
+          if (through != null)
+            one(
+                db.sql("select id from public.messages where id=:message and conversation_id=:id")
+                    .param("message", through)
+                    .param("id", id));
+          String cutoff =
+              through == null
+                  ? ""
+                  : " and message_id in (select id from public.messages where conversation_id=:id"
+                      + " and (created_at,id)<=(select created_at,id from public.messages where"
+                      + " id=:message))";
+          var update =
+              db.sql(
+                      "update public.notifications set read_at=now() where conversation_id=:id and"
+                          + " recipient_id=private.request_user_id() and kind='message_received'"
+                          + " and read_at is null"
+                          + cutoff)
+                  .param("id", id);
+          if (through != null) update.param("message", through);
+          update.update();
           return null;
         });
   }

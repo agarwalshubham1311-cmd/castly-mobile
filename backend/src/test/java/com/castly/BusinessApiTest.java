@@ -773,6 +773,169 @@ class BusinessApiTest {
   }
 
   @Test
+  void notificationCutoffDoesNotMarkNewerMessagesAndRejectsForeignMessageCursor() throws Exception {
+    String id = newBooking(), talent = talentFor(id);
+    call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
+    String conv =
+        object(call("POST", "/api/v1/conversations", CLIENT, "{\"booking_id\":\"" + id + "\"}"))
+            .get("id")
+            .toString();
+    String first =
+        object(
+                call(
+                        "POST",
+                        "/api/v1/conversations/" + conv + "/messages",
+                        CLIENT,
+                        "{\"body\":\"First notice\"}")
+                    .andExpect(status().isCreated()))
+            .get("id")
+            .toString();
+    call(
+            "POST",
+            "/api/v1/conversations/" + conv + "/messages",
+            CLIENT,
+            "{\"body\":\"Newer notice\"}")
+        .andExpect(status().isCreated());
+    call(
+            "POST",
+            "/api/v1/conversations/" + conv + "/notifications/read?through=" + first,
+            talent,
+            null)
+        .andExpect(status().isNoContent());
+    call("GET", "/api/v1/conversations/" + conv, talent, null)
+        .andExpect(jsonPath("$.unread_notifications").value(1));
+    call(
+            "POST",
+            "/api/v1/conversations/" + conv + "/notifications/read?through=" + UUID.randomUUID(),
+            talent,
+            null)
+        .andExpect(status().isNotFound());
+    call(
+            "POST",
+            "/api/v1/conversations/" + conv + "/notifications/read?through=" + first,
+            OUTSIDER,
+            null)
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void notificationInvokersKeepConcurrentActorsIsolatedAndMessageRollbackAtomic() throws Exception {
+    var pairs = new ArrayList<String[]>();
+    for (int n = 0; n < 4; n++) {
+      String id = newBooking(), talent = talentFor(id);
+      call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
+      String conv =
+          object(call("POST", "/api/v1/conversations", CLIENT, "{\"booking_id\":\"" + id + "\"}"))
+              .get("id")
+              .toString();
+      pairs.add(new String[] {conv, talent});
+    }
+    try (var executor = java.util.concurrent.Executors.newFixedThreadPool(8)) {
+      var futures = new ArrayList<java.util.concurrent.Future<?>>();
+      var start = new java.util.concurrent.CountDownLatch(1);
+      for (var pair : pairs)
+        for (String sender : List.of(CLIENT, pair[1]))
+          futures.add(
+              executor.submit(
+                  () -> {
+                    try {
+                      assertTrue(start.await(5, java.util.concurrent.TimeUnit.SECONDS));
+                      String message =
+                          object(
+                                  call(
+                                          "POST",
+                                          "/api/v1/conversations/" + pair[0] + "/messages",
+                                          sender,
+                                          "{\"body\":\"Concurrent private notice\"}")
+                                      .andExpect(status().isCreated()))
+                              .get("id")
+                              .toString();
+                      String recipient = sender.equals(CLIENT) ? pair[1] : CLIENT;
+                      assertEquals(
+                          (Object) 1,
+                          data.as(
+                              UUID.fromString(recipient),
+                              db ->
+                                  db.sql(
+                                          "select count(*)::int from public.notifications where"
+                                              + " message_id=:id")
+                                      .param("id", UUID.fromString(message))
+                                      .query(Integer.class)
+                                      .single()));
+                      assertEquals(
+                          (Object) 0,
+                          data.as(
+                              UUID.fromString(sender),
+                              db ->
+                                  db.sql(
+                                          "select count(*)::int from public.notifications where"
+                                              + " message_id=:id")
+                                      .param("id", UUID.fromString(message))
+                                      .query(Integer.class)
+                                      .single()));
+                      assertEquals(
+                          (Object) 0,
+                          data.as(
+                              null,
+                              db ->
+                                  db.sql(
+                                          "select count(*)::int from public.notifications where"
+                                              + " message_id=:id")
+                                      .param("id", UUID.fromString(message))
+                                      .query(Integer.class)
+                                      .single()));
+                    } catch (Exception e) {
+                      throw new RuntimeException(e);
+                    }
+                  }));
+      start.countDown();
+      for (var future : futures) future.get(15, java.util.concurrent.TimeUnit.SECONDS);
+    }
+    var pair = pairs.get(0);
+    int before =
+        data.as(
+            UUID.fromString(pair[1]),
+            db ->
+                db.sql("select count(*)::int from public.notifications where conversation_id=:id")
+                    .param("id", UUID.fromString(pair[0]))
+                    .query(Integer.class)
+                    .single());
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            data.as(
+                UUID.fromString(CLIENT),
+                db -> {
+                  db.sql(
+                          "insert into public.messages(conversation_id,sender_id,body)"
+                              + " values(:id,private.request_user_id(),'Rolled back message')")
+                      .param("id", UUID.fromString(pair[0]))
+                      .update();
+                  throw new IllegalStateException("Synthetic rollback");
+                }));
+    assertEquals(
+        (Object) before,
+        data.as(
+            UUID.fromString(pair[1]),
+            db ->
+                db.sql("select count(*)::int from public.notifications where conversation_id=:id")
+                    .param("id", UUID.fromString(pair[0]))
+                    .query(Integer.class)
+                    .single()));
+    assertEquals(
+        (Object) 0,
+        data.as(
+            UUID.fromString(CLIENT),
+            db ->
+                db.sql(
+                        "select count(*)::int from public.messages where conversation_id=:id and"
+                            + " body='Rolled back message'")
+                    .param("id", UUID.fromString(pair[0]))
+                    .query(Integer.class)
+                    .single()));
+  }
+
+  @Test
   void notificationsAreTransactionalRecipientOnlyDeduplicatedAndNotReadReceipts() throws Exception {
     String id = newBooking(), talent = talentFor(id);
     var notification =
@@ -1294,10 +1457,9 @@ class BusinessApiTest {
         json.readTree(
             java.nio.file.Files.readString(
                 java.nio.file.Path.of("/tmp/castly-identity-before-" + variant + ".json")));
-    String query =
-        java.nio.file.Files.readString(java.nio.file.Path.of("scripts/identity-catalog.sql"));
     String afterJson =
-        data.as(UUID.fromString(CLIENT), db -> db.sql(query).query(String.class).single());
+        java.nio.file.Files.readString(
+            java.nio.file.Path.of("/tmp/castly-identity-after-" + variant + ".json"));
     var after = json.readTree(afterJson);
     var expected = before.deepCopy();
     for (var policy : expected.get("policies")) {

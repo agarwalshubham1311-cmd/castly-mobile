@@ -1,5 +1,7 @@
 # Castly Spring business API
 
+Milestone 5 notifications: [invoker migration, security tests and exact deployment order](../docs/milestone5/invoker-notifications-deployment.md). Hosted already has private request identity; use only the new `20261107170000_invoker_notifications.sql` artifact after approval. Do not batch-apply the older pending definer notification or auth-grant proposals.
+
 Current P0 proposal: [private SECURITY INVOKER request identity fallback and deployment report](../docs/milestone5/private-request-identity-deployment.md). This supersedes the auth-USAGE grant-only candidate for the requested rollout. The forward migration and matching Spring changes are review-ready; no hosted SQL or deployment has been performed.
 
 For the Milestone 5 DNS/pool lifecycle and acceptance 42501 investigation, see [the current findings and diagnostic procedure](../docs/milestone5/connectivity-and-acceptance-investigation.md). The custom pool factory explicitly binds maximum-pool-size and connection-timeout; defaults remain unchanged. No hosted database repair is applied by that investigation.

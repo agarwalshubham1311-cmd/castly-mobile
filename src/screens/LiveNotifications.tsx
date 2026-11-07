@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { services } from '../backend';
@@ -9,7 +9,7 @@ import { readableError } from '../backend/errors';
 import {
   notificationTitles,
   notificationRoute,
-  mergeNotifications,
+  loadNotificationWindow,
 } from '../backend/notifications';
 import type { NotificationRow } from '../backend/types';
 import { Screen, Label, Heading, PrimaryButton, EmptyState } from '../components/ui';
@@ -18,32 +18,26 @@ export default function LiveNotifications() {
   const auth = useAuth();
   const notices = useNotifications();
   const live = useLiveRefresh('notifications');
-  const [rows, setRows] = useState<NotificationRow[]>([]),
-    [error, setError] = useState(''),
+  const owner = auth.session?.user.id;
+  const [snapshot, setSnapshot] = useState<{
+    owner?: string;
+    rows: NotificationRow[];
+    more: boolean;
+  }>();
+  const [scope, setScope] = useState({ owner, pages: 1 });
+  const pages = scope.owner === owner ? scope.pages : 1;
+  const rows = snapshot && snapshot.owner === owner ? snapshot.rows : [];
+  const more = snapshot && snapshot.owner === owner && snapshot.more;
+  const [error, setError] = useState(''),
     [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
-    [more, setMore] = useState(false);
-  const [revision, setRevision] = useState(0);
-  const load = useCallback(async () => {
-    try {
-      const page = await services!.notifications.list();
-      setRows(page);
-      setMore(page.length === 50);
-      setError('');
-    } catch (e) {
-      setError(readableError(e));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    [revision, setRevision] = useState(0);
   useEffect(() => {
     let active = true;
-    services!.notifications
-      .list()
+    loadNotificationWindow(services!.notifications.list, pages)
       .then((page) => {
         if (active) {
-          setRows(page);
-          setMore(page.length === 50);
+          setSnapshot({ owner, ...page });
           setError('');
         }
       })
@@ -56,29 +50,29 @@ export default function LiveNotifications() {
     return () => {
       active = false;
     };
-  }, [live.revision, revision]);
-  const older = async () => {
-    if (!rows.length) return;
-    setBusy(true);
-    try {
-      const page = await services!.notifications.list(rows[rows.length - 1].id);
-      setRows((current) => mergeNotifications(current, page));
-      setMore(page.length === 50);
-    } catch (e) {
-      setError(readableError(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-  const open = async (row: NotificationRow) => {
+  }, [live.revision, revision, pages, owner]);
+  const read = async (row: NotificationRow, navigate: boolean) => {
     setBusy(true);
     setError('');
     try {
-      await services!.notifications.read(row.id, auth.session!.user.id);
-      await notices.refresh();
-      const route = notificationRoute(row);
-      if (route) router.push(route);
-      else await load();
+      if (!row.read_at) {
+        await services!.notifications.read(row.id, owner);
+        setSnapshot((current) =>
+          current && current.owner === owner
+            ? {
+                ...current,
+                rows: current.rows.map((item) =>
+                  item.id === row.id ? { ...item, read_at: new Date().toISOString() } : item,
+                ),
+              }
+            : current,
+        );
+        await notices.refresh();
+      }
+      if (navigate) {
+        const route = notificationRoute(row);
+        if (route) router.push(route);
+      }
     } catch (e) {
       setError(readableError(e));
     } finally {
@@ -127,12 +121,22 @@ export default function LiveNotifications() {
               {row.read_at ? 'Read notification' : 'Unread notification'} ·{' '}
               {new Date(row.created_at).toLocaleString()}
             </Label>
+            {!row.read_at && (
+              <PrimaryButton
+                title="Mark as read"
+                secondary
+                disabled={busy}
+                onPress={() => {
+                  void read(row, false);
+                }}
+              />
+            )}
             <PrimaryButton
               title={row.kind === 'message_received' ? 'View conversation' : 'View booking'}
               secondary
               disabled={busy}
               onPress={() => {
-                void open(row);
+                void read(row, true);
               }}
             />
           </View>
@@ -147,9 +151,10 @@ export default function LiveNotifications() {
         <PrimaryButton
           title="Load older notifications"
           secondary
-          disabled={busy}
+          disabled={busy || loading}
           onPress={() => {
-            void older();
+            setLoading(true);
+            setScope({ owner, pages: pages + 1 });
           }}
         />
       )}
