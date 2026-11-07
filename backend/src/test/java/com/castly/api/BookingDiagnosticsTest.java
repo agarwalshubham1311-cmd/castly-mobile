@@ -87,6 +87,59 @@ class BookingDiagnosticsTest {
   }
 
   @Test
+  void actualSpringBadSqlGrammarWrapperDoesNotImplySyntaxError() {
+    var sql =
+        new SQLException("ERROR: Booking account role mismatch\nWhere: private context", "42501");
+    var wrapper =
+        new org.springframework.jdbc.BadSqlGrammarException("sensitive task", "sensitive SQL", sql);
+    assertEquals("booking_guard_account_role", SqlFailureKind.of(wrapper));
+    assertEquals("42501", SqlFailureKind.sqlState(wrapper));
+    var response =
+        new ApiErrors()
+            .databaseStep(
+                assertThrows(
+                    DatabaseStep.class,
+                    () ->
+                        DatabaseStep.run(
+                            "booking.accepted.update",
+                            () -> {
+                              throw wrapper;
+                            })));
+    assertEquals(403, response.getStatus());
+    assertEquals("Not permitted", response.getDetail());
+  }
+
+  @Test
+  void dnsCauseRetainsSqlStateAndPublic503DoesNotLogHostCredentialsOrStack() {
+    String sensitive = "synthetic-private-host-and-credential";
+    var sql =
+        new java.sql.SQLTransientConnectionException(
+            sensitive, "08001", new java.net.UnknownHostException(sensitive));
+    var error =
+        new org.springframework.transaction.CannotCreateTransactionException(sensitive, sql);
+    assertEquals("dns_resolution_failed", SqlFailureKind.of(error));
+    assertEquals("08001", SqlFailureKind.sqlState(error));
+    var logger = (Logger) LoggerFactory.getLogger(ApiErrors.class);
+    var capture = new ListAppender<ILoggingEvent>();
+    capture.start();
+    logger.addAppender(capture);
+    try {
+      var response = new ApiErrors().transaction(error);
+      assertEquals(503, response.getStatus());
+      assertEquals("Castly is temporarily unavailable. Please retry.", response.getDetail());
+      String line = capture.list.getLast().getFormattedMessage();
+      assertTrue(line.contains("reason=dns_resolution_failed"));
+      assertTrue(line.contains("sqlstate=08001"));
+      assertFalse(line.contains(sensitive));
+      assertNull(capture.list.getLast().getThrowableProxy());
+      assertFalse(response.toString().contains(sensitive));
+    } finally {
+      logger.detachAppender(capture);
+      capture.stop();
+    }
+  }
+
+  @Test
   void disabledProbeDoesNotTouchTheDatabase() {
     assertNull(new BookingUpdateDiagnostics(false).capture(null, null, null));
   }

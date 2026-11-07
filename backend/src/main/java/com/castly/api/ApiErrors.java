@@ -43,11 +43,11 @@ public class ApiErrors {
   @ExceptionHandler(DatabaseStep.class)
   ProblemDetail databaseStep(DatabaseStep error) {
     String reference = java.util.UUID.randomUUID().toString();
-    var result = database(error.failure());
+    var result = databaseResponse(error.failure());
     result.setProperty("operation", error.operation());
     result.setProperty("reference", reference);
     var cause = error.failure().getMostSpecificCause();
-    String state = cause instanceof java.sql.SQLException sql ? sql.getSQLState() : "unknown";
+    String state = SqlFailureKind.sqlState(error.failure());
     org.slf4j.LoggerFactory.getLogger(ApiErrors.class)
         .warn(
             "Business DB failure reference={} operation={} sqlstate={} exception_class={}"
@@ -64,17 +64,37 @@ public class ApiErrors {
 
   @ExceptionHandler(DataAccessException.class)
   ProblemDetail database(DataAccessException e) {
+    logConnectionFailure(e, "database.operation");
+    return databaseResponse(e);
+  }
+
+  @ExceptionHandler(org.springframework.transaction.CannotCreateTransactionException.class)
+  ProblemDetail transaction(org.springframework.transaction.CannotCreateTransactionException e) {
+    logConnectionFailure(e, "database.transaction.begin");
+    return ProblemDetail.forStatusAndDetail(
+        HttpStatus.SERVICE_UNAVAILABLE, "Castly is temporarily unavailable. Please retry.");
+  }
+
+  private void logConnectionFailure(RuntimeException failure, String operation) {
+    org.slf4j.LoggerFactory.getLogger(ApiErrors.class)
+        .warn(
+            "Database failure reference={} operation={} sqlstate={} exception_class={} reason={}",
+            java.util.UUID.randomUUID(),
+            operation,
+            SqlFailureKind.sqlState(failure),
+            failure.getClass().getSimpleName(),
+            SqlFailureKind.of(failure));
+  }
+
+  private ProblemDetail databaseResponse(DataAccessException e) {
     if (e instanceof DataIntegrityViolationException)
       return ProblemDetail.forStatusAndDetail(
           HttpStatus.CONFLICT, "The change conflicts with existing data or constraints.");
-    Throwable root = e.getMostSpecificCause();
-    if (root instanceof java.sql.SQLException sql) {
-      if ("42501".equals(sql.getSQLState()))
-        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Not permitted");
-      if ("P0001".equals(sql.getSQLState()))
-        return ProblemDetail.forStatusAndDetail(
-            HttpStatus.CONFLICT, "The requested change is not allowed");
-    }
+    if ("42501".equals(SqlFailureKind.sqlState(e)))
+      return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Not permitted");
+    if ("P0001".equals(SqlFailureKind.sqlState(e)))
+      return ProblemDetail.forStatusAndDetail(
+          HttpStatus.CONFLICT, "The requested change is not allowed");
     return ProblemDetail.forStatusAndDetail(
         HttpStatus.SERVICE_UNAVAILABLE, "Castly is temporarily unavailable. Please retry.");
   }

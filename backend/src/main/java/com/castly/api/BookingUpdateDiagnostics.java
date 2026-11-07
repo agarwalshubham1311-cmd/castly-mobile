@@ -34,30 +34,46 @@ public class BookingUpdateDiagnostics {
     // Static savepoint name; never SQL/parameters or claims in diagnostics.
     db.sql("savepoint castly_booking_diagnostic").update();
     Evidence result;
+    Boolean identityPresent = null, identityMatches = null;
     try {
-      var row =
+      var identity =
           db.sql(
                   "select auth.uid() is not null as identity_present,"
-                      + " coalesce(auth.uid()=:expected,false) as identity_matches, exists(select 1"
+                      + " coalesce(auth.uid()=:expected,false) as identity_matches")
+              .param("expected", expected)
+              .query()
+              .singleRow();
+      identityPresent = (Boolean) identity.get("identity_present");
+      identityMatches = (Boolean) identity.get("identity_matches");
+      var row =
+          db.sql(
+                  "select exists(select 1"
                       + " from public.users where id=auth.uid()) as account_visible, exists(select"
                       + " 1 from public.users where id=auth.uid() and primary_role=cast(:role as"
                       + " public.account_role)) as role_matches")
-              .param("expected", expected)
               .param("role", talent ? "talent" : "client")
               .query()
               .singleRow();
       result =
           new Evidence(
               "ok",
-              (Boolean) row.get("identity_present"),
-              (Boolean) row.get("identity_matches"),
+              identityPresent,
+              identityMatches,
               (Boolean) row.get("account_visible"),
               (Boolean) row.get("role_matches"),
               talent,
               requested);
     } catch (DataAccessException failure) {
       db.sql("rollback to savepoint castly_booking_diagnostic").update();
-      result = new Evidence(SqlFailureKind.of(failure), null, null, null, null, talent, requested);
+      result =
+          new Evidence(
+              SqlFailureKind.of(failure),
+              identityPresent,
+              identityMatches,
+              null,
+              null,
+              talent,
+              requested);
     }
     db.sql("release savepoint castly_booking_diagnostic").update();
     return result;

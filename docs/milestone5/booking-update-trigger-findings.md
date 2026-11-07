@@ -72,7 +72,7 @@ The code adds `SqlFailureKind.java` and `BookingUpdateDiagnostics.java`, wires e
 | `postgres_rls_denied` | PostgreSQL row-level-security rejection message |
 | `unclassified_42501` | Unknown/changed/localized message; do not guess or dump raw text to logs |
 
-Probe fields are tri-state: null means not established, false is an observed mismatch. For example, `identityMatches=true, accountVisible=false, roleMatches=false` with `booking_guard_account_role` demonstrates correct principal binding but missing self-account visibility in the invoking role's transaction. `accountVisible=true, roleMatches=false` instead shows a visible account whose role does not match this booking participant. If the probe itself says `postgres_privilege_denied`, identity/role fields remain null and the original UPDATE still runs/fails normally; inspect the read-only dependency grants. These are interpretations of **future actual evidence**, not a claim that any one is the hosted cause.
+Probe fields are tri-state: null means not established, false is an observed mismatch. For example, `identityMatches=true, accountVisible=false, roleMatches=false` with `booking_guard_account_role` demonstrates correct principal binding but missing self-account visibility in the invoking role's transaction. `accountVisible=true, roleMatches=false` instead shows a visible account whose role does not match this booking participant. If the probe itself says `postgres_privilege_denied`, any fields not established remain null and the original UPDATE still runs/fails normally; inspect the read-only dependency grants. These are interpretations of **future actual evidence**, not a claim that any one is the hosted cause.
 
 ## Smallest secure fix: gated on actual error evidence
 
@@ -89,3 +89,6 @@ The smallest repair depends on that evidence:
 | Different explicit guard error, nested function denial or restrictive booking RLS error | Repair the specific demonstrated identity, immutable-field, transition, dependency ACL or policy discrepancy. The SQLSTATE alone does not justify relaxing checks. |
 
 These are conditional review decisions, **not claims about the hosted cause**. Once actual definitions/CONTEXT identify the failing line, reproduce that exact definition/error locally, add a before/after regression and prepare one forward repair artifact. Wait for explicit approval before any hosted application. Neither a blanket SECURITY DEFINER conversion, trigger EXECUTE grant, table-wide booking UPDATE, nor disabling RLS is proposed.
+
+
+Update 2026-11-07: [Connectivity and acceptance follow-up](connectivity-and-acceptance-investigation.md) documents supplied lifecycle logs, the older acceptance log format, Hikari property wiring, and a split read probe that retains verified identity evidence when the account-role read is denied. The original 78-test results above are the earlier investigation, not the follow-up suite.

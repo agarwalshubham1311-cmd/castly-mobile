@@ -11,19 +11,26 @@ import org.springframework.context.annotation.*;
 @Configuration
 public class DatabaseConfiguration {
   @Bean
-  DataSource dataSource(
+  protected HikariConfig businessPoolConfiguration(
       @Value("${spring.datasource.url}") String url,
       @Value("${spring.datasource.username}") String user,
-      @Value("${spring.datasource.password}") String password) {
+      @Value("${spring.datasource.password}") String password,
+      @Value("${spring.datasource.hikari.maximum-pool-size:8}") int maximumPoolSize,
+      @Value("${spring.datasource.hikari.connection-timeout:10000}") long connectionTimeout) {
     validate(url, user);
     var config = new HikariConfig();
     config.setJdbcUrl(url);
     config.setUsername(user);
     config.setPassword(password);
-    config.setMaximumPoolSize(8);
-    config.setConnectionTimeout(10000);
+    config.setMaximumPoolSize(maximumPoolSize);
+    config.setConnectionTimeout(connectionTimeout);
     config.setPoolName("castly-business");
-    return new HikariDataSource(config);
+    return config;
+  }
+
+  @Bean
+  protected DataSource dataSource(HikariConfig businessPoolConfiguration) {
+    return new HikariDataSource(businessPoolConfiguration);
   }
 
   public static void validate(String url, String user) {

@@ -1029,7 +1029,10 @@ class BusinessApiTest {
                 new com.castly.api.BookingUpdateDiagnostics(true)
                     .capture(db, UUID.fromString(deniedTalent), booking);
             assertEquals("postgres_privilege_denied", evidence.probe());
-            assertNull(evidence.identityMatches());
+            assertEquals(true, evidence.identityPresent());
+            assertEquals(true, evidence.identityMatches());
+            assertNull(evidence.accountVisible());
+            assertNull(evidence.roleMatches());
             // If the probe left this transaction aborted, even this read would fail with 25P02.
             assertEquals(1, db.sql("select 1").query(Integer.class).single());
             return null;

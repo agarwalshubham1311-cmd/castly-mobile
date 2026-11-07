@@ -1,5 +1,7 @@
 # Castly Spring business API
 
+For the Milestone 5 DNS/pool lifecycle and acceptance 42501 investigation, see [the current findings and diagnostic procedure](../docs/milestone5/connectivity-and-acceptance-investigation.md). The custom pool factory explicitly binds maximum-pool-size and connection-timeout; defaults remain unchanged. No hosted database repair is applied by that investigation.
+
 Java 21 / Spring Boot 3.5.7 is the business API for Milestones 1 and 2. Supabase still owns Auth, Storage uploads/download signing and Realtime transport. The application never connects as a database owner, administrator or `service_role`, never handles a JWT signing secret, and never applies migrations at startup. No payments or production deployment is included.
 
 ## Milestone 3 mobile integration
