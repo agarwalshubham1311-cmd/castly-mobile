@@ -2,6 +2,8 @@
 
 For the Milestone 5 DNS/pool lifecycle and acceptance 42501 investigation, see [the current findings and diagnostic procedure](../docs/milestone5/connectivity-and-acceptance-investigation.md). The custom pool factory explicitly binds maximum-pool-size and connection-timeout; defaults remain unchanged. No hosted database repair is applied by that investigation.
 
+The subsequent [P0 auth schema USAGE investigation](../docs/milestone5/auth-schema-usage-repair.md) reproduces the precise acceptance failure and tests a one-grant repair. Its forward migration is prepared for review only; hosted application requires explicit approval.
+
 Java 21 / Spring Boot 3.5.7 is the business API for Milestones 1 and 2. Supabase still owns Auth, Storage uploads/download signing and Realtime transport. The application never connects as a database owner, administrator or `service_role`, never handles a JWT signing secret, and never applies migrations at startup. No payments or production deployment is included.
 
 ## Milestone 3 mobile integration

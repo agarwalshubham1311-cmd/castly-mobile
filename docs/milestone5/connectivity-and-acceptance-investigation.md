@@ -1,5 +1,7 @@
 # Milestone 5: connectivity and acceptance investigation
 
+P0 follow-up: [missing auth schema USAGE is now reproduced with the exact acceptance error signature](auth-schema-usage-repair.md). The single-grant repair is tested locally and awaits explicit hosted approval. The evidence below records the earlier investigation before that additional hosted metadata was supplied.
+
 2026-11-07. User-supplied timestamps below are Asia/Kolkata (+05:30). Investigation branch: `feat/milestone5-booking-messaging-notifications`, starting at `99c3ad2`.
 
 No hosted SQL, policy, grant, trigger, schema or data write was performed. No credentials, TLS verification, DNS settings, firewall, VPN, IP-family preference or network security settings were changed. Mobile code is unchanged. All database regression writes were confined to disposable Docker fixtures.

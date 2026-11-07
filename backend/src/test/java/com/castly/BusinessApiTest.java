@@ -42,6 +42,7 @@ class BusinessApiTest {
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper json;
   @Autowired ActorDatabase data;
+  @Autowired javax.sql.DataSource pool;
   static final String CLIENT = "00000000-0000-0000-0000-000000000001",
       TALENT = "00000000-0000-0000-0000-000000000002",
       OUTSIDER = "00000000-0000-0000-0000-000000000003",
@@ -1045,6 +1046,240 @@ class BusinessApiTest {
     }
     call("POST", "/api/v1/bookings/" + denied + "/accept", deniedTalent, null)
         .andExpect(status().isOk());
+  }
+
+  @Test
+  void authSchemaUsageAloneRepairsAcceptanceWithoutWideningBusinessPrivileges() throws Exception {
+    String id = newBooking(), talent = talentFor(id);
+    String migration =
+        java.nio.file.Files.readString(
+            java.nio.file.Path.of(
+                "../supabase/migrations/20261107130000_restore_api_auth_schema_usage.sql"));
+    localOwner("revoke usage on schema auth from castly_api");
+    try {
+      // Cached function plans can retain resolved OIDs. Reproduce missing name-resolution
+      // privileges on fresh physical connections, not accidentally precompiled trigger plans.
+      ((com.zaxxer.hikari.HikariDataSource) pool).getHikariPoolMXBean().softEvictConnections();
+      var booking =
+          data.as(
+              UUID.fromString(talent),
+              db -> {
+                assertFalse(
+                    db.sql("select has_schema_privilege(current_user,'auth','USAGE')")
+                        .query(Boolean.class)
+                        .single());
+                assertTrue(
+                    db.sql(
+                            "select has_table_privilege(current_user,'public.bookings','SELECT')"
+                                + " and has_table_privilege(current_user,'public.users','SELECT')")
+                        .query(Boolean.class)
+                        .single());
+                // OID-based ACL inspection does not itself require resolving the name auth.uid().
+                assertTrue(
+                    db.sql(
+                            "select has_function_privilege(current_user,p.oid,'EXECUTE')"
+                                + " from pg_proc p join pg_namespace n on n.oid=p.pronamespace"
+                                + " where n.nspname='auth' and p.proname='uid' and p.pronargs=0")
+                        .query(Boolean.class)
+                        .single());
+                return ActorDatabase.one(
+                    db.sql("select * from public.bookings where id=:id for update")
+                        .param("id", UUID.fromString(id)));
+              });
+      var uidDenied =
+          assertThrows(
+              org.springframework.dao.DataAccessException.class,
+              () ->
+                  data.as(
+                      UUID.fromString(talent),
+                      db -> db.sql("select auth.uid()").query().singleRow()));
+      assertEquals("42501", com.castly.api.SqlFailureKind.sqlState(uidDenied));
+      assertEquals("postgres_privilege_denied", com.castly.api.SqlFailureKind.of(uidDenied));
+      assertTrue(
+          uidDenied
+              .getMostSpecificCause()
+              .getMessage()
+              .contains("permission denied for schema auth"));
+      var evidence =
+          data.as(
+              UUID.fromString(talent),
+              db ->
+                  new com.castly.api.BookingUpdateDiagnostics(true)
+                      .capture(db, UUID.fromString(talent), booking));
+      assertEquals("postgres_privilege_denied", evidence.probe());
+      assertNull(evidence.identityMatches());
+      var updateDenied =
+          assertThrows(
+              org.springframework.dao.DataAccessException.class,
+              () ->
+                  data.as(
+                      UUID.fromString(talent),
+                      db ->
+                          db.sql(
+                                  "update public.bookings set status='accepted' where id=:id"
+                                      + " returning *")
+                              .param("id", UUID.fromString(id))
+                              .query()
+                              .singleRow()));
+      assertEquals("42501", com.castly.api.SqlFailureKind.sqlState(updateDenied));
+      assertTrue(
+          updateDenied
+              .getMostSpecificCause()
+              .getMessage()
+              .contains("permission denied for schema auth"));
+      assertTrue(
+          updateDenied
+              .getMostSpecificCause()
+              .getMessage()
+              .contains("api_booking_transition_guard"));
+      var logger =
+          (ch.qos.logback.classic.Logger)
+              org.slf4j.LoggerFactory.getLogger(com.castly.api.ApiErrors.class);
+      var logs =
+          new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
+      logs.start();
+      logger.addAppender(logs);
+      try {
+        call("POST", "/api/v1/bookings/" + id + "/accept", talent, null)
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.detail").value("Not permitted"))
+            .andExpect(jsonPath("$.operation").value("booking.accepted.update"));
+        String line = logs.list.getLast().getFormattedMessage();
+        assertTrue(line.contains("reason=postgres_privilege_denied"));
+        assertTrue(line.contains("probe=postgres_privilege_denied"));
+        assertFalse(line.contains(id));
+        assertFalse(line.contains(talent));
+      } finally {
+        logger.detachAppender(logs);
+        logs.stop();
+      }
+      call("GET", "/api/v1/bookings/" + id, CLIENT, null)
+          .andExpect(jsonPath("$.status").value("requested"));
+      assertEquals(
+          (Object) 0,
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql("select count(*)::int from public.conversations where talent_id=:talent")
+                      .param("talent", UUID.fromString(talent))
+                      .query(Integer.class)
+                      .single()));
+      assertEquals(
+          (Object) 0,
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql(
+                          "select count(*)::int from public.notifications where booking_id=:id"
+                              + " and kind='booking_accepted'")
+                      .param("id", UUID.fromString(id))
+                      .query(Integer.class)
+                      .single()));
+
+      // Apply the exact reviewed artifact twice, only inside the disposable local fixture.
+      localOwner(migration);
+      localOwner(migration);
+      var repaired =
+          data.as(
+              UUID.fromString(talent),
+              db -> {
+                assertTrue(
+                    db.sql("select has_schema_privilege(current_user,'auth','USAGE')")
+                        .query(Boolean.class)
+                        .single());
+                assertEquals(
+                    talent, db.sql("select auth.uid()::text").query(String.class).single());
+                return new com.castly.api.BookingUpdateDiagnostics(true)
+                    .capture(db, UUID.fromString(talent), booking);
+              });
+      assertEquals("ok", repaired.probe());
+      assertEquals(true, repaired.identityMatches());
+      assertEquals(true, repaired.accountVisible());
+      assertEquals(true, repaired.roleMatches());
+      call("POST", "/api/v1/bookings/" + id + "/accept", CLIENT, null)
+          .andExpect(status().isForbidden());
+      call(
+              "POST",
+              "/api/v1/bookings/" + id + "/accept",
+              "00000000-0000-0000-0000-000000000005",
+              null)
+          .andExpect(status().isNotFound());
+      call("POST", "/api/v1/bookings/" + id + "/accept", talent, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.status").value("accepted"));
+      call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
+      var conversation =
+          object(
+              call("POST", "/api/v1/conversations", CLIENT, "{\"booking_id\":\"" + id + "\"}")
+                  .andExpect(status().isOk())
+                  .andExpect(jsonPath("$.client_id").value(CLIENT))
+                  .andExpect(jsonPath("$.talent_id").value(talent)));
+      assertEquals(
+          (Object) 1,
+          data.as(
+              UUID.fromString(talent),
+              db ->
+                  db.sql("select count(*)::int from public.conversations where talent_id=:talent")
+                      .param("talent", UUID.fromString(talent))
+                      .query(Integer.class)
+                      .single()));
+      call("GET", "/api/v1/conversations/" + conversation.get("id"), OUTSIDER, null)
+          .andExpect(status().isNotFound());
+      call("GET", "/api/v1/bookings/" + id, OUTSIDER, null).andExpect(status().isNotFound());
+      data.as(
+          UUID.fromString(talent),
+          db -> {
+            assertEquals(
+                0,
+                db.sql("select count(*)::int from public.users where id=:client")
+                    .param("client", UUID.fromString(CLIENT))
+                    .query(Integer.class)
+                    .single());
+            assertFalse(
+                db.sql(
+                        "select has_table_privilege(current_user,'public.bookings','UPDATE') or"
+                            + " has_column_privilege(current_user,'public.bookings','updated_at','UPDATE')"
+                            + " or has_schema_privilege(current_user,'auth','CREATE')")
+                    .query(Boolean.class)
+                    .single());
+            assertTrue(
+                db.sql(
+                        "select"
+                            + " has_column_privilege(current_user,'public.bookings','status','UPDATE')")
+                    .query(Boolean.class)
+                    .single());
+            assertFalse(
+                db.sql(
+                        "select prosecdef from pg_proc where oid="
+                            + "'public.api_booking_transition_guard()'::regprocedure")
+                    .query(Boolean.class)
+                    .single());
+            assertTrue(
+                db.sql(
+                        "select bool_and(relrowsecurity) from pg_class where oid in"
+                            + " ('public.bookings'::regclass,'public.users'::regclass,'public.conversations'::regclass)")
+                    .query(Boolean.class)
+                    .single());
+            return null;
+          });
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () ->
+              data.as(
+                  UUID.fromString(talent),
+                  db -> db.sql("select id from auth.users limit 1").query().listOfRows()));
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () ->
+              data.as(
+                  UUID.fromString(talent),
+                  db ->
+                      db.sql("update public.bookings set agreed_rate=1 where id=:id")
+                          .param("id", UUID.fromString(id))
+                          .update()));
+    } finally {
+      localOwner("grant usage on schema auth to castly_api");
+    }
   }
 
   @Test
