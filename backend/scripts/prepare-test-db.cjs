@@ -39,6 +39,20 @@ function sql(text, db = 'postgres') {
 }
 sql('drop database if exists castly_spring_test; create database castly_spring_test;');
 const root = path.resolve(__dirname, '../..');
+const identityMigration = '20261107150000_private_request_identity.sql';
+function beforeIdentityMigration() {
+  sql('revoke usage on schema auth from castly_api;', 'castly_spring_test');
+  const snapshot = run(
+    ['exec', '-i', container, 'psql', '-X', '-At', '-U', 'postgres',
+      '-d', 'castly_spring_test', '-v', 'ON_ERROR_STOP=1'],
+    fs.readFileSync(path.join(__dirname, 'identity-catalog.sql'), 'utf8'),
+  );
+  JSON.parse(snapshot);
+  fs.writeFileSync(
+    `/tmp/castly-identity-before-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`,
+    snapshot,
+  );
+}
 sql(
   fs.readFileSync(path.join(root, 'supabase/tests/bootstrap-local.sql'), 'utf8'),
   'castly_spring_test',
@@ -48,11 +62,13 @@ const schemaPath = process.env.CASTLY_TEST_SCHEMA_PATH || 'repository';
 if (!['repository', 'reconciliation'].includes(schemaPath))
   throw new Error('Unknown disposable schema path');
 if (schemaPath === 'repository') {
-  for (const name of fs.readdirSync(path.join(root, 'supabase/migrations')).sort())
+  for (const name of fs.readdirSync(path.join(root, 'supabase/migrations')).sort()) {
+    if (name === identityMigration) beforeIdentityMigration();
     sql(
       fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
       'castly_spring_test',
     );
+  }
 } else {
   for (const name of [
     '20261022000100_accounts_and_marketplace.sql',
@@ -82,6 +98,15 @@ if (schemaPath === 'reconciliation')
     ),
     'castly_spring_test',
   );
+if (schemaPath === 'reconciliation') {
+  beforeIdentityMigration();
+  sql(
+    fs.readFileSync(path.join(root, 'supabase/migrations', identityMigration), 'utf8'),
+    'castly_spring_test',
+  );
+}
+// Reproduce hosted restrictions for EVERY Java business operation, on both schema paths.
+sql('revoke usage on schema auth from castly_api;', 'castly_spring_test');
 sql("alter role castly_api login password 'castly-api-local-test';", 'castly_spring_test');
 for (let n = 1; n <= 100; n++)
   sql(

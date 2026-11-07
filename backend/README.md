@@ -1,5 +1,7 @@
 # Castly Spring business API
 
+Current P0 proposal: [private SECURITY INVOKER request identity fallback and deployment report](../docs/milestone5/private-request-identity-deployment.md). This supersedes the auth-USAGE grant-only candidate for the requested rollout. The forward migration and matching Spring changes are review-ready; no hosted SQL or deployment has been performed.
+
 For the Milestone 5 DNS/pool lifecycle and acceptance 42501 investigation, see [the current findings and diagnostic procedure](../docs/milestone5/connectivity-and-acceptance-investigation.md). The custom pool factory explicitly binds maximum-pool-size and connection-timeout; defaults remain unchanged. No hosted database repair is applied by that investigation.
 
 The subsequent [P0 auth schema USAGE investigation](../docs/milestone5/auth-schema-usage-repair.md) reproduces the precise acceptance failure and tests a one-grant repair. Its forward migration is prepared for review only; hosted application requires explicit approval.

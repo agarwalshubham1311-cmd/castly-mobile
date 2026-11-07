@@ -1,5 +1,7 @@
 # P0 acceptance: auth schema USAGE repair for review
 
+Superseded rollout proposal: the subsequent [private invoker identity fallback](private-request-identity-deployment.md) avoids changing managed auth privileges. This document and its grant-only candidate record the earlier reproduction; do not apply that older candidate as part of the fallback rollout.
+
 2026-11-07. Branch: `feat/milestone5-booking-messaging-notifications`. **No hosted SQL has been applied.** This change adds a forward grant-only migration and local regression coverage. It changes no application code, credentials, TLS/network configuration, existing migration, RLS policy, trigger definition or function security mode.
 
 ## Root cause and matching reproduction

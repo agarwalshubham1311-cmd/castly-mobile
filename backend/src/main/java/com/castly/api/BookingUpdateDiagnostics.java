@@ -38,8 +38,8 @@ public class BookingUpdateDiagnostics {
     try {
       var identity =
           db.sql(
-                  "select auth.uid() is not null as identity_present,"
-                      + " coalesce(auth.uid()=:expected,false) as identity_matches")
+                  "select private.request_user_id() is not null as identity_present,"
+                      + " coalesce(private.request_user_id()=:expected,false) as identity_matches")
               .param("expected", expected)
               .query()
               .singleRow();
@@ -47,9 +47,9 @@ public class BookingUpdateDiagnostics {
       identityMatches = (Boolean) identity.get("identity_matches");
       var row =
           db.sql(
-                  "select exists(select 1"
-                      + " from public.users where id=auth.uid()) as account_visible, exists(select"
-                      + " 1 from public.users where id=auth.uid() and primary_role=cast(:role as"
+                  "select exists(select 1 from public.users where id=private.request_user_id()) as"
+                      + " account_visible, exists(select 1 from public.users where"
+                      + " id=private.request_user_id() and primary_role=cast(:role as"
                       + " public.account_role)) as role_matches")
               .param("role", talent ? "talent" : "client")
               .query()

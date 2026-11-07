@@ -32,8 +32,8 @@ public class NotificationController {
                   db.sql(
                       "select count(*)::int as unread_count,count(*) filter(where"
                           + " kind='message_received')::int as message_unread_count from"
-                          + " public.notifications where recipient_id=auth.uid() and read_at is"
-                          + " null"));
+                          + " public.notifications where recipient_id=private.request_user_id() and"
+                          + " read_at is null"));
           counts.put("enabled", true);
           return counts;
         });
@@ -52,18 +52,19 @@ public class NotificationController {
             one(
                 db.sql(
                         "select id from public.notifications where id=:id and"
-                            + " recipient_id=auth.uid()")
+                            + " recipient_id=private.request_user_id()")
                     .param("id", before));
           String cursor =
               before == null
                   ? ""
                   : " and (created_at,id)<(select created_at,id from public.notifications where"
-                      + " id=:before and recipient_id=auth.uid())";
+                      + " id=:before and recipient_id=private.request_user_id())";
           var query =
               db.sql(
                       "select"
                           + " id,recipient_id,kind,booking_id,conversation_id,message_id,created_at,read_at"
-                          + " from public.notifications where recipient_id=auth.uid()"
+                          + " from public.notifications where"
+                          + " recipient_id=private.request_user_id()"
                           + cursor
                           + " order by created_at desc,id desc limit :limit")
                   .param("limit", limit);
@@ -82,7 +83,7 @@ public class NotificationController {
           one(
               db.sql(
                       "update public.notifications set read_at=coalesce(read_at,now()) where id=:id"
-                          + " and recipient_id=auth.uid() returning id")
+                          + " and recipient_id=private.request_user_id() returning id")
                   .param("id", id));
           return null;
         });
@@ -100,7 +101,8 @@ public class NotificationController {
           notifications.require(db);
           db.sql(
                   "update public.notifications set read_at=now() where conversation_id=:id and"
-                      + " recipient_id=auth.uid() and kind='message_received' and read_at is null")
+                      + " recipient_id=private.request_user_id() and kind='message_received' and"
+                      + " read_at is null")
               .param("id", id)
               .update();
           return null;

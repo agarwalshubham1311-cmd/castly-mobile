@@ -37,7 +37,7 @@ public class NotificationService {
           "unread_notifications",
           db.sql(
                   "select count(*)::int from public.notifications where conversation_id=:id and"
-                      + " recipient_id=auth.uid() and read_at is null")
+                      + " recipient_id=private.request_user_id() and read_at is null")
               .param("id", UUID.fromString(conversation.get("id").toString()))
               .query(Integer.class)
               .single());
@@ -51,8 +51,8 @@ public class NotificationService {
         rows(
             db.sql(
                 "select conversation_id,count(*)::int as total from public.notifications where"
-                    + " recipient_id=auth.uid() and conversation_id is not null and read_at is null"
-                    + " group by conversation_id"));
+                    + " recipient_id=private.request_user_id() and conversation_id is not null and"
+                    + " read_at is null group by conversation_id"));
     var byId = new HashMap<String, Object>();
     for (var count : counts) byId.put(count.get("conversation_id").toString(), count.get("total"));
     for (var row : conversations)
