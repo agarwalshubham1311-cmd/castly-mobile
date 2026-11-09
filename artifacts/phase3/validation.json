@@ -21,5 +21,11 @@
   "live_google_purchase": "not performed",
   "hosted_schema_or_deployment": "not performed",
   "portrait_regression": "pass",
-  "screenshot_validation": "pass"
+  "screenshot_validation": "pass",
+  "delivery": {
+    "feature_push": "succeeded",
+    "branch": "feat/phase3-subscriptions-monetization",
+    "draft_pr": "blocked",
+    "error": "GitHub GraphQL API Forbidden; gh auth status reports invalid GH_TOKEN"
+  }
 }

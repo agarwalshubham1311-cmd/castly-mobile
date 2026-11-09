@@ -331,97 +331,97 @@ INSERT 0 3
 UPDATE 2
 UPDATE 1
 INSERT 0 1
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
-              set_config              
+              set_config
 --------------------------------------
  00000000-0000-0000-0000-000000000011
 (1 row)
 
 SET
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
 RESET
 SET
 INSERT 0 1
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 RESET
-              set_config              
+              set_config
 --------------------------------------
  00000000-0000-0000-0000-000000000012
 (1 row)
@@ -430,68 +430,68 @@ SET
 UPDATE 1
 INSERT 0 1
 INSERT 0 1
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
 RESET
-              set_config              
+              set_config
 --------------------------------------
  00000000-0000-0000-0000-000000000013
 (1 row)
 
 SET
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 RESET
 SET
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 RESET
-              set_config              
+              set_config
 --------------------------------------
  00000000-0000-0000-0000-000000000011
 (1 row)
 
 SET
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 RESET
 SET
 UPDATE 1
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 ROLLBACK
@@ -530,33 +530,33 @@ INSERT 0 3
 UPDATE 1
 UPDATE 1
 INSERT 0 1
-              set_config              
+              set_config
 --------------------------------------
  b0000000-0000-0000-0000-000000000001
 (1 row)
 
 SET
 INSERT 0 1
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
 RESET
-              set_config              
+              set_config
 --------------------------------------
  b0000000-0000-0000-0000-000000000002
 (1 row)
 
 SET
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 UPDATE 1
@@ -565,69 +565,69 @@ RESET
 INSERT 0 1
 SET
 INSERT 0 1
- denied 
+ denied
 --------
- 
+
 (1 row)
 
 RESET
-              set_config              
+              set_config
 --------------------------------------
  b0000000-0000-0000-0000-000000000001
 (1 row)
 
 SET
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
 RESET
 SET
 UPDATE 2
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 RESET
-              set_config              
+              set_config
 --------------------------------------
  b0000000-0000-0000-0000-000000000003
 (1 row)
 
 SET
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 RESET
 SET
- denied 
+ denied
 --------
- 
+
 (1 row)
 
 RESET
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 ROLLBACK
@@ -656,111 +656,111 @@ UPDATE 1
 INSERT 0 1
 CREATE TRIGGER
 CREATE TRIGGER
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 SET
-              set_config              |                   set_config                   
+              set_config              |                   set_config
 --------------------------------------+------------------------------------------------
  c1000000-0000-0000-0000-000000000001 | {"sub":"c1000000-0000-0000-0000-000000000001"}
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 INSERT 0 1
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
-              set_config              |                   set_config                   
+              set_config              |                   set_config
 --------------------------------------+------------------------------------------------
  c1000000-0000-0000-0000-000000000002 | {"sub":"c1000000-0000-0000-0000-000000000002"}
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 UPDATE 1
 INSERT 0 1
-              set_config              |                   set_config                   
+              set_config              |                   set_config
 --------------------------------------+------------------------------------------------
  c1000000-0000-0000-0000-000000000001 | {"sub":"c1000000-0000-0000-0000-000000000001"}
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 INSERT 0 1
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 RESET
 SET
-              set_config              |                   set_config                   
+              set_config              |                   set_config
 --------------------------------------+------------------------------------------------
  c1000000-0000-0000-0000-000000000002 | {"sub":"c1000000-0000-0000-0000-000000000002"}
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 ROLLBACK
@@ -788,100 +788,100 @@ GRANT
 GRANT
 INSERT 0 2
 UPDATE 2
-              set_config              
+              set_config
 --------------------------------------
  00000000-0000-0000-0000-000000000051
 (1 row)
 
 SET
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
 RESET
 SET
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
- set_config 
+ set_config
 ------------
  yes
 (1 row)
 
 INSERT 0 1
 INSERT 0 1
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- set_config 
+ set_config
 ------------
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
-              set_config              
+              set_config
 --------------------------------------
  00000000-0000-0000-0000-000000000052
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- eq 
+ eq
 ----
- 
+
 (1 row)
 
- set_config 
+ set_config
 ------------
  yes
 (1 row)
 
- denied 
+ denied
 --------
- 
+
 (1 row)
 
 RESET
- eq 
+ eq
 ----
- 
+
 (1 row)
 
 ROLLBACK

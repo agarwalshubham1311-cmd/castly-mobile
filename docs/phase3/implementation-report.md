@@ -75,7 +75,7 @@ Tests include concurrent paid verification, duplicate/linked tokens, cross-accou
 
 Dedicated worktree: `/workspace/castly-phase3`; branch: `feat/phase3-subscriptions-monetization`. The latest remote development branch `02361e7f23e7025a1ca93ee7f6f384b6f5b4ce29` was fetched and reconciled. Its original Phase 3 design/helper contracts and five tests were retained, as were `com.castly.mobile` and preview APK intent. Original local Render preparation d065bf5 was preserved as d60aab4. No base/main/parallel APK branch was overwritten.
 
-Implementation commits: d60aab4 (preserved Render preparation), f15325d (M1), f172907 (M2), 1a143ea (M3), 62a3079 (M4/security/QA), 56bd066 (final Expo-native adapter and independent checkout/restore gates). Final documentation/evidence commits follow these. See [PR body](pr-description.md) for review scope and final delivery status.
+Implementation commits: d60aab4 (preserved Render preparation), f15325d (M1), f172907 (M2), 1a143ea (M3), 62a3079 (M4/security/QA), 56bd066 (final Expo-native adapter and independent checkout/restore gates). Final documentation/evidence commits follow these. The feature branch was successfully published. Creating a draft PR failed with GitHub API `Post "https://api.github.com/graphql": Forbidden`; GitHub CLI authentication status also reported invalid GH_TOKEN. No credential settings were changed. There is no PR URL from this attempt; [review/create the PR](https://github.com/agarwalshubham1311-cmd/castly-mobile/compare/feat%2Fmilestone5-booking-messaging-notifications...feat%2Fphase3-subscriptions-monetization?expand=1) with the [prepared PR body](pr-description.md).
 
 ## Release blockers and limits
 
