@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { promotionUrl, membershipExpiry } from '../src/subscriptions/catalog.ts';
 test('public promotion links are normalized and never fetched by the client',()=>{
- assert.equal(promotionUrl('https://www.instagram.com/reel/abc/?tracking=x'),'https://www.instagram.com/reel/abc');
+ assert.equal(promotionUrl('https://www.instagram.com/reel/abc/?tracking=x'),'https://instagram.com/reel/abc');
  for(const bad of ['http://youtube.com/watch/a','https://evil.example/x','https://youtube.com@evil.example/x','https://localhost/a','https://x.com/']) assert.throws(()=>promotionUrl(bad));
 });
 test('membership expiry comes from server entitlement, including perpetual legacy grants',()=>{
@@ -10,3 +10,5 @@ test('membership expiry comes from server entitlement, including perpetual legac
  assert.equal(membershipExpiry({...base,entitlements:[{entitlement:'creator_pro',valid_until:null}]}),null);
  assert.equal(membershipExpiry({...base,entitlements:[]}),undefined);
 });
+
+test('YouTube video identity survives tracking normalization',()=>assert.equal(promotionUrl('https://www.youtube.com/watch?v=abc12345&t=20'),'https://youtube.com/watch?v=abc12345'));

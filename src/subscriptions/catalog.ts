@@ -5,7 +5,13 @@ export type SubscriptionOrder = { id: string; product_id: string; state: string;
 export function promotionUrl(value: string): string {
   const url = new URL(value.trim());
   if (url.protocol !== 'https:' || url.username || url.password || url.port || !['instagram.com','www.instagram.com','youtube.com','www.youtube.com','youtu.be','tiktok.com','www.tiktok.com','x.com','www.x.com'].includes(url.hostname) || url.pathname === '/') throw new Error('Enter a public HTTPS post URL from Instagram, YouTube, TikTok or X.');
-  return `${url.origin}${url.pathname.replace(/\/$/, '')}`;
+  const host = url.hostname.replace(/^www\./, '');
+  if (host === 'youtube.com' && url.pathname === '/watch') {
+    const id=url.searchParams.get('v');
+    if(!id || !/^[A-Za-z0-9_-]{6,100}$/.test(id)) throw new Error('Enter a valid YouTube video URL.');
+    return `https://${host}/watch?v=${id}`;
+  }
+  return `https://${host}${url.pathname.replace(/\/$/, '')}`;
 }
 export function membershipExpiry(membership: Membership): string | null | undefined {
   return membership.entitlements.find(x => x.entitlement === 'creator_pro')?.valid_until;

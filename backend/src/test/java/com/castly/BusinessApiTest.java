@@ -1563,4 +1563,33 @@ class BusinessApiTest {
       db.sql("select * from public.subscription_grants where user_id=:u").param("u",UUID.fromString(TALENT)).query().listOfRows().size()));
   }
 
+  @Test
+  void foundingOfferRequiresCreatorAndTrustedReviewerAndGrantsOnce() throws Exception {
+    call("POST","/api/v1/subscriptions/promotions/claims",CLIENT,"{\"post_url\":\"https://instagram.com/reel/client\"}")
+      .andExpect(status().isForbidden());
+    call("POST","/api/v1/subscriptions/promotions/claims",TALENT,"{\"post_url\":\"https://localhost/private\"}")
+      .andExpect(status().isBadRequest());
+    var claim=object(call("POST","/api/v1/subscriptions/promotions/claims",TALENT,"{\"post_url\":\"https://www.instagram.com/reel/founding-test/?tracking=1\"}")
+      .andExpect(status().isOk()));
+    String id=claim.get("id").toString();
+    call("POST","/api/v1/subscriptions/promotions/claims",TALENT,"{\"post_url\":\"https://instagram.com/reel/founding-test\"}")
+      .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id));
+    call("GET","/api/v1/admin/subscriptions/promotions",TALENT,null).andExpect(status().isForbidden());
+    call("POST","/api/v1/admin/subscriptions/promotions/"+id+"/approve",OUTSIDER,"{\"reason\":\"Verified public creator video\"}").andExpect(status().isForbidden());
+    var process=new ProcessBuilder("docker","exec","castly-spring-test-db","psql","-U","postgres","-d","castly_spring_test","-v","ON_ERROR_STOP=1","-c","insert into private.subscription_admins values ('"+OUTSIDER+"') on conflict do nothing").start();
+    assertEquals(0,process.waitFor());
+    try {
+      call("GET","/api/v1/admin/subscriptions/promotions",OUTSIDER,null).andExpect(status().isOk());
+      for(int n=0;n<2;n++)call("POST","/api/v1/admin/subscriptions/promotions/"+id+"/approve",OUTSIDER,"{\"reason\":\"Verified public creator video\"}")
+        .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("approved"));
+      call("POST","/api/v1/admin/subscriptions/promotions/"+id+"/reject",OUTSIDER,"{\"reason\":\"Cannot reverse\"}").andExpect(status().isConflict());
+      call("GET","/api/v1/subscriptions/me",TALENT,null).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(true));
+      assertEquals((Object)1L,data.as(UUID.fromString(TALENT),db->db.sql("select count(*) from public.subscription_grants where source_key=:key").param("key","promotion:"+id).query(Long.class).single()));
+      call("GET","/api/v1/subscriptions/promotions/me",CLIENT,null).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+    } finally {
+      var cleanup=new ProcessBuilder("docker","exec","castly-spring-test-db","psql","-U","postgres","-d","castly_spring_test","-c","delete from public.subscription_audit_logs where resource_id='"+id+"'; delete from public.subscription_grants where source_key='promotion:"+id+"'; delete from public.subscription_entitlements where user_id='"+TALENT+"'; delete from public.promotion_claims where id='"+id+"'; delete from private.subscription_admins where user_id='"+OUTSIDER+"'").start();
+      assertEquals(0,cleanup.waitFor());
+    }
+  }
+
 }
