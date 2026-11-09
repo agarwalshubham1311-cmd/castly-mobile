@@ -1,1 +1,1 @@
-export {default} from '../../src/subscriptions/FoundingOfferScreen';
+export { default } from '../../src/subscriptions/FoundingOfferScreen';

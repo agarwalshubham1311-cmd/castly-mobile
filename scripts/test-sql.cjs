@@ -49,5 +49,8 @@ if (!remote) {
 }
 testSQL(fs.readFileSync(path.join(__dirname, '../supabase/tests/spring-policies.sql'), 'utf8'));
 testSQL(fs.readFileSync(path.join(__dirname, '../supabase/tests/notifications.sql'), 'utf8'));
-testSQL(fs.readFileSync(path.join(__dirname, '../supabase/tests/invoker-notifications.sql'), 'utf8'));
+testSQL(
+  fs.readFileSync(path.join(__dirname, '../supabase/tests/invoker-notifications.sql'), 'utf8'),
+);
+testSQL(fs.readFileSync(path.join(__dirname, '../supabase/tests/subscriptions.sql'), 'utf8'));
 console.log('PASS: migrations and RLS policy tests on PostgreSQL. Test fixtures rolled back.');

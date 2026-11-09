@@ -1,25 +1,72 @@
-export type Plan = { id: string; name: string; portfolio_limit: number | null; premium_discovery: boolean; google_product_id: string | null; google_base_plan_id: string | null };
-export type Membership = { id: string; name: string; portfolio_limit: number | null; premium_discovery: boolean; is_creator_pro: boolean; entitlements: { entitlement: string; valid_until: string | null }[] };
-export type PromotionClaim = { id: string; post_url: string; status: 'pending' | 'approved' | 'rejected'; reason: string | null; created_at: string; reviewed_at: string | null };
-export type SubscriptionOrder = { id: string; product_id: string; state: string; expires_at: string | null; auto_renewing: boolean };
+export type Plan = {
+  id: string;
+  name: string;
+  portfolio_limit: number | null;
+  premium_discovery: boolean;
+  google_product_id: string | null;
+  google_base_plan_id: string | null;
+};
+export type Membership = {
+  id: string;
+  name: string;
+  portfolio_limit: number | null;
+  premium_discovery: boolean;
+  is_creator_pro: boolean;
+  entitlements: { entitlement: string; valid_until: string | null }[];
+};
+export type PromotionClaim = {
+  id: string;
+  post_url: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reason: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+};
+export type SubscriptionOrder = {
+  id: string;
+  product_id: string;
+  state: string;
+  expires_at: string | null;
+  auto_renewing: boolean;
+};
 export function promotionUrl(value: string): string {
   const url = new URL(value.trim());
-  if (url.protocol !== 'https:' || url.username || url.password || url.port || !['instagram.com','www.instagram.com','youtube.com','www.youtube.com','youtu.be','tiktok.com','www.tiktok.com','x.com','www.x.com'].includes(url.hostname) || url.pathname === '/') throw new Error('Enter a public HTTPS post URL from Instagram, YouTube, TikTok or X.');
+  if (
+    url.protocol !== 'https:' ||
+    url.username ||
+    url.password ||
+    url.port ||
+    ![
+      'instagram.com',
+      'www.instagram.com',
+      'youtube.com',
+      'www.youtube.com',
+      'youtu.be',
+      'tiktok.com',
+      'www.tiktok.com',
+      'x.com',
+      'www.x.com',
+    ].includes(url.hostname) ||
+    url.pathname === '/'
+  )
+    throw new Error('Enter a public HTTPS post URL from Instagram, YouTube, TikTok or X.');
   const host = url.hostname.replace(/^www\./, '');
-  if(host === 'youtu.be' || (host === 'youtube.com' && url.pathname.startsWith('/shorts/'))) {
-    const id=url.pathname.replace(/\/$/, '').split('/').pop();
-    if(!id || !/^[A-Za-z0-9_-]{6,100}$/.test(id)) throw new Error('Enter a valid YouTube video URL.');
+  if (host === 'youtu.be' || (host === 'youtube.com' && url.pathname.startsWith('/shorts/'))) {
+    const id = url.pathname.replace(/\/$/, '').split('/').pop();
+    if (!id || !/^[A-Za-z0-9_-]{6,100}$/.test(id))
+      throw new Error('Enter a valid YouTube video URL.');
     return `https://youtube.com/watch?v=${id}`;
   }
   if (host === 'youtube.com' && url.pathname === '/watch') {
-    const id=url.searchParams.get('v');
-    if(!id || !/^[A-Za-z0-9_-]{6,100}$/.test(id)) throw new Error('Enter a valid YouTube video URL.');
+    const id = url.searchParams.get('v');
+    if (!id || !/^[A-Za-z0-9_-]{6,100}$/.test(id))
+      throw new Error('Enter a valid YouTube video URL.');
     return `https://${host}/watch?v=${id}`;
   }
   return `https://${host}${url.pathname.replace(/\/$/, '')}`;
 }
 export function membershipExpiry(membership: Membership): string | null | undefined {
-  return membership.entitlements.find(x => x.entitlement === 'creator_pro')?.valid_until;
+  return membership.entitlements.find((x) => x.entitlement === 'creator_pro')?.valid_until;
 }
 /** Phase 3 M1 catalog — no checkout, no payment activation. */
 export type SubscriptionPlanCode = 'free' | 'creator_pro';

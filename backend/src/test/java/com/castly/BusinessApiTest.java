@@ -43,8 +43,12 @@ class BusinessApiTest {
     }
   }
 
-  @org.springframework.test.context.bean.override.mockito.MockitoBean com.castly.subscription.GooglePlayGateway google;
+  @org.springframework.test.context.bean.override.mockito.MockitoBean
+  com.castly.subscription.GooglePlayGateway google;
+
   @Autowired com.castly.subscription.GooglePlayService googleService;
+  @Autowired com.castly.subscription.PromotionService promotionService;
+  @Autowired com.castly.subscription.SubscriptionService membershipService;
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper json;
   @Autowired ActorDatabase data;
@@ -1546,92 +1550,553 @@ class BusinessApiTest {
     }
     call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
   }
+
   @Test
   void subscriptionCatalogIsPublicAndMembershipIsPrivate() throws Exception {
-    call("GET", "/api/v1/subscriptions/plans", null, null).andExpect(status().isOk())
-      .andExpect(jsonPath("$[0].id").value("free"))
-      .andExpect(jsonPath("$[1].google_product_id").isEmpty());
+    call("GET", "/api/v1/subscriptions/plans", null, null)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].id").value("free"))
+        .andExpect(jsonPath("$[1].google_product_id").isEmpty());
     call("GET", "/api/v1/subscriptions/me", null, null).andExpect(status().isUnauthorized());
-    call("GET", "/api/v1/subscriptions/me", TALENT, null).andExpect(status().isOk())
-      .andExpect(jsonPath("$.is_creator_pro").value(false));
-    call("GET", "/api/v1/subscriptions/history?limit=101", TALENT, null).andExpect(status().isBadRequest());
-    call("GET", "/api/v1/subscriptions/history", TALENT, null).andExpect(status().isOk())
-      .andExpect(jsonPath("$.length()").value(0));
+    call("GET", "/api/v1/subscriptions/me", TALENT, null)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.is_creator_pro").value(false));
+    call("GET", "/api/v1/subscriptions/history?limit=101", TALENT, null)
+        .andExpect(status().isBadRequest());
+    call("GET", "/api/v1/subscriptions/history", TALENT, null)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0));
   }
 
   @Test
   void subscriptionLedgerDeniesUnverifiedSelfGrant() {
-    assertThrows(org.springframework.dao.DataAccessException.class, () -> data.as(UUID.fromString(TALENT), db ->
-      db.sql("insert into public.subscription_grants(user_id,entitlement,source,source_key) values(:u,'creator_pro','google_play','forged')")
-        .param("u",UUID.fromString(TALENT)).update()));
-    assertEquals((Object) 0, data.as(UUID.fromString(OUTSIDER), db ->
-      db.sql("select * from public.subscription_grants where user_id=:u").param("u",UUID.fromString(TALENT)).query().listOfRows().size()));
+    assertThrows(
+        org.springframework.dao.DataAccessException.class,
+        () ->
+            data.as(
+                UUID.fromString(TALENT),
+                db ->
+                    db.sql(
+                            "insert into"
+                                + " public.subscription_grants(user_id,entitlement,source,source_key)"
+                                + " values(:u,'creator_pro','google_play','forged')")
+                        .param("u", UUID.fromString(TALENT))
+                        .update()));
+    assertEquals(
+        (Object) 0,
+        data.as(
+            UUID.fromString(OUTSIDER),
+            db ->
+                db.sql("select * from public.subscription_grants where user_id=:u")
+                    .param("u", UUID.fromString(TALENT))
+                    .query()
+                    .listOfRows()
+                    .size()));
   }
 
   @Test
   void foundingOfferRequiresCreatorAndTrustedReviewerAndGrantsOnce() throws Exception {
-    call("POST","/api/v1/subscriptions/promotions/claims",CLIENT,"{\"post_url\":\"https://instagram.com/reel/client\"}")
-      .andExpect(status().isForbidden());
-    call("POST","/api/v1/subscriptions/promotions/claims",TALENT,"{\"post_url\":\"https://localhost/private\"}")
-      .andExpect(status().isBadRequest());
-    var claim=object(call("POST","/api/v1/subscriptions/promotions/claims",TALENT,"{\"post_url\":\"https://www.instagram.com/reel/founding-test/?tracking=1\"}")
-      .andExpect(status().isOk()));
-    String id=claim.get("id").toString();
-    call("POST","/api/v1/subscriptions/promotions/claims",TALENT,"{\"post_url\":\"https://instagram.com/reel/founding-test\"}")
-      .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id));
-    call("GET","/api/v1/admin/subscriptions/promotions",TALENT,null).andExpect(status().isForbidden());
-    call("POST","/api/v1/admin/subscriptions/promotions/"+id+"/approve",OUTSIDER,"{\"reason\":\"Verified public creator video\"}").andExpect(status().isForbidden());
-    var process=new ProcessBuilder("docker","exec","castly-spring-test-db","psql","-U","postgres","-d","castly_spring_test","-v","ON_ERROR_STOP=1","-c","insert into private.subscription_admins values ('"+OUTSIDER+"') on conflict do nothing").start();
-    assertEquals(0,process.waitFor());
+    call(
+            "POST",
+            "/api/v1/subscriptions/promotions/claims",
+            CLIENT,
+            "{\"post_url\":\"https://instagram.com/reel/client\"}")
+        .andExpect(status().isForbidden());
+    call(
+            "POST",
+            "/api/v1/subscriptions/promotions/claims",
+            TALENT,
+            "{\"post_url\":\"https://localhost/private\"}")
+        .andExpect(status().isBadRequest());
+    var claim =
+        object(
+            call(
+                    "POST",
+                    "/api/v1/subscriptions/promotions/claims",
+                    TALENT,
+                    "{\"post_url\":\"https://www.instagram.com/reel/founding-test/?tracking=1\"}")
+                .andExpect(status().isOk()));
+    String id = claim.get("id").toString();
+    call(
+            "POST",
+            "/api/v1/subscriptions/promotions/claims",
+            TALENT,
+            "{\"post_url\":\"https://instagram.com/reel/founding-test\"}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(id));
+    call("GET", "/api/v1/admin/subscriptions/promotions", TALENT, null)
+        .andExpect(status().isForbidden());
+    call(
+            "POST",
+            "/api/v1/admin/subscriptions/promotions/" + id + "/approve",
+            OUTSIDER,
+            "{\"reason\":\"Verified public creator video\"}")
+        .andExpect(status().isForbidden());
+    var process =
+        new ProcessBuilder(
+                "docker",
+                "exec",
+                "castly-spring-test-db",
+                "psql",
+                "-U",
+                "postgres",
+                "-d",
+                "castly_spring_test",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-c",
+                "insert into private.subscription_admins values ('"
+                    + OUTSIDER
+                    + "') on conflict do nothing")
+            .start();
+    assertEquals(0, process.waitFor());
     try {
-      call("GET","/api/v1/admin/subscriptions/promotions",OUTSIDER,null).andExpect(status().isOk());
-      for(int n=0;n<2;n++)call("POST","/api/v1/admin/subscriptions/promotions/"+id+"/approve",OUTSIDER,"{\"reason\":\"Verified public creator video\"}")
-        .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("approved"));
-      call("POST","/api/v1/admin/subscriptions/promotions/"+id+"/reject",OUTSIDER,"{\"reason\":\"Cannot reverse\"}").andExpect(status().isConflict());
-      call("GET","/api/v1/subscriptions/me",TALENT,null).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(true));
-      assertEquals((Object)1L,data.as(UUID.fromString(TALENT),db->db.sql("select count(*) from public.subscription_grants where source_key=:key").param("key","promotion:"+id).query(Long.class).single()));
-      call("GET","/api/v1/subscriptions/promotions/me",CLIENT,null).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+      call("GET", "/api/v1/admin/subscriptions/promotions", OUTSIDER, null)
+          .andExpect(status().isOk());
+      for (int n = 0; n < 2; n++)
+        call(
+                "POST",
+                "/api/v1/admin/subscriptions/promotions/" + id + "/approve",
+                OUTSIDER,
+                "{\"reason\":\"Verified public creator video\"}")
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("approved"));
+      call(
+              "POST",
+              "/api/v1/admin/subscriptions/promotions/" + id + "/reject",
+              OUTSIDER,
+              "{\"reason\":\"Cannot reverse\"}")
+          .andExpect(status().isConflict());
+      call("GET", "/api/v1/subscriptions/me", TALENT, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.is_creator_pro").value(true));
+      assertEquals(
+          (Object) 1L,
+          data.as(
+              UUID.fromString(TALENT),
+              db ->
+                  db.sql("select count(*) from public.subscription_grants where source_key=:key")
+                      .param("key", "promotion:" + id)
+                      .query(Long.class)
+                      .single()));
+      call("GET", "/api/v1/subscriptions/promotions/me", CLIENT, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.length()").value(0));
     } finally {
-      var cleanup=new ProcessBuilder("docker","exec","castly-spring-test-db","psql","-U","postgres","-d","castly_spring_test","-c","delete from public.subscription_audit_logs where resource_id='"+id+"'; delete from public.subscription_grants where source_key='promotion:"+id+"'; delete from public.subscription_entitlements where user_id='"+TALENT+"'; delete from public.promotion_claims where id='"+id+"'; delete from private.subscription_admins where user_id='"+OUTSIDER+"'").start();
-      assertEquals(0,cleanup.waitFor());
+      var cleanup =
+          new ProcessBuilder(
+                  "docker",
+                  "exec",
+                  "castly-spring-test-db",
+                  "psql",
+                  "-U",
+                  "postgres",
+                  "-d",
+                  "castly_spring_test",
+                  "-c",
+                  "delete from public.subscription_audit_logs where resource_id='"
+                      + id
+                      + "'; delete from public.subscription_grants where source_key='promotion:"
+                      + id
+                      + "'; delete from public.subscription_entitlements where user_id='"
+                      + TALENT
+                      + "'; delete from public.promotion_claims where id='"
+                      + id
+                      + "'; delete from private.subscription_admins where user_id='"
+                      + OUTSIDER
+                      + "'")
+              .start();
+      assertEquals(0, cleanup.waitFor());
     }
   }
 
   private void ownerFixture(String sql) throws Exception {
-    var process=new ProcessBuilder("docker","exec","castly-spring-test-db","psql","-U","postgres","-d","castly_spring_test","-v","ON_ERROR_STOP=1","-c",sql).start();
-    assertEquals(0,process.waitFor(),new String(process.getErrorStream().readAllBytes()));
+    var process =
+        new ProcessBuilder(
+                "docker",
+                "exec",
+                "castly-spring-test-db",
+                "psql",
+                "-U",
+                "postgres",
+                "-d",
+                "castly_spring_test",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-c",
+                sql)
+            .start();
+    assertEquals(0, process.waitFor(), new String(process.getErrorStream().readAllBytes()));
   }
+
   @Test
   void googleLifecycleIsAuthoritativeIdempotentAndReplaySafe() throws Exception {
-    ownerFixture("update public.subscription_plans set google_product_id='creator_pro_fixture',google_base_plan_id='annual' where id='creator_pro'");
+    ownerFixture(
+        "update public.subscription_plans set"
+            + " google_product_id='creator_pro_fixture',google_base_plan_id='annual' where"
+            + " id='creator_pro'");
     org.mockito.Mockito.when(google.configured()).thenReturn(true);
-    String token="fixture-purchase-token-123456789";
-    String hash=com.castly.subscription.GooglePlayService.hash(token);
-    var state=new java.util.concurrent.atomic.AtomicReference<>("ACTIVE");
-    org.mockito.Mockito.when(google.get("com.castly.fixture",token)).thenAnswer(invocation->json.readTree("{\"subscriptionState\":\"SUBSCRIPTION_STATE_"+state.get()+"\",\"acknowledgementState\":\"ACKNOWLEDGEMENT_STATE_PENDING\",\"externalAccountIdentifiers\":{\"obfuscatedExternalAccountId\":\""+googleService.accountId(UUID.fromString(TALENT))+"\"},\"lineItems\":[{\"productId\":\"creator_pro_fixture\",\"offerDetails\":{\"basePlanId\":\"annual\"},\"expiryTime\":\"2030-11-09T00:00:00Z\",\"latestSuccessfulOrderId\":\"GPA.fixture.123\",\"autoRenewingPlan\":{\"autoRenewEnabled\":true}}]}"));
-    String body=json.writeValueAsString(Map.of("purchase_token",token));
+    String token = "fixture-purchase-token-123456789";
+    String hash = com.castly.subscription.GooglePlayService.hash(token);
+    var state = new java.util.concurrent.atomic.AtomicReference<>("ACTIVE");
+    org.mockito.Mockito.when(google.get("com.castly.fixture", token))
+        .thenAnswer(
+            invocation ->
+                json.readTree(
+                    "{\"subscriptionState\":\"SUBSCRIPTION_STATE_"
+                        + state.get()
+                        + "\",\"acknowledgementState\":\"ACKNOWLEDGEMENT_STATE_PENDING\",\"externalAccountIdentifiers\":{\"obfuscatedExternalAccountId\":\""
+                        + googleService.accountId(UUID.fromString(TALENT))
+                        + "\"},\"lineItems\":[{\"productId\":\"creator_pro_fixture\",\"offerDetails\":{\"basePlanId\":\"annual\"},\"expiryTime\":\"2030-11-09T00:00:00Z\",\"latestSuccessfulOrderId\":\"GPA.fixture.123\",\"autoRenewingPlan\":{\"autoRenewEnabled\":true}}]}"));
+    String body = json.writeValueAsString(Map.of("purchase_token", token));
     try {
-      call("GET","/api/v1/subscriptions/google-play/configuration",TALENT,null).andExpect(status().isOk()).andExpect(jsonPath("$.enabled").value(true));
-      for(int n=0;n<2;n++)call("POST","/api/v1/subscriptions/google-play/verify",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(true));
-      assertEquals((Object)1L,data.as(UUID.fromString(TALENT),db->db.sql("select count(*) from public.subscription_orders where token_hash=:h").param("h",hash).query(Long.class).single()));
-      call("POST","/api/v1/subscriptions/google-play/verify",OUTSIDER,body).andExpect(status().isForbidden());
-      assertThrows(org.springframework.dao.DataAccessException.class,()->data.as(UUID.fromString(OUTSIDER),db->db.sql("insert into public.subscription_grants(user_id,entitlement,source,source_key) values(:u,'creator_pro','google_play','forged-google')").param("u",UUID.fromString(OUTSIDER)).update()));
-      assertEquals((Object)0,data.as(UUID.fromString(TALENT),db->db.sql("update public.subscription_orders set state='revoked' where token_hash=:h").param("h",hash).update()));
-      state.set("ON_HOLD");call("POST","/api/v1/subscriptions/google-play/restore",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(false));
-      state.set("IN_GRACE_PERIOD");call("POST","/api/v1/subscriptions/google-play/restore",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(true));
-      state.set("CANCELED");call("POST","/api/v1/subscriptions/google-play/restore",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(true));
-      String event=Base64.getEncoder().encodeToString(json.writeValueAsBytes(Map.of("packageName","com.castly.fixture","subscriptionNotification",Map.of("purchaseToken",token,"notificationType",12))));
-      googleService.rtdn("fixture-rtdn-1",event);googleService.rtdn("fixture-rtdn-1",event);
-      call("GET","/api/v1/subscriptions/me",TALENT,null).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(false));
-      state.set("ACTIVE");call("POST","/api/v1/subscriptions/google-play/restore",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.purchase_state").value("revoked"));
-      call("GET","/api/v1/subscriptions/history",TALENT,null).andExpect(status().isOk()).andExpect(jsonPath("$[0].token_hash").doesNotExist()).andExpect(jsonPath("$[0].provider_order_id").doesNotExist());
-      mvc.perform(post("/api/v1/subscriptions/google-play/rtdn").header("Authorization","Bearer forged").contentType("application/json").content("{}" )).andExpect(status().isUnauthorized());
-      org.mockito.Mockito.when(google.get("com.castly.fixture","fixture-error-token-1234")).thenThrow(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,"Google unavailable"));
-      call("POST","/api/v1/subscriptions/google-play/verify",TALENT,"{\"purchase_token\":\"fixture-error-token-1234\"}").andExpect(status().isServiceUnavailable());
-      assertEquals((Object)0L,data.as(UUID.fromString(TALENT),db->db.sql("select count(*) from public.subscription_orders where token_hash=:h").param("h",com.castly.subscription.GooglePlayService.hash("fixture-error-token-1234")).query(Long.class).single()));
-    }finally{
-      ownerFixture("delete from public.subscription_audit_logs where action like 'google_%'; delete from public.subscription_events; delete from public.subscription_grants where source='google_play'; delete from public.subscription_orders; delete from private.subscription_purchase_owners; delete from private.subscription_rtdn_receipts; delete from public.subscription_entitlements where user_id='"+TALENT+"'; update public.subscription_plans set google_product_id=null,google_base_plan_id=null where id='creator_pro'");
+      call("GET", "/api/v1/subscriptions/google-play/configuration", TALENT, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.enabled").value(true));
+      for (int n = 0; n < 2; n++)
+        call("POST", "/api/v1/subscriptions/google-play/verify", TALENT, body)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.is_creator_pro").value(true));
+      assertEquals(
+          (Object) 1L,
+          data.as(
+              UUID.fromString(TALENT),
+              db ->
+                  db.sql("select count(*) from public.subscription_orders where token_hash=:h")
+                      .param("h", hash)
+                      .query(Long.class)
+                      .single()));
+      call("POST", "/api/v1/subscriptions/google-play/verify", OUTSIDER, body)
+          .andExpect(status().isForbidden());
+      call(
+              "POST",
+              "/api/v1/subscriptions/google-play/verify",
+              "00000000-0000-0000-0000-000000000005",
+              body)
+          .andExpect(status().isConflict());
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () ->
+              data.as(
+                  UUID.fromString(OUTSIDER),
+                  db ->
+                      db.sql(
+                              "insert into"
+                                  + " public.subscription_grants(user_id,entitlement,source,source_key)"
+                                  + " values(:u,'creator_pro','google_play','forged-google')")
+                          .param("u", UUID.fromString(OUTSIDER))
+                          .update()));
+      assertEquals(
+          (Object) 0,
+          data.as(
+              UUID.fromString(TALENT),
+              db ->
+                  db.sql(
+                          "update public.subscription_orders set state='revoked' where"
+                              + " token_hash=:h")
+                      .param("h", hash)
+                      .update()));
+      state.set("ON_HOLD");
+      call("POST", "/api/v1/subscriptions/google-play/restore", TALENT, body)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.is_creator_pro").value(false));
+      state.set("IN_GRACE_PERIOD");
+      call("POST", "/api/v1/subscriptions/google-play/restore", TALENT, body)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.is_creator_pro").value(true));
+      state.set("CANCELED");
+      call("POST", "/api/v1/subscriptions/google-play/restore", TALENT, body)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.is_creator_pro").value(true));
+      String event =
+          Base64.getEncoder()
+              .encodeToString(
+                  json.writeValueAsBytes(
+                      Map.of(
+                          "packageName",
+                          "com.castly.fixture",
+                          "subscriptionNotification",
+                          Map.of("purchaseToken", token, "notificationType", 12))));
+      googleService.rtdn("fixture-rtdn-1", event);
+      googleService.rtdn("fixture-rtdn-1", event);
+      call("GET", "/api/v1/subscriptions/me", TALENT, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.is_creator_pro").value(false));
+      state.set("ACTIVE");
+      call("POST", "/api/v1/subscriptions/google-play/restore", TALENT, body)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.purchase_state").value("revoked"));
+      call("GET", "/api/v1/subscriptions/history", TALENT, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$[0].token_hash").doesNotExist())
+          .andExpect(jsonPath("$[0].provider_order_id").doesNotExist());
+      mvc.perform(
+              post("/api/v1/subscriptions/google-play/rtdn")
+                  .header("Authorization", "Bearer forged")
+                  .contentType("application/json")
+                  .content("{}"))
+          .andExpect(status().isUnauthorized());
+      org.mockito.Mockito.when(google.get("com.castly.fixture", "fixture-error-token-1234"))
+          .thenThrow(
+              new org.springframework.web.server.ResponseStatusException(
+                  org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "Google unavailable"));
+      call(
+              "POST",
+              "/api/v1/subscriptions/google-play/verify",
+              TALENT,
+              "{\"purchase_token\":\"fixture-error-token-1234\"}")
+          .andExpect(status().isServiceUnavailable());
+      assertEquals(
+          (Object) 0L,
+          data.as(
+              UUID.fromString(TALENT),
+              db ->
+                  db.sql("select count(*) from public.subscription_orders where token_hash=:h")
+                      .param(
+                          "h",
+                          com.castly.subscription.GooglePlayService.hash(
+                              "fixture-error-token-1234"))
+                      .query(Long.class)
+                      .single()));
+    } finally {
+      ownerFixture(
+          "delete from public.subscription_audit_logs where action like 'google_%'; delete from"
+              + " public.subscription_events; delete from public.subscription_grants where"
+              + " source='google_play'; delete from public.subscription_orders; delete from"
+              + " private.subscription_purchase_owners; delete from"
+              + " private.subscription_rtdn_receipts; delete from public.subscription_entitlements"
+              + " where user_id='"
+              + TALENT
+              + "'; update public.subscription_plans set"
+              + " google_product_id=null,google_base_plan_id=null where id='creator_pro'");
     }
   }
 
+  @Test
+  void concurrentPromotionApprovalsAndAuditFailureAreAtomic() throws Exception {
+    UUID creator = UUID.fromString("00000000-0000-0000-0000-000000000006"),
+        reviewer = UUID.fromString("00000000-0000-0000-0000-000000000007");
+    ownerFixture("insert into private.subscription_admins values ('" + reviewer + "')");
+    UUID claim =
+        UUID.fromString(
+            promotionService
+                .submit(creator, "https://instagram.com/reel/concurrent-approval")
+                .get("id")
+                .toString());
+    try {
+      ownerFixture(
+          "create function private.fixture_fail_audit() returns trigger language plpgsql as $$begin"
+              + " raise exception 'fixture audit failure'; end$$; create trigger fixture_audit"
+              + " before insert on public.subscription_audit_logs for each row execute function"
+              + " private.fixture_fail_audit()");
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () -> promotionService.review(reviewer, claim, true, "Verified creator post"));
+      assertEquals("pending", promotionService.own(creator).getFirst().get("status"));
+      assertEquals(false, membershipService.current(creator).get("is_creator_pro"));
+      ownerFixture(
+          "drop trigger fixture_audit on public.subscription_audit_logs; drop function"
+              + " private.fixture_fail_audit()");
+      try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+        var results =
+            executor.invokeAll(
+                java.util.List.of(
+                    () -> promotionService.review(reviewer, claim, true, "Verified creator post"),
+                    () -> promotionService.review(reviewer, claim, true, "Verified creator post")));
+        for (var result : results)
+          assertEquals("approved", ((Map<?, ?>) result.get()).get("status"));
+      }
+      assertEquals(
+          (Object) 1L,
+          data.as(
+              creator,
+              db ->
+                  db.sql(
+                          "select count(*) from public.subscription_grants where source_key=:k and"
+                              + " expires_at=starts_at+interval '12 months'")
+                      .param("k", "promotion:" + claim)
+                      .query(Long.class)
+                      .single()));
+      call("GET", "/api/v1/account/entitlements", creator.toString(), null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$[0].id").exists())
+          .andExpect(jsonPath("$[0].user_id").value(creator.toString()))
+          .andExpect(jsonPath("$[0].created_at").exists());
+    } finally {
+      ownerFixture(
+          "drop trigger if exists fixture_audit on public.subscription_audit_logs; drop function if"
+              + " exists private.fixture_fail_audit(); delete from public.subscription_audit_logs"
+              + " where resource_id='"
+              + claim
+              + "'; delete from public.subscription_grants where user_id='"
+              + creator
+              + "'; delete from public.subscription_entitlements where user_id='"
+              + creator
+              + "'; delete from public.subscription_discovery_eligibility where user_id='"
+              + creator
+              + "'; delete from public.promotion_claims where id='"
+              + claim
+              + "'; delete from private.subscription_admins where user_id='"
+              + reviewer
+              + "'");
+    }
+  }
+
+  @Test
+  void overlappingGrantsExpiryRevocationAndConfiguredPortfolioLimits() throws Exception {
+    UUID creator = UUID.fromString("00000000-0000-0000-0000-000000000099");
+    ownerFixture(
+        "insert into public.talent_profiles(id,display_name,category_id,city,day_rate,published)"
+            + " values ('"
+            + creator
+            + "','Subscription Creator','creators','Mumbai',100,true); insert into"
+            + " public.subscription_grants(user_id,entitlement,source,source_key,starts_at,expires_at)"
+            + " values ('"
+            + creator
+            + "','creator_pro','promotion','expiry-fixture',now()-interval '2 years',now()-interval"
+            + " '1 year'),('"
+            + creator
+            + "','creator_pro','google_play','active-fixture',now()-interval '1 day',now()+interval"
+            + " '1 month'),('"
+            + creator
+            + "','future_feature','legacy','future-fixture',now()+interval '1 year',now()+interval"
+            + " '2 years'); update public.subscription_plans set portfolio_limit=1 where id='free';"
+            + " update public.subscription_plans set portfolio_limit=2 where id='creator_pro'");
+    try {
+      assertEquals(true, membershipService.current(creator).get("is_creator_pro"));
+      assertEquals(1, ((List<?>) membershipService.current(creator).get("entitlements")).size());
+      for (int n = 0; n < 2; n++)
+        call(
+                "POST",
+                "/api/v1/talents/me/portfolio",
+                creator.toString(),
+                "{\"path\":\""
+                    + creator
+                    + "/image"
+                    + n
+                    + ".jpg\",\"label\":\"Portfolio\",\"position\":"
+                    + n
+                    + "}")
+            .andExpect(status().isOk());
+      call(
+              "POST",
+              "/api/v1/talents/me/portfolio",
+              creator.toString(),
+              "{\"path\":\"" + creator + "/third.jpg\",\"label\":\"Portfolio\",\"position\":2}")
+          .andExpect(status().isConflict());
+      ownerFixture(
+          "update public.subscription_grants set revoked_at=now() where"
+              + " source_key='active-fixture'");
+      assertEquals(false, membershipService.current(creator).get("is_creator_pro"));
+      call("GET", "/api/v1/talents/" + creator + "/portfolio", null, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.length()").value(2));
+      call("GET", "/api/v1/account/entitlements", creator.toString(), null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.length()").value(0));
+    } finally {
+      ownerFixture(
+          "delete from public.subscription_grants where user_id='"
+              + creator
+              + "'; delete from public.portfolio_assets where talent_id='"
+              + creator
+              + "'; delete from public.talent_profiles where id='"
+              + creator
+              + "'; update public.subscription_plans set portfolio_limit=null");
+    }
+  }
+
+  @Test
+  void linkedPurchaseRetiresPriorTokenAndConcurrentVerificationGrantsOnce() throws Exception {
+    UUID creator = UUID.fromString("00000000-0000-0000-0000-000000000098");
+    String oldToken = "replacement-original-token-12345",
+        newToken = "replacement-new-token-12345678";
+    ownerFixture(
+        "update public.subscription_plans set"
+            + " google_product_id='creator_pro_fixture',google_base_plan_id='annual' where"
+            + " id='creator_pro'");
+    org.mockito.Mockito.when(google.configured()).thenReturn(true);
+    for (String token : List.of(oldToken, newToken)) {
+      var response =
+          json.createObjectNode()
+              .put("subscriptionState", "SUBSCRIPTION_STATE_ACTIVE")
+              .put("acknowledgementState", "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED");
+      response
+          .putObject("externalAccountIdentifiers")
+          .put("obfuscatedExternalAccountId", googleService.accountId(creator));
+      var line =
+          response
+              .putArray("lineItems")
+              .addObject()
+              .put("productId", "creator_pro_fixture")
+              .put("expiryTime", "2030-12-01T00:00:00Z")
+              .put(
+                  "latestSuccessfulOrderId",
+                  token.equals(oldToken) ? "GPA.original" : "GPA.replacement");
+      line.putObject("offerDetails").put("basePlanId", "annual");
+      if (token.equals(newToken)) response.put("linkedPurchaseToken", oldToken);
+      org.mockito.Mockito.when(google.get("com.castly.fixture", token)).thenReturn(response);
+    }
+    try {
+      try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+        var results =
+            executor.invokeAll(
+                List.of(
+                    () -> googleService.verify(creator, oldToken),
+                    () -> googleService.verify(creator, oldToken)));
+        for (var result : results)
+          assertEquals(true, ((Map<?, ?>) result.get()).get("is_creator_pro"));
+      }
+      googleService.verify(creator, newToken);
+      var denied =
+          assertThrows(
+              org.springframework.web.server.ResponseStatusException.class,
+              () -> googleService.verify(creator, oldToken));
+      assertEquals(409, denied.getStatusCode().value());
+      assertEquals(
+          (Object) 1L,
+          data.as(
+              creator,
+              db ->
+                  db.sql(
+                          "select count(*) from public.subscription_grants where user_id=:u and"
+                              + " revoked_at is null")
+                      .param("u", creator)
+                      .query(Long.class)
+                      .single()));
+      String stale =
+          Base64.getEncoder()
+              .encodeToString(
+                  json.writeValueAsBytes(
+                      Map.of(
+                          "packageName",
+                          "com.castly.fixture",
+                          "subscriptionNotification",
+                          Map.of("purchaseToken", oldToken, "notificationType", 3))));
+      googleService.rtdn("replacement-stale-event", stale);
+      assertEquals(true, membershipService.current(creator).get("is_creator_pro"));
+    } finally {
+      ownerFixture(
+          "delete from public.subscription_audit_logs where user_id='"
+              + creator
+              + "'; delete from public.subscription_events where user_id='"
+              + creator
+              + "'; delete from public.subscription_grants where user_id='"
+              + creator
+              + "'; delete from public.subscription_orders where user_id='"
+              + creator
+              + "'; delete from private.subscription_purchase_owners where user_id='"
+              + creator
+              + "'; delete from private.subscription_replaced_tokens where user_id='"
+              + creator
+              + "'; delete from private.subscription_rtdn_receipts where"
+              + " message_id='replacement-stale-event'; delete from"
+              + " public.subscription_entitlements where user_id='"
+              + creator
+              + "'; delete from public.subscription_discovery_eligibility where user_id='"
+              + creator
+              + "'; update public.subscription_plans set"
+              + " google_product_id=null,google_base_plan_id=null where id='creator_pro'");
+    }
+  }
 }

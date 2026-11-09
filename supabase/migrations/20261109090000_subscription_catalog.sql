@@ -41,6 +41,7 @@ create table public.subscription_audit_logs (
 );
 create table private.subscription_admins(user_id uuid primary key references public.users(id));
 alter table private.subscription_admins enable row level security;
+revoke all on private.subscription_admins from public,anon,authenticated;
 grant select on private.subscription_admins to castly_api;
 create policy subscription_admin_self on private.subscription_admins for select to castly_api using(user_id=private.request_user_id());
 create function private.is_subscription_admin() returns boolean language sql stable security invoker set search_path='' as $$
@@ -50,22 +51,28 @@ revoke all on function private.is_subscription_admin() from public;
 grant execute on function private.is_subscription_admin() to castly_api;
 -- Token routing contains hashes only; grants no access to another user's business rows.
 create table private.subscription_purchase_owners(token_hash text primary key check(length(token_hash)=64),user_id uuid not null references public.users(id));
-grant select,insert on private.subscription_purchase_owners to castly_api;
+revoke all on private.subscription_purchase_owners from public,anon,authenticated;
+grant select,insert(token_hash,user_id) on private.subscription_purchase_owners to castly_api;
 alter table private.subscription_purchase_owners enable row level security;
 create policy purchase_route_read on private.subscription_purchase_owners for select to castly_api using(true);
 create policy purchase_route_insert on private.subscription_purchase_owners for insert to castly_api with check(user_id=private.request_user_id());
 alter table public.subscription_plans enable row level security;
+revoke all on public.subscription_plans from public,anon,authenticated;
 grant select on public.subscription_plans to castly_api;
 create policy subscription_plans_read on public.subscription_plans for select to castly_api using(enabled);
 do $$ declare t text; begin
  foreach t in array array['subscription_grants','subscription_orders','subscription_events','subscription_audit_logs'] loop
   execute format('alter table public.%I enable row level security',t);
-  execute format('revoke all on public.%I from anon,authenticated',t);
-  execute format('grant select,insert on public.%I to castly_api',t);
+  execute format('revoke all on public.%I from public,anon,authenticated',t);
+  execute format('grant select on public.%I to castly_api',t);
   execute format('create policy owner_read on public.%I for select to castly_api using(user_id=private.request_user_id() or private.is_subscription_admin())',t);
   execute format('create policy owner_insert on public.%I for insert to castly_api with check((user_id=private.request_user_id() and current_setting(''castly.subscription_verified'',true)=''yes'') or private.is_subscription_admin())',t);
  end loop;
 end $$;
+grant insert(user_id,entitlement,source,source_key,starts_at,expires_at) on public.subscription_grants to castly_api;
+grant insert(user_id,token_hash,product_id,provider_order_id,state,expires_at,auto_renewing,acknowledged) on public.subscription_orders to castly_api;
+grant insert(user_id,event_key,order_id,event_type) on public.subscription_events to castly_api;
+grant insert(user_id,actor_id,action,resource_id,reason) on public.subscription_audit_logs to castly_api;
 grant update(expires_at,revoked_at) on public.subscription_grants to castly_api;
 create policy grant_update on public.subscription_grants for update to castly_api using((user_id=private.request_user_id() and current_setting('castly.subscription_verified',true)='yes') or private.is_subscription_admin()) with check((user_id=private.request_user_id() and current_setting('castly.subscription_verified',true)='yes') or private.is_subscription_admin());
 grant update(provider_order_id,state,expires_at,auto_renewing,acknowledged,updated_at) on public.subscription_orders to castly_api;

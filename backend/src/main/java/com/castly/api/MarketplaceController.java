@@ -18,7 +18,8 @@ public class MarketplaceController {
   private final ActorDatabase data;
   private final com.castly.subscription.SubscriptionService subscriptions;
 
-  public MarketplaceController(ActorDatabase data, com.castly.subscription.SubscriptionService subscriptions) {
+  public MarketplaceController(
+      ActorDatabase data, com.castly.subscription.SubscriptionService subscriptions) {
     this.subscriptions = subscriptions;
     this.data = data;
   }
@@ -100,7 +101,9 @@ public class MarketplaceController {
         db ->
             rows(
                 db.sql(
-                        "select * from public.talent_profiles where published and (:query='' or"
+                        "select *,"
+                            + subscriptions.discoveryField()
+                            + " from public.talent_profiles where published and (:query='' or"
                             + " position(lower(:query) in lower(display_name||' '||city||'"
                             + " '||bio||' '||array_to_string(skills,' ')))>0) and (:category='' or"
                             + " category_id=:category) and (:city='' or lower(city)=lower(:city))"
@@ -138,7 +141,10 @@ public class MarketplaceController {
         actor(jwt),
         db ->
             one(
-                db.sql("select * from public.talent_profiles where id=:id and published")
+                db.sql(
+                        "select *,"
+                            + subscriptions.discoveryField()
+                            + " from public.talent_profiles where id=:id and published")
                     .param("id", id)));
   }
 
@@ -232,13 +238,13 @@ public class MarketplaceController {
         db -> {
           subscriptions.checkPortfolio(db, me);
           return one(
-                db.sql(
-                        "insert into public.portfolio_assets(talent_id,path,label,position)"
-                            + " values(:me,:path,:label,:position) returning *")
-                    .param("me", me)
-                    .param("path", body.path())
-                    .param("label", body.label().trim())
-                    .param("position", body.position()));
+              db.sql(
+                      "insert into public.portfolio_assets(talent_id,path,label,position)"
+                          + " values(:me,:path,:label,:position) returning *")
+                  .param("me", me)
+                  .param("path", body.path())
+                  .param("label", body.label().trim())
+                  .param("position", body.position()));
         });
   }
 

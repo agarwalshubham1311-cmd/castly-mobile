@@ -125,6 +125,8 @@ async function until(url) {
           SUPABASE_JWT_ISSUER: issuer,
           JWT_SIGNING_MODE: 'jwks',
           CASTLY_NOTIFICATIONS_ENABLED: 'true',
+          CASTLY_SUBSCRIPTIONS_ENABLED: 'true',
+          CASTLY_GOOGLE_PLAY_ENABLED: 'false',
           CORS_ALLOWED_ORIGINS: new URL(process.env.TEST_URL).origin,
           PORT: '8080',
         },
@@ -238,7 +240,10 @@ async function until(url) {
     await b.getByRole('button', { name: 'Confirm accept booking', exact: true }).click();
     await b.getByRole('button', { name: 'Open conversation', exact: true }).waitFor();
     await ready(b);
-    await b.screenshot({ path: path.join(folder, 'accepted-booking-390x844.png'), animations: 'disabled' });
+    await b.screenshot({
+      path: path.join(folder, 'accepted-booking-390x844.png'),
+      animations: 'disabled',
+    });
     await go(a, '/notifications', 'Notifications');
     await a.getByText('Booking accepted', { exact: true }).waitFor();
     await a.getByRole('button', { name: 'View booking', exact: true }).click();
@@ -274,7 +279,10 @@ async function until(url) {
     await a.getByRole('button', { name: 'Refresh messages', exact: true }).click();
     await a.getByText('Hello from talent via Spring.', { exact: true }).waitFor();
     await ready(a);
-    await a.screenshot({ path: path.join(folder, 'conversation-390x844.png'), animations: 'disabled' });
+    await a.screenshot({
+      path: path.join(folder, 'conversation-390x844.png'),
+      animations: 'disabled',
+    });
     const denied = await fetch(api + '/bookings/' + bookingId, {
       headers: { Authorization: 'Bearer ' + token(outsider) },
     });
@@ -327,6 +335,56 @@ async function until(url) {
     await b.getByRole('button', { name: 'Cancel booking', exact: true }).click();
     await b.getByRole('button', { name: 'Confirm cancel booking', exact: true }).click();
     await b.getByText('Cancelled', { exact: true }).waitFor();
+    await go(b, '/subscriptions', 'Membership');
+    await b.getByText('Creator Pro', { exact: true }).waitFor();
+    assert.equal(
+      await b.getByRole('button', { name: 'Purchases unavailable', exact: true }).isDisabled(),
+      true,
+    );
+    await b.getByRole('button', { name: 'Founding Creator Offer', exact: true }).click();
+    await b
+      .getByRole('textbox', { name: 'Public promotional post URL', exact: true })
+      .fill('https://instagram.com/reel/browser-founding-creator');
+    await b.getByRole('button', { name: 'Submit for review', exact: true }).click();
+    await b.getByText('Status: pending', { exact: true }).waitFor();
+    const provision = spawnSync(
+      'docker',
+      [
+        'exec',
+        'castly-spring-test-db',
+        'psql',
+        '-U',
+        'postgres',
+        '-d',
+        'castly_spring_test',
+        '-v',
+        'ON_ERROR_STOP=1',
+        '-c',
+        `insert into private.subscription_admins values ('${client}')`,
+      ],
+      { encoding: 'utf8' },
+    );
+    assert.equal(provision.status, 0, provision.stderr);
+    await go(a, '/subscriptions/review', 'Founding offer review');
+    await a
+      .getByRole('textbox', { name: 'Review reason and evidence', exact: true })
+      .fill('Verified creator identity and public Castly promotional video');
+    await a.getByRole('button', { name: 'Approve 12 months', exact: true }).click();
+    await a.getByText('No pending claims.', { exact: true }).waitFor();
+    await b.getByRole('button', { name: 'Refresh status', exact: true }).click();
+    await b.getByText('Status: approved', { exact: true }).waitFor();
+    await go(b, '/subscriptions', 'Membership');
+    await b.getByText('Your membership: Creator Pro', { exact: true }).waitFor();
+    await noOverflow(b);
+    const discovery = await fetch(api + '/talents/' + talent);
+    assert.equal((await discovery.json()).premium_discovery_eligible, true);
+    await b.screenshot({
+      path: path.join(folder, 'creator-pro-390x844.png'),
+      animations: 'disabled',
+    });
+    console.log(
+      'PASS: subscription catalog, disabled checkout, creator claim submission, trusted admin review, approved status, 12-month membership and public discovery eligibility through real browser + Spring + PostgreSQL.',
+    );
     assert.deepEqual(bypass, []);
     assert.deepEqual(errors, []);
     console.log(
