@@ -1,0 +1,13 @@
+# Allowlist: no credentials, local environments, tests, migration scripts or host build artifacts.
+**
+!Dockerfile
+!pom.xml
+!src/
+!src/main/
+!src/main/**
+**/.env*
+**/*.pem
+**/*.crt
+**/*.key
+**/*.p12
+**/*.jks

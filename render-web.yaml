@@ -1,0 +1,51 @@
+# OPTIONAL separate Static Site. Do not apply until the release checkpoint is approved.
+services:
+  - type: web
+    name: castly-web
+    runtime: static
+    repo: https://github.com/agarwalshubham1311-cmd/castly-mobile
+    branch: feat/milestone5-booking-messaging-notifications
+    autoDeployTrigger: "off"
+    buildCommand: npm ci && npm run check:release-env && npm run export:web
+    staticPublishPath: dist-web
+    envVars:
+      - key: NODE_VERSION
+        value: "24.19.0"
+      - key: CASTLY_RELEASE_CHECK
+        value: "1"
+      - key: EXPO_PUBLIC_BACKEND_MODE
+        value: supabase
+      - key: EXPO_PUBLIC_BUSINESS_API_MODE
+        value: spring
+      - key: EXPO_PUBLIC_ISOLATED_SUPABASE_FALLBACK
+        value: "false"
+      - key: EXPO_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: EXPO_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: EXPO_PUBLIC_API_URL
+        sync: false
+      - key: EXPO_NO_TELEMETRY
+        value: "1"
+      - key: EXPO_NO_DOTENV
+        value: "1"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+      - path: /_expo/static/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

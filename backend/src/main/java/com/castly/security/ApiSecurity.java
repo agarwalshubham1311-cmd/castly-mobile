@@ -36,6 +36,7 @@ public class ApiSecurity {
                         "/api/v1/talents",
                         "/api/v1/talents/*",
                         "/api/v1/categories",
+                        "/api/v1/subscriptions/plans",
                         "/api/v1/portfolio",
                         "/api/v1/talents/*/portfolio")
                     .permitAll()

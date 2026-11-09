@@ -150,3 +150,11 @@ The browser suite starts a local Auth/JWKS fixture, the actual packaged Java API
 The original M1 HTTP contract suite remains `npm run test:legacy-backend`, run against a Metro development web server configured for the explicit Supabase fallback and `https://castly-test.supabase.co`/test publishable key. The isolated fallback acknowledgement must also be set for that Metro fixture. Its requests are intercepted; it does not mutate a hosted project. `npm run test:sql` now runs cutover policies; the old M1 policy file is preserved as history for pre-cutover development.
 
 No main merge, production deployment, hosted migration or payment enablement is part of this work.
+
+## Render release preparation
+
+Use the [Render/EAS release runbook](../docs/deployment/RENDER_RELEASE.md) for the Java 21 multi-stage image, restricted-role read-only connection checker, verified TLS/CA setup, environment variables and initial notification-disabled deployment. `render.yaml` deploys only the API; no database migrations or hosted configuration changes run automatically. Creation of a Render service still requires the release checkpoint even though future auto-deploys are off.
+
+## Phase 3 memberships (disabled by default)
+
+See [implementation report](../docs/phase3/implementation-report.md), [migration review](../docs/phase3/migration-review.md) and [Google Play setup](../docs/phase3/google-play-setup.md). `CASTLY_SUBSCRIPTIONS_ENABLED` enables the migrated membership module; `CASTLY_GOOGLE_PLAY_ENABLED` enables provider verification/RTDN; separate `CASTLY_GOOGLE_PLAY_CHECKOUT_ENABLED` controls new checkout. All default false. In-app notifications stay false and require no Phase 3 migration. No startup DDL, hosted SQL, deployment or live payment activation is performed by this code. Full environment names are in `.env.example`; Google keys and the stable account-association HMAC key are backend-only.

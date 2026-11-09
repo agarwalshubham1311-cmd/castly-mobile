@@ -1,0 +1,37 @@
+
+> castly-mobile@0.1.0 test:components
+> node --experimental-strip-types --test tests/*components.test.cjs
+
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ booking confirmation requires an explicit action, supports cancel and disables both controls while busy (16.367006ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ booking status is accessible text for every existing server state, with no completion action (4.657478ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ count invalidations during an in-flight request schedule one fresh read instead of losing the event (38.747715ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ notification feed marks read without navigation, retains history on live refresh and opens booking (116.266334ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ plans render without invented prices and unavailable billing remains disabled (24.25303ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ delayed old-account membership cannot appear after account switch (5.934535ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ promotion form rejects untrusted URL and then displays authoritative pending status (9.399333ms)
+✔ checkout pause keeps Restore Purchases available in native UI (2.735267ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 852.204678
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

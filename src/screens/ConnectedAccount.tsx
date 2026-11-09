@@ -158,7 +158,7 @@ export default function ConnectedAccount() {
         <AccountRow
           title="Subscription"
           icon="sparkles-outline"
-          onPress={() => router.push('/settings/subscription')}
+          onPress={() => router.push('/subscriptions')}
         />
         <AccountRow
           title="Notifications"
@@ -233,7 +233,7 @@ export function ConnectedSettings() {
         ) : !entitlements.length ? (
           <EmptyState
             title="No active entitlements"
-            detail="No subscription has been granted to this account. Checkout and payments are not enabled."
+            detail="No premium membership is currently active. Open Membership to view available plans and offers."
           />
         ) : (
           entitlements.map((row) => (

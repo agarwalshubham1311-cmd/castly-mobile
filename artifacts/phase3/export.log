@@ -1,0 +1,83 @@
+
+> castly-mobile@0.1.0 export:web
+> expo export --platform web --output-dir dist-web --output-dir /tmp/castly-phase3-web-final
+
+Starting Metro Bundler
+
+| (node:185896) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Web Bundled 1083ms node_modules/expo-router/entry.js (997 modules)
+
+› Assets (35):
+assets/talent/portrait-01.65f8127a0d237e868091de9d6accd940.jpg (102KB)
+assets/talent/portrait-02.e02dc97cb4b1f8f5372272b7c9d1a93b.jpg (93KB)
+assets/talent/portrait-03.433195d03311fedc09d7d4c815dfd76f.jpg (94KB)
+assets/talent/portrait-04.8693a56bfb6da5d2b604fae8d6b3c884.jpg (256KB)
+assets/talent/portrait-05.27c90987e5bc085340b7699a430b7e15.jpg (199KB)
+assets/talent/portrait-06.5489332229ec7062dc03c63f6a83afe3.jpg (69KB)
+assets/talent/portrait-07.3aab9221a60c2075507a797c49edceb6.jpg (208KB)
+assets/talent/portrait-08.bc0bb2523a95ef7ad146a3c0a4d0bb2f.jpg (178KB)
+assets/talent/portrait-09.88d9d1720eaa774698b2c13b9352caff.jpg (155KB)
+assets/talent/portrait-10.b46895f49f14156ab96e8620276ce6cf.jpg (152KB)
+assets/talent/portrait-11.ab13bbe372c6acc345076d9cdbb4a2e9.jpg (122KB)
+node_modules/@expo-google-fonts/manrope/400Regular/Manrope_400Regular.8ca1a84037fdb644723129315c390ad9.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/500Medium/Manrope_500Medium.de7b3026c153d63d5732582887fecbf4.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/600SemiBold/Manrope_600SemiBold.80cb1b1a8ba262608706cb7f2b017835.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/700Bold/Manrope_700Bold.8e8fe178c0f147b91ed2a2b3097ad8a4.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/800ExtraBold/Manrope_800ExtraBold.f8f555c6d9efacc1b0af255e815a97da.ttf (98KB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.b4eb097d35f44ed943676fd56f6bdc51.ttf (390KB)
+node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png (9.5KB)
+node_modules/expo-router/assets/error.d1ea1496f9057eb392d5bbf3732a61b7.png (469B)
+node_modules/expo-router/assets/file.19eeb73b9593a38f8e9f418337fc7d10.png (138B)
+node_modules/expo-router/assets/forward.d8b800c443b8972542883e0b9de2bdc6.png (188B)
+node_modules/expo-router/assets/pkg.ab19f4cbc543357183a20571f68380a3.png (364B)
+node_modules/expo-router/assets/react-navigation/elements/back-icon-mask.0a328cd9c1afd0afe8e3b1ec5165b1b4.png (653B)
+node_modules/expo-router/assets/react-navigation/elements/back-icon.35ba0eaec5a4f5ed12ca16fabeae451d.png (207B)
+node_modules/expo-router/assets/react-navigation/elements/clear-icon.c94f6478e7ae0cdd9f15de1fcb9e5e55.png (4 variations | 425B)
+node_modules/expo-router/assets/react-navigation/elements/close-icon.808e1b1b9b53114ec2838071a7e6daa7.png (4 variations | 235B)
+node_modules/expo-router/assets/react-navigation/elements/search-icon.286d67d3f74808a60a78d3ebf1a5fb57.png (928B)
+node_modules/expo-router/assets/sitemap.412dd9275b6b48ad28f5e3d81bb1f626.png (465B)
+node_modules/expo-router/assets/unmatched.20e71bdf79e3a97bf55fd9e164041578.png (4.8KB)
+
+› web bundles (29):
+_expo/static/js/web/__common-595f9f120f94106d01b1396e6db97aa3.js (497KB)
+_expo/static/js/web/__expo-metro-runtime-8c088df87a31e4e6accd81c554ec290d.js (3.8KB)
+_expo/static/js/web/_layout-2c15aab9e17b79bd99e96c48098a8d74.js (4KB)
+_expo/static/js/web/_layout-856b77ea4cad2514caa478d9f1ecb55a.js (865B)
+_expo/static/js/web/_layout-8b9667f9b2fddbfbc678484c0c74c2b2.js (304B)
+_expo/static/js/web/[id]-09ba832e288532d1a0b535e8ac6fbdb7.js (3.2KB)
+_expo/static/js/web/[id]-5c3d3ddd7c91c0fc9801ece464d016ee.js (4.5KB)
+_expo/static/js/web/[id]-7901017eea11124c445dd25a6c6da413.js (713B)
+_expo/static/js/web/[id]-913dc7f3209ab37a9a346731dde434da.js (3.5KB)
+_expo/static/js/web/[id]-b3d41ca81e886ae6efd295d1ed584eb8.js (7.4KB)
+_expo/static/js/web/[section]-8c40153943605f485c7946e82dc48ffc.js (308B)
+_expo/static/js/web/+not-found-20b38182f102bdeac8f503f6a6ae4a07.js (472B)
+_expo/static/js/web/account-8d4e1c45c9cf099eb109d4ce0dd56d5e.js (348B)
+_expo/static/js/web/bookings-b7d170df86d2ad72a9981bdf6424bc46.js (697B)
+_expo/static/js/web/callback-cee44fe7a2a969b76cbe211d3db9491c.js (1.6KB)
+_expo/static/js/web/entry-9d7028505572dc7ba8c3e3e92e708719.js (1.1MB)
+_expo/static/js/web/filters-7cc93e464c123025ef2caa1a38a7f825.js (20KB)
+_expo/static/js/web/founding-5d3ca8d1925437e79b023936ac19400a.js (3.1KB)
+_expo/static/js/web/index-292201dfb11499d778ca97564792a571.js (10KB)
+_expo/static/js/web/index-e78d5860fe07e09cc8bc05f91dd40316.js (11KB)
+_expo/static/js/web/login-f1fbc6619e442d540471dfb1364f7769.js (262B)
+_expo/static/js/web/messages-7625ef5b971f412dc42b74234d7946b0.js (694B)
+_expo/static/js/web/notifications-92cd0df60deddd9737ce8fad84fd3cdb.js (4.6KB)
+_expo/static/js/web/onboarding-8ff868e089377f699b889816268f09b9.js (209B)
+_expo/static/js/web/review-85ec6d940a7e50029d88f3c498ffea4b.js (2.4KB)
+_expo/static/js/web/saved-10bed7ba86fc18dd35658702c2771edf.js (3KB)
+_expo/static/js/web/search-9730b9885488a91132a1898f5be69895.js (3KB)
+_expo/static/js/web/signup-6848aaacf70932a3c256f6e91baf2cb5.js (271B)
+_expo/static/js/web/talent-edit-4dc8266c61f9e5d042a3d9e5c3530559.js (18KB)
+
+› Files (3):
+favicon.ico (15KB)
+index.html (1.4KB)
+metadata.json (49B)
+
+Exported: /tmp/castly-phase3-web-final
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

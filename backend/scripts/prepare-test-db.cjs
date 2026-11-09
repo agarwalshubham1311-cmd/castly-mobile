@@ -1,6 +1,7 @@
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 const container = 'castly-spring-test-db';
 function run(args, input) {
   const r = spawnSync('docker', args, { input, encoding: 'utf8' });
@@ -62,7 +63,10 @@ function beforeIdentityMigration() {
   );
   JSON.parse(snapshot);
   fs.writeFileSync(
-    `/tmp/castly-identity-before-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`,
+    path.join(
+      os.tmpdir(),
+      `castly-identity-before-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`,
+    ),
     snapshot,
   );
 }
@@ -86,7 +90,10 @@ function afterIdentityMigration() {
   );
   JSON.parse(snapshot);
   fs.writeFileSync(
-    `/tmp/castly-identity-after-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`,
+    path.join(
+      os.tmpdir(),
+      `castly-identity-after-${process.env.CASTLY_TEST_SCHEMA_PATH || 'repository'}.json`,
+    ),
     snapshot,
   );
 }
@@ -139,6 +146,16 @@ if (schemaPath === 'reconciliation') {
     fs.readFileSync(path.join(root, 'supabase/migrations', notificationMigration), 'utf8'),
     'castly_spring_test',
   );
+}
+if (schemaPath === 'reconciliation') {
+  for (const name of fs
+    .readdirSync(path.join(root, 'supabase/migrations'))
+    .sort()
+    .filter((name) => name.startsWith('20261109')))
+    sql(
+      fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
+      'castly_spring_test',
+    );
 }
 // Reproduce hosted restrictions for EVERY Java business operation, on both schema paths.
 sql('revoke usage on schema auth from castly_api;', 'castly_spring_test');

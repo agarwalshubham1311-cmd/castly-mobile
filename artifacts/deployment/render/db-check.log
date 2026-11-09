@@ -1,0 +1,1 @@
+PASS database connection endpoint=direct_or_custom checks={notification_schema_ready=true, private_identity_ready=true, read_only=true, server_backend_tls=true, role_verified=true} notifications_flag_enabled=false

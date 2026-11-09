@@ -1,9 +1,16 @@
 server:
   port: ${PORT:8080}
+  address: 0.0.0.0
+  shutdown: graceful
   error:
     include-message: never
     include-stacktrace: never
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  sql:
+    init:
+      mode: never
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME:castly_api}
@@ -17,6 +24,16 @@ spring:
       fail-on-unknown-properties: true
       accept-float-as-int: false
 castly:
+  google:
+    enabled: ${CASTLY_GOOGLE_PLAY_ENABLED:false}
+    checkout-enabled: ${CASTLY_GOOGLE_PLAY_CHECKOUT_ENABLED:false}
+    package-name: ${GOOGLE_PLAY_PACKAGE_NAME:}
+    credentials-file: ${GOOGLE_PLAY_CREDENTIALS_FILE:}
+    account-key: ${GOOGLE_PLAY_ACCOUNT_KEY:}
+    rtdn-audience: ${GOOGLE_RTDN_AUDIENCE:}
+    rtdn-email: ${GOOGLE_RTDN_SERVICE_ACCOUNT_EMAIL:}
+  subscriptions:
+    enabled: ${CASTLY_SUBSCRIPTIONS_ENABLED:false}
   booking-diagnostics:
     enabled: ${CASTLY_BOOKING_DIAGNOSTICS_ENABLED:false}
   notifications:
@@ -35,3 +52,4 @@ management:
   endpoint:
     health:
       show-details: never
+      show-components: never

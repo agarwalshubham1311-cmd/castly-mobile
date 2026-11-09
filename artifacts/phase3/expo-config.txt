@@ -1,0 +1,5 @@
+Local Expo prebuild-config resolution (no native build): PASS
+Android package: com.castly.mobile
+Plugin: expo-iap 6.4.3
+Flag tested locally for config resolution only: EXPO_PUBLIC_GOOGLE_PLAY_BILLING_ENABLED=true
+Committed default remains false.

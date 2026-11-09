@@ -16,8 +16,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1")
 public class MarketplaceController {
   private final ActorDatabase data;
+  private final com.castly.subscription.SubscriptionService subscriptions;
 
-  public MarketplaceController(ActorDatabase data) {
+  public MarketplaceController(
+      ActorDatabase data, com.castly.subscription.SubscriptionService subscriptions) {
+    this.subscriptions = subscriptions;
     this.data = data;
   }
 
@@ -72,12 +75,7 @@ public class MarketplaceController {
 
   @GetMapping("/account/entitlements")
   public List<Map<String, Object>> entitlements(@AuthenticationPrincipal Jwt jwt) {
-    return data.as(
-        actor(jwt),
-        db ->
-            rows(
-                db.sql("select * from public.subscription_entitlements where user_id=:me")
-                    .param("me", actor(jwt))));
+    return subscriptions.entitlements(actor(jwt));
   }
 
   @GetMapping("/categories")
@@ -103,7 +101,9 @@ public class MarketplaceController {
         db ->
             rows(
                 db.sql(
-                        "select * from public.talent_profiles where published and (:query='' or"
+                        "select *,"
+                            + subscriptions.discoveryField()
+                            + " from public.talent_profiles where published and (:query='' or"
                             + " position(lower(:query) in lower(display_name||' '||city||'"
                             + " '||bio||' '||array_to_string(skills,' ')))>0) and (:category='' or"
                             + " category_id=:category) and (:city='' or lower(city)=lower(:city))"
@@ -141,7 +141,10 @@ public class MarketplaceController {
         actor(jwt),
         db ->
             one(
-                db.sql("select * from public.talent_profiles where id=:id and published")
+                db.sql(
+                        "select *,"
+                            + subscriptions.discoveryField()
+                            + " from public.talent_profiles where id=:id and published")
                     .param("id", id)));
   }
 
@@ -232,15 +235,17 @@ public class MarketplaceController {
           HttpStatus.BAD_REQUEST, "Portfolio path must belong to your account");
     return data.as(
         me,
-        db ->
-            one(
-                db.sql(
-                        "insert into public.portfolio_assets(talent_id,path,label,position)"
-                            + " values(:me,:path,:label,:position) returning *")
-                    .param("me", me)
-                    .param("path", body.path())
-                    .param("label", body.label().trim())
-                    .param("position", body.position())));
+        db -> {
+          subscriptions.checkPortfolio(db, me);
+          return one(
+              db.sql(
+                      "insert into public.portfolio_assets(talent_id,path,label,position)"
+                          + " values(:me,:path,:label,:position) returning *")
+                  .param("me", me)
+                  .param("path", body.path())
+                  .param("label", body.label().trim())
+                  .param("position", body.position()));
+        });
   }
 
   @PatchMapping("/portfolio/{id}")
