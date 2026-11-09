@@ -16,8 +16,10 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1")
 public class MarketplaceController {
   private final ActorDatabase data;
+  private final com.castly.subscription.SubscriptionService subscriptions;
 
-  public MarketplaceController(ActorDatabase data) {
+  public MarketplaceController(ActorDatabase data, com.castly.subscription.SubscriptionService subscriptions) {
+    this.subscriptions = subscriptions;
     this.data = data;
   }
 
@@ -72,12 +74,7 @@ public class MarketplaceController {
 
   @GetMapping("/account/entitlements")
   public List<Map<String, Object>> entitlements(@AuthenticationPrincipal Jwt jwt) {
-    return data.as(
-        actor(jwt),
-        db ->
-            rows(
-                db.sql("select * from public.subscription_entitlements where user_id=:me")
-                    .param("me", actor(jwt))));
+    return subscriptions.entitlements(actor(jwt));
   }
 
   @GetMapping("/categories")
@@ -232,15 +229,17 @@ public class MarketplaceController {
           HttpStatus.BAD_REQUEST, "Portfolio path must belong to your account");
     return data.as(
         me,
-        db ->
-            one(
+        db -> {
+          subscriptions.checkPortfolio(db, me);
+          return one(
                 db.sql(
                         "insert into public.portfolio_assets(talent_id,path,label,position)"
                             + " values(:me,:path,:label,:position) returning *")
                     .param("me", me)
                     .param("path", body.path())
                     .param("label", body.label().trim())
-                    .param("position", body.position())));
+                    .param("position", body.position()));
+        });
   }
 
   @PatchMapping("/portfolio/{id}")

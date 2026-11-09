@@ -54,3 +54,6 @@ backend/target/
 backend/.env
 backend/.env.*
 !backend/.env.example
+
+# Also ignore a worktree-local dependency symlink.
+node_modules

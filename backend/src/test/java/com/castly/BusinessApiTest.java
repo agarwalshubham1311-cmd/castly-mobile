@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.*;
       "castly.jwt.audience=authenticated",
       "castly.jwt.mode=jwks",
       "castly.notifications.enabled=true",
+      "castly.subscriptions.enabled=true",
       "castly.booking-diagnostics.enabled=true",
       "castly.cors-origins=http://localhost:8081"
     })
@@ -1540,4 +1541,26 @@ class BusinessApiTest {
     }
     call("POST", "/api/v1/bookings/" + id + "/accept", talent, null).andExpect(status().isOk());
   }
+  @Test
+  void subscriptionCatalogIsPublicAndMembershipIsPrivate() throws Exception {
+    call("GET", "/api/v1/subscriptions/plans", null, null).andExpect(status().isOk())
+      .andExpect(jsonPath("$[0].id").value("free"))
+      .andExpect(jsonPath("$[1].google_product_id").isEmpty());
+    call("GET", "/api/v1/subscriptions/me", null, null).andExpect(status().isUnauthorized());
+    call("GET", "/api/v1/subscriptions/me", TALENT, null).andExpect(status().isOk())
+      .andExpect(jsonPath("$.is_creator_pro").value(false));
+    call("GET", "/api/v1/subscriptions/history?limit=101", TALENT, null).andExpect(status().isBadRequest());
+    call("GET", "/api/v1/subscriptions/history", TALENT, null).andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()").value(0));
+  }
+
+  @Test
+  void subscriptionLedgerDeniesUnverifiedSelfGrant() {
+    assertThrows(org.springframework.dao.DataAccessException.class, () -> data.as(UUID.fromString(TALENT), db ->
+      db.sql("insert into public.subscription_grants(user_id,entitlement,source,source_key) values(:u,'creator_pro','google_play','forged')")
+        .param("u",UUID.fromString(TALENT)).update()));
+    assertEquals((Object) 0, data.as(UUID.fromString(OUTSIDER), db ->
+      db.sql("select * from public.subscription_grants where user_id=:u").param("u",UUID.fromString(TALENT)).query().listOfRows().size()));
+  }
+
 }

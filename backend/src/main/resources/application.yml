@@ -24,6 +24,8 @@ spring:
       fail-on-unknown-properties: true
       accept-float-as-int: false
 castly:
+  subscriptions:
+    enabled: ${CASTLY_SUBSCRIPTIONS_ENABLED:false}
   booking-diagnostics:
     enabled: ${CASTLY_BOOKING_DIAGNOSTICS_ENABLED:false}
   notifications:

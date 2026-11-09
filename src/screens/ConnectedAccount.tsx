@@ -158,7 +158,7 @@ export default function ConnectedAccount() {
         <AccountRow
           title="Subscription"
           icon="sparkles-outline"
-          onPress={() => router.push('/settings/subscription')}
+          onPress={() => router.push('/subscriptions')}
         />
         <AccountRow
           title="Notifications"
