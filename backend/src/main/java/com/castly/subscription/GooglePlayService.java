@@ -23,6 +23,7 @@ public class GooglePlayService {
   private final GooglePlayGateway google;
   private final ObjectMapper json;
   private final boolean enabled;
+  private final boolean checkoutEnabled;
   private final String packageName, associationKey;
 
   public GooglePlayService(
@@ -31,6 +32,7 @@ public class GooglePlayService {
       GooglePlayGateway google,
       ObjectMapper json,
       @Value("${castly.google.enabled:false}") boolean enabled,
+      @Value("${castly.google.checkout-enabled:false}") boolean checkoutEnabled,
       @Value("${castly.google.package-name:}") String packageName,
       @Value("${castly.google.account-key:}") String associationKey) {
     this.subscriptions = subscriptions;
@@ -38,6 +40,7 @@ public class GooglePlayService {
     this.google = google;
     this.json = json;
     this.enabled = enabled;
+    this.checkoutEnabled = checkoutEnabled;
     this.packageName = packageName;
     this.associationKey = associationKey;
   }
@@ -102,6 +105,8 @@ public class GooglePlayService {
           return Map.of(
               "enabled",
               ready,
+              "checkout_enabled",
+              ready && checkoutEnabled,
               "package_name",
               ready ? packageName : "",
               "obfuscated_account_id",

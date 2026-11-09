@@ -7,7 +7,7 @@ export async function loadNativeBilling(): Promise<NativeBilling | null> {
   )
     return null;
   try {
-    return await import('react-native-iap');
+    return await import('expo-iap');
   } catch {
     return null;
   }

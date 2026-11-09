@@ -26,6 +26,7 @@ spring:
 castly:
   google:
     enabled: ${CASTLY_GOOGLE_PLAY_ENABLED:false}
+    checkout-enabled: ${CASTLY_GOOGLE_PLAY_CHECKOUT_ENABLED:false}
     package-name: ${GOOGLE_PLAY_PACKAGE_NAME:}
     credentials-file: ${GOOGLE_PLAY_CREDENTIALS_FILE:}
     account-key: ${GOOGLE_PLAY_ACCOUNT_KEY:}

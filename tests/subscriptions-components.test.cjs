@@ -10,6 +10,8 @@ let actor = 'creator-a',
   current = async () => ({ id: 'free', name: 'Free', is_creator_pro: false, entitlements: [] }),
   claims = async () => [],
   claimCalls = 0;
+let billingConfig = { enabled: false, checkout_enabled: false, products: {} };
+let nativeModule = null;
 const services = {
   subscriptions: {
     plans: async () => [
@@ -23,7 +25,7 @@ const services = {
       claimCalls++;
       return {};
     },
-    billingConfiguration: async () => ({ enabled: false, products: {} }),
+    billingConfiguration: async () => billingConfig,
   },
 };
 const original = Module._load;
@@ -40,7 +42,7 @@ Module._load = function (name, parent, main) {
       Field: (props) => React.createElement('Field', props),
       PrimaryButton: (props) => React.createElement('Button', props),
     };
-  if (name === './billingNative') return { loadNativeBilling: async () => null };
+  if (name === './billingNative') return { loadNativeBilling: async () => nativeModule };
   return original.call(this, name, parent, main);
 };
 for (const ext of ['.ts', '.tsx'])
@@ -114,4 +116,44 @@ test('promotion form rejects untrusted URL and then displays authoritative pendi
   assert.equal(claimCalls, 1);
   assert.match(text(tree), /pending/);
   await act(() => tree.unmount());
+});
+
+test('checkout pause keeps Restore Purchases available in native UI', async () => {
+  let restores = 0;
+  billingConfig = {
+    enabled: true,
+    checkout_enabled: false,
+    products: { pro: 'annual' },
+    package_name: 'com.castly.mobile',
+    obfuscated_account_id: 'bound',
+  };
+  nativeModule = {
+    initConnection: async () => true,
+    endConnection: async () => true,
+    purchaseUpdatedListener: () => ({ remove() {} }),
+    purchaseErrorListener: () => ({ remove() {} }),
+    fetchProducts: async () => {
+      throw new Error('Offers should not load while paused');
+    },
+    getAvailablePurchases: async () => {
+      restores++;
+      return [];
+    },
+    finishTransaction: async () => {},
+    requestPurchase: async () => {
+      throw new Error('Purchase must remain disabled');
+    },
+  };
+  const { PlayBilling } = require('../src/subscriptions/PlayBilling.tsx');
+  let tree;
+  await act(async () => {
+    tree = create(React.createElement(PlayBilling, { onVerified() {} }));
+  });
+  assert.equal(tree.root.findByProps({ title: 'Restore purchases' }).props.disabled, false);
+  assert.equal(tree.root.findByProps({ title: 'Purchases unavailable' }).props.disabled, true);
+  await act(async () => tree.root.findByProps({ title: 'Restore purchases' }).props.onPress());
+  assert.equal(restores, 1);
+  await act(() => tree.unmount());
+  billingConfig = { enabled: false, checkout_enabled: false, products: {} };
+  nativeModule = null;
 });

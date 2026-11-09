@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import {
   BillingSession,
   billingFailure,
+  billingPeriodLabel,
   type NativeBilling,
 } from '../src/subscriptions/billing.ts';
 const config = {
   enabled: true,
+  checkout_enabled: true,
   package_name: 'com.castly.fixture',
   obfuscated_account_id: 'bound',
   products: { pro: 'annual' },
@@ -220,4 +222,33 @@ test('account change during verification prevents finishing and success feedback
   await assert.rejects(processing, /account changed/);
   assert.equal(f.finished, 0);
   assert.equal(states.includes('confirmed'), false);
+});
+
+test('paused checkout connects for restore but cannot query offers or initiate purchase', async () => {
+  const f = fixture();
+  const session = new BillingSession(
+    f.native,
+    { ...config, checkout_enabled: false },
+    'creator',
+    () => 'creator',
+    async () => f.result,
+    (s) => f.statuses.push(s),
+  );
+  await session.connect();
+  assert.equal(session.offers.length, 0);
+  await session.restore();
+  assert.equal(f.finished, 1);
+  await assert.rejects(() =>
+    session.purchase({ productId: 'pro', token: 'offer', label: 'price', phases: [] }),
+  );
+  await session.close();
+});
+
+test('Google billing periods display readable renewal terms without invented prices', () => {
+  assert.equal(billingPeriodLabel('P1M'), 'month');
+  assert.equal(billingPeriodLabel('P1Y'), 'year');
+  assert.equal(billingPeriodLabel('P3M'), '3 months');
+  assert.equal(billingPeriodLabel('P2W'), '2 weeks');
+  assert.equal(billingPeriodLabel('P1D'), 'day');
+  assert.equal(billingPeriodLabel('unknown'), 'billing period shown by Google Play');
 });

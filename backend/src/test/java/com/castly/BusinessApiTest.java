@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.*;
       "castly.notifications.enabled=true",
       "castly.subscriptions.enabled=true",
       "castly.google.enabled=true",
+      "castly.google.checkout-enabled=true",
       "castly.google.package-name=com.castly.fixture",
       "castly.google.account-key=local-fixture-account-association-key-32-characters",
       "castly.booking-diagnostics.enabled=true",
@@ -49,6 +50,7 @@ class BusinessApiTest {
   @Autowired com.castly.subscription.GooglePlayService googleService;
   @Autowired com.castly.subscription.PromotionService promotionService;
   @Autowired com.castly.subscription.SubscriptionService membershipService;
+  @Autowired com.castly.subscription.SubscriptionRateLimiter subscriptionLimiter;
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper json;
   @Autowired ActorDatabase data;
@@ -1753,6 +1755,21 @@ class BusinessApiTest {
       call("GET", "/api/v1/subscriptions/google-play/configuration", TALENT, null)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.enabled").value(true));
+      var pausedCheckout =
+          new com.castly.subscription.GooglePlayService(
+              membershipService,
+              subscriptionLimiter,
+              google,
+              json,
+              true,
+              false,
+              "com.castly.fixture",
+              "local-fixture-account-association-key-32-characters");
+      assertEquals(
+          false, pausedCheckout.configuration(UUID.fromString(TALENT)).get("checkout_enabled"));
+      assertEquals(true, pausedCheckout.configuration(UUID.fromString(TALENT)).get("enabled"));
+      assertEquals(
+          true, pausedCheckout.verify(UUID.fromString(TALENT), token).get("is_creator_pro"));
       for (int n = 0; n < 2; n++)
         call("POST", "/api/v1/subscriptions/google-play/verify", TALENT, body)
             .andExpect(status().isOk())

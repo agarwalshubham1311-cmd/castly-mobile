@@ -1,7 +1,8 @@
-import type * as Iap from 'react-native-iap';
+import type * as Iap from 'expo-iap';
 import type { Membership } from './catalog';
 export type BillingConfiguration = {
   enabled: boolean;
+  checkout_enabled: boolean;
   package_name: string;
   obfuscated_account_id: string;
   products: Record<string, string>;
@@ -30,6 +31,12 @@ export type NativeBilling = Pick<
   | 'purchaseUpdatedListener'
   | 'purchaseErrorListener'
 >;
+export function billingPeriodLabel(period: string): string {
+  const match = /^P([1-9]\d*)([DWMY])$/.exec(period);
+  if (!match) return 'billing period shown by Google Play';
+  const unit = ({ D: 'day', W: 'week', M: 'month', Y: 'year' } as Record<string, string>)[match[2]];
+  return match[1] === '1' ? unit : `${match[1]} ${unit}s`;
+}
 let nativeLifecycle: Promise<void> = Promise.resolve();
 function serializeNative(action: () => Promise<void>) {
   const pending = nativeLifecycle.then(action);
@@ -104,6 +111,10 @@ export class BillingSession {
         this.connected = true;
       });
       this.account();
+      if (!this.config.checkout_enabled) {
+        this.status('ready', 'New purchases are paused. You can still restore existing purchases.');
+        return;
+      }
       const products = await this.native.fetchProducts({
         skus: Object.keys(this.config.products),
         type: 'subs',
@@ -122,7 +133,7 @@ export class BillingSession {
             label: offer.displayPrice,
             phases: (offer.pricingPhasesAndroid?.pricingPhaseList || []).map(
               (p) =>
-                `${p.formattedPrice} / ${p.billingPeriod}${p.billingCycleCount ? ` for ${p.billingCycleCount} cycles` : ''}`,
+                `${p.formattedPrice} / ${billingPeriodLabel(p.billingPeriod)}${p.billingCycleCount ? ` for ${p.billingCycleCount} cycles` : ''}`,
             ),
           })),
       );
@@ -145,6 +156,7 @@ export class BillingSession {
     this.account();
     if (
       !this.config.enabled ||
+      !this.config.checkout_enabled ||
       !this.offers.some((o) => o.token === offer.token && o.productId === offer.productId)
     )
       throw new Error('This offer is unavailable.');
