@@ -1,3 +1,4 @@
+import { TrustLinks } from '../trust/TrustLinks';
 import { usePublishedTalent } from '../backend/usePublishedTalent';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, Share, Text, View } from 'react-native';
@@ -112,6 +113,7 @@ export default function TalentProfile() {
         contentContainerStyle={{ paddingBottom: 24 }}
       >
         <View style={{ paddingHorizontal: padding, paddingTop: 8, gap: 10 }}>
+          {!mock ? <TrustLinks talentId={talent.id} /> : null}
           {!mock && talent.verifiedCreator ? (
             <Label accessibilityLabel="Verified Creator: profile and portfolio manually reviewed">
               ✓ Verified Creator

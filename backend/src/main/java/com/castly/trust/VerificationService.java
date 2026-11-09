@@ -47,7 +47,12 @@ public class VerificationService {
               rows(
                   db.sql(
                           "select id,user_id,case when status='VERIFIED' and expires_at<=now() then"
-                              + " 'EXPIRED' when status='VERIFIED' and not exists(select 1 from public.creator_verification_badges v join public.talent_profiles t on t.id=v.user_id where v.user_id=verification_requests.user_id and v.portfolio_reviewed and v.profile_facts=trust_private.review_facts(t)) then 'REVOKED' else status end as"
+                              + " 'EXPIRED' when status='VERIFIED' and not exists(select 1 from"
+                              + " public.creator_verification_badges v join public.talent_profiles"
+                              + " t on t.id=v.user_id where v.user_id=verification_requests.user_id"
+                              + " and v.portfolio_reviewed and"
+                              + " v.profile_facts=trust_private.review_facts(t)) then 'REVOKED'"
+                              + " else status end as"
                               + " status,statement,revision,submitted_at,expires_at from"
                               + " public.verification_requests where user_id=:u")
                       .param("u", actor));

@@ -208,7 +208,7 @@ public class ActivityController {
           + " public.bookings b where b.client_id=c.client_id and b.talent_id=c.talent_id order by"
           + " b.created_at desc,b.id desc limit 1),'Talent') as talent_name,exists(select 1 from"
           + " public.bookings b where b.client_id=c.client_id and b.talent_id=c.talent_id and"
-          + " b.status='accepted') as can_send from public.conversations c";
+          + " b.status in ('accepted','completed')) as can_send from public.conversations c";
 
   @GetMapping("/conversations")
   public List<Map<String, Object>> conversations(
@@ -246,7 +246,7 @@ public class ActivityController {
         db -> {
           var row = booking(db, request.bookingId(), true);
           requireParticipant(actor(jwt), row);
-          if (!"accepted".equals(row.get("status")))
+          if (!Set.of("accepted", "completed").contains(row.get("status")))
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT, "An accepted booking is required");
           return ensureConversation(db, row);
@@ -305,7 +305,8 @@ public class ActivityController {
               rows(
                   db.sql(
                           "select id from public.bookings where client_id=:client and"
-                              + " talent_id=:talent and status='accepted' order by id for update")
+                              + " talent_id=:talent and status in ('accepted','completed') order by"
+                              + " id for update")
                       .param("client", UUID.fromString(conversation.get("client_id").toString()))
                       .param("talent", UUID.fromString(conversation.get("talent_id").toString())));
           if (accepted.isEmpty())

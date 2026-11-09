@@ -1,3 +1,4 @@
+import { TrustLinks } from '../trust/TrustLinks';
 import { DecisionDialog, type Decision } from '../components/DecisionDialog';
 import { BookingStatus } from '../components/BookingStatus';
 import { useNotifications } from '../backend/NotificationProvider';
@@ -247,6 +248,7 @@ export function LiveBookingDetail() {
       {booking && (
         <>
           <BookingSummary booking={booking} />
+          <TrustLinks bookingId={booking.id} />
           <Heading>Project requirements</Heading>
           <Label>{booking.requirements}</Label>
           <Label>No payment is collected through this booking.</Label>
@@ -283,7 +285,7 @@ export function LiveBookingDetail() {
               }}
             />
           )}
-          {booking.status === 'accepted' && (client || talent) && (
+          {['accepted', 'completed'].includes(booking.status) && (client || talent) && (
             <PrimaryButton
               title="Open conversation"
               disabled={busy}

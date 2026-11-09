@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.*;
       "castly.notifications.enabled=true",
       "castly.subscriptions.enabled=true",
       "castly.trust.verification-enabled=true",
+      "castly.trust.reviews-enabled=true",
       "castly.google.enabled=true",
       "castly.google.checkout-enabled=true",
       "castly.google.package-name=com.castly.fixture",
@@ -2296,6 +2297,105 @@ class BusinessApiTest {
     } finally {
       committed.countDown();
       ownerFixture("delete from public.subscription_grants where source_key='temporal-fixture'");
+    }
+  }
+
+  @Test
+  void explicitMutualCompletionControlsReviewsAndPreservesConversation() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    String review = "{\"rating\":5,\"body\":\"Completed project review\"}";
+    call("POST", "/api/v1/bookings/" + booking + "/reviews", CLIENT, review)
+        .andExpect(status().isConflict());
+    call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+        .andExpect(status().isOk());
+    call("POST", "/api/v1/bookings/" + booking + "/completion", OUTSIDER, null)
+        .andExpect(status().isNotFound());
+    call("POST", "/api/v1/bookings/" + booking + "/completion", CLIENT, null)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.booking.status").value("accepted"));
+    call("POST", "/api/v1/bookings/" + booking + "/completion", CLIENT, null)
+        .andExpect(jsonPath("$.confirmation_count").value(1));
+    assertThrows(
+        org.springframework.dao.DataAccessException.class,
+        () ->
+            data.as(
+                UUID.fromString(CLIENT),
+                db ->
+                    db.sql("update public.bookings set status='completed' where id=:b")
+                        .param("b", UUID.fromString(booking))
+                        .update()));
+    call("POST", "/api/v1/bookings/" + booking + "/reviews", CLIENT, review)
+        .andExpect(status().isConflict());
+    call("POST", "/api/v1/bookings/" + booking + "/completion", talent, null)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.booking.status").value("completed"));
+    String conversation =
+        object(
+                call(
+                        "POST",
+                        "/api/v1/conversations",
+                        CLIENT,
+                        "{\"booking_id\":\"" + booking + "\"}")
+                    .andExpect(status().isOk()))
+            .get("id")
+            .toString();
+    call(
+            "POST",
+            "/api/v1/conversations/" + conversation + "/messages",
+            CLIENT,
+            "{\"body\":\"Completed booking conversation remains available\"}")
+        .andExpect(status().isCreated());
+    var created =
+        object(
+            call("POST", "/api/v1/bookings/" + booking + "/reviews", CLIENT, review)
+                .andExpect(status().isOk()));
+    String id = created.get("id").toString();
+    call("POST", "/api/v1/bookings/" + booking + "/reviews", CLIENT, review)
+        .andExpect(jsonPath("$.id").value(id));
+    call(
+            "POST",
+            "/api/v1/bookings/" + booking + "/reviews",
+            CLIENT,
+            "{\"rating\":4,\"body\":\"Duplicate changed content\"}")
+        .andExpect(status().isConflict());
+    call("PATCH", "/api/v1/reviews/" + id, talent, review).andExpect(status().isNotFound());
+    call(
+            "PATCH",
+            "/api/v1/reviews/" + id,
+            CLIENT,
+            "{\"rating\":4,\"body\":\"Edited within allowed window\"}")
+        .andExpect(status().isOk());
+    call("GET", "/api/v1/talents/" + talent + "/reviews", OUTSIDER, null)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.summary.review_count").value(1))
+        .andExpect(jsonPath("$.reviews[0].booking_id").doesNotExist())
+        .andExpect(jsonPath("$.reviews[0].reviewer_id").doesNotExist());
+    call(
+            "POST",
+            "/api/v1/admin/reviews/" + id + "/moderation",
+            CLIENT,
+            "{\"hidden\":true,\"reason\":\"Self moderation\"}")
+        .andExpect(status().isForbidden());
+    ownerFixture("insert into trust_private.reviewers values('" + OUTSIDER + "','moderation')");
+    try {
+      call(
+              "POST",
+              "/api/v1/admin/reviews/" + id + "/moderation",
+              OUTSIDER,
+              "{\"hidden\":true,\"reason\":\"Confirmed policy violation\"}")
+          .andExpect(status().isOk());
+      call("GET", "/api/v1/talents/" + talent + "/reviews", CLIENT, null)
+          .andExpect(jsonPath("$.summary.review_count").value(0));
+      call(
+              "POST",
+              "/api/v1/admin/reviews/" + id + "/moderation",
+              OUTSIDER,
+              "{\"hidden\":false,\"reason\":\"Appeal accepted by reviewer\"}")
+          .andExpect(status().isOk());
+      call("GET", "/api/v1/talents/" + talent + "/reviews", CLIENT, null)
+          .andExpect(jsonPath("$.summary.average_rating").value(4.0));
+    } finally {
+      ownerFixture("delete from trust_private.reviewers where user_id='" + OUTSIDER + "'");
     }
   }
 }

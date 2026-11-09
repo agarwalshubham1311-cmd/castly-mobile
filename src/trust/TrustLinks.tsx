@@ -1,0 +1,30 @@
+import React, { useEffect, useState } from 'react';
+import { router } from 'expo-router';
+import { services } from '../backend';
+import { useAuth } from '../auth/AuthProvider';
+import { PrimaryButton } from '../components/ui';
+import { useTrustGuard } from './useTrustGuard';
+export function TrustLinks({ bookingId, talentId }: { bookingId?: string; talentId?: string }) {
+  const { session } = useAuth();
+  const begin = useTrustGuard(session?.user.id);
+  const [enabled, setEnabled] = useState(false);
+  useEffect(() => {
+    const valid = begin();
+    void services?.trust
+      .configuration()
+      .then((config) => {
+        if (valid()) setEnabled(config.features.reviews);
+      })
+      .catch(() => {});
+  }, [session?.user.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!enabled) return null;
+  return (
+    <PrimaryButton
+      secondary
+      title={bookingId ? 'Completion and review' : 'Booking-based reviews'}
+      onPress={() =>
+        router.push(bookingId ? `/safety/booking/${bookingId}` : `/safety/reviews/${talentId}`)
+      }
+    />
+  );
+}
