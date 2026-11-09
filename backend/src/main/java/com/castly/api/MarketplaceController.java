@@ -16,10 +16,12 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1")
 public class MarketplaceController {
   private final ActorDatabase data;
+  private final com.castly.trust.VerificationService verification;
   private final com.castly.subscription.SubscriptionService subscriptions;
 
   public MarketplaceController(
-      ActorDatabase data, com.castly.subscription.SubscriptionService subscriptions) {
+      ActorDatabase data, com.castly.subscription.SubscriptionService subscriptions, com.castly.trust.VerificationService verification) {
+    this.verification=verification;
     this.subscriptions = subscriptions;
     this.data = data;
   }
@@ -102,7 +104,7 @@ public class MarketplaceController {
             rows(
                 db.sql(
                         "select *,"
-                            + subscriptions.discoveryField()
+                            + subscriptions.discoveryField() + "," + verification.badgeField()
                             + " from public.talent_profiles where published and (:query='' or"
                             + " position(lower(:query) in lower(display_name||' '||city||'"
                             + " '||bio||' '||array_to_string(skills,' ')))>0) and (:category='' or"
@@ -143,7 +145,7 @@ public class MarketplaceController {
             one(
                 db.sql(
                         "select *,"
-                            + subscriptions.discoveryField()
+                            + subscriptions.discoveryField() + "," + verification.badgeField()
                             + " from public.talent_profiles where id=:id and published")
                     .param("id", id)));
   }

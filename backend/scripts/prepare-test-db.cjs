@@ -151,7 +151,7 @@ if (schemaPath === 'reconciliation') {
   for (const name of fs
     .readdirSync(path.join(root, 'supabase/migrations'))
     .sort()
-    .filter((name) => name.startsWith('20261109')))
+    .filter((name) => name.startsWith('20261109') || name.startsWith('20261110')))
     sql(
       fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
       'castly_spring_test',

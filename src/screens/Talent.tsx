@@ -112,6 +112,11 @@ export default function TalentProfile() {
         contentContainerStyle={{ paddingBottom: 24 }}
       >
         <View style={{ paddingHorizontal: padding, paddingTop: 8, gap: 10 }}>
+          {!mock && talent.verifiedCreator ? (
+            <Label accessibilityLabel="Verified Creator: profile and portfolio manually reviewed">
+              ✓ Verified Creator
+            </Label>
+          ) : null}
           <View style={{ position: 'relative' }}>
             <TalentImage
               source={imageSource(talent.portrait, talent.portraitUri)}

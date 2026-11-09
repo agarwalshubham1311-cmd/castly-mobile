@@ -70,6 +70,7 @@ export async function mapTalent(
   return {
     talent: {
       id: profile.id,
+      verifiedCreator: profile.verified_creator === true,
       name: profile.display_name,
       city: profile.city,
       category: categoryNames[profile.category_id] || 'Creators',

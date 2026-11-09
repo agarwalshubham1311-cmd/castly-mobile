@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.*;
       "castly.jwt.mode=jwks",
       "castly.notifications.enabled=true",
       "castly.subscriptions.enabled=true",
+      "castly.trust.verification-enabled=true",
       "castly.google.enabled=true",
       "castly.google.checkout-enabled=true",
       "castly.google.package-name=com.castly.fixture",
@@ -2114,6 +2115,187 @@ class BusinessApiTest {
               + creator
               + "'; update public.subscription_plans set"
               + " google_product_id=null,google_base_plan_id=null where id='creator_pro'");
+    }
+  }
+
+  @Test
+  void verificationRequiresOwnedPortfolioTrustedReviewerAndAuditsBadgeRevocation()
+      throws Exception {
+    String creator = "00000000-0000-0000-0000-000000000090",
+        reviewer = "00000000-0000-0000-0000-000000000091";
+    ownerFixture(
+        "insert into public.talent_profiles(id,display_name,category_id,city,day_rate,published)"
+            + " values ('"
+            + creator
+            + "','Verified fixture creator','creators','Mumbai',100,true); insert into"
+            + " public.portfolio_assets(id,talent_id,path,label) values"
+            + " ('10000000-0000-0000-0000-000000000090','"
+            + creator
+            + "','"
+            + creator
+            + "/work.jpg','Owned portfolio')");
+    try {
+      call("GET", "/api/v1/verification/me", creator, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.status").value("NOT_SUBMITTED"));
+      call("GET", "/api/v1/verification/contact", creator, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.status").value("unavailable"));
+      String body =
+          json.writeValueAsString(
+              Map.of(
+                  "statement",
+                  "I created this original portfolio and consent to manual review.",
+                  "portfolio_asset_ids",
+                  List.of("10000000-0000-0000-0000-000000000090"),
+                  "consent_version",
+                  "profile-review-v1"));
+      call("POST", "/api/v1/verification", TALENT, body).andExpect(status().isNotFound());
+      var request =
+          object(call("POST", "/api/v1/verification", creator, body).andExpect(status().isOk()));
+      String id = request.get("id").toString();
+      call(
+              "POST",
+              "/api/v1/admin/verification/" + id + "/decision",
+              creator,
+              "{\"decision\":\"VERIFIED\",\"reason\":\"Self claim\"}")
+          .andExpect(status().isForbidden());
+      ownerFixture(
+          "insert into trust_private.reviewers values ('" + reviewer + "','verification')");
+      call(
+              "POST",
+              "/api/v1/admin/verification/" + id + "/decision",
+              reviewer,
+              "{\"decision\":\"UNDER_REVIEW\",\"reason\":\"Review started\"}")
+          .andExpect(status().isOk());
+      for (int n = 0; n < 2; n++)
+        call(
+                "POST",
+                "/api/v1/admin/verification/" + id + "/decision",
+                reviewer,
+                "{\"decision\":\"VERIFIED\",\"reason\":\"Profile and owned portfolio manually"
+                    + " reviewed\"}")
+            .andExpect(status().isOk());
+      call("GET", "/api/v1/talents/" + creator, null, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.verified_creator").value(true));
+      data.as(
+          UUID.fromString(creator),
+          db ->
+              db.sql("update public.talent_profiles set available=false,day_rate=200 where id=:u")
+                  .param("u", UUID.fromString(creator))
+                  .update());
+      call("GET", "/api/v1/talents/" + creator, null, null)
+          .andExpect(jsonPath("$.verified_creator").value(true));
+      data.as(
+          UUID.fromString(creator),
+          db ->
+              db.sql(
+                      "update public.talent_profiles set display_name='Changed review identity'"
+                          + " where id=:u")
+                  .param("u", UUID.fromString(creator))
+                  .update());
+      call("GET", "/api/v1/talents/" + creator, null, null)
+          .andExpect(jsonPath("$.verified_creator").value(false));
+      call("GET", "/api/v1/verification/me", creator, null)
+          .andExpect(jsonPath("$.status").value("REVOKED"));
+      call("POST", "/api/v1/verification", creator, body)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.revision").value(2));
+      call(
+              "POST",
+              "/api/v1/admin/verification/" + id + "/decision",
+              reviewer,
+              "{\"decision\":\"VERIFIED\",\"reason\":\"Changed profile manually reviewed\"}")
+          .andExpect(status().isOk());
+      call(
+              "POST",
+              "/api/v1/admin/verification/" + id + "/decision",
+              reviewer,
+              "{\"decision\":\"REVOKED\",\"reason\":\"Ownership evidence withdrawn\"}")
+          .andExpect(status().isOk());
+      call("GET", "/api/v1/talents/" + creator, null, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.verified_creator").value(false));
+      call("GET", "/api/v1/verification/history", creator, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.length()").value(4));
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () ->
+              data.as(
+                  UUID.fromString(creator),
+                  db ->
+                      db.sql("insert into trust_private.reviewers values(:u,'verification')")
+                          .param("u", UUID.fromString(creator))
+                          .update()));
+    } finally {
+      ownerFixture(
+          "delete from public.trust_audit_logs where subject_id='"
+              + creator
+              + "'; delete from public.verification_decisions where request_id in(select id from"
+              + " public.verification_requests where user_id='"
+              + creator
+              + "'); delete from public.verification_evidence where owner_id='"
+              + creator
+              + "'; delete from public.verification_revisions where owner_id='"
+              + creator
+              + "'; delete from public.verification_requests where user_id='"
+              + creator
+              + "'; delete from public.creator_verification_badges where user_id='"
+              + creator
+              + "'; delete from public.portfolio_assets where talent_id='"
+              + creator
+              + "'; delete from public.talent_profiles where id='"
+              + creator
+              + "'; delete from trust_private.reviewers where user_id='"
+              + reviewer
+              + "'");
+    }
+  }
+
+  @Test
+  void entitlementReadUsesStatementTimeAfterWaitingForLaterGrant() throws Exception {
+    UUID creator = UUID.fromString("00000000-0000-0000-0000-000000000089");
+    var started = new java.util.concurrent.CountDownLatch(1);
+    var committed = new java.util.concurrent.CountDownLatch(1);
+    var repository = new com.castly.subscription.SubscriptionRepository();
+    try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      var waiting =
+          executor.submit(
+              () ->
+                  data.as(
+                      creator,
+                      db -> {
+                        db.sql("select now()").query().singleRow();
+                        started.countDown();
+                        try {
+                          if (!committed.await(20, java.util.concurrent.TimeUnit.SECONDS))
+                            throw new AssertionError("Writer did not commit");
+                        } catch (InterruptedException e) {
+                          throw new RuntimeException(e);
+                        }
+                        repository.lock(db, creator);
+                        assertEquals(
+                            0L,
+                            db.sql(
+                                    "select count(*) from public.subscription_grants where"
+                                        + " user_id=:u and starts_at<=now()")
+                                .param("u", creator)
+                                .query(Long.class)
+                                .single());
+                        return repository.effective(db, creator);
+                      }));
+      assertTrue(started.await(20, java.util.concurrent.TimeUnit.SECONDS));
+      ownerFixture(
+          "insert into public.subscription_grants(user_id,entitlement,source,source_key) values('"
+              + creator
+              + "','creator_pro','legacy','temporal-fixture')");
+      committed.countDown();
+      assertEquals(1, waiting.get(20, java.util.concurrent.TimeUnit.SECONDS).size());
+    } finally {
+      committed.countDown();
+      ownerFixture("delete from public.subscription_grants where source_key='temporal-fixture'");
     }
   }
 }

@@ -7,6 +7,7 @@ export type Account = {
   updated_at: string;
 };
 export type TalentProfile = {
+  verified_creator?: boolean;
   id: string;
   display_name: string;
   category_id: string;
@@ -152,5 +153,4 @@ export type NotificationRow = {
   read_at: string | null;
 };
 export type NotificationStats =
-  | { enabled: false }
-  | { enabled: true; unread_count: number; message_unread_count: number };
+  { enabled: false } | { enabled: true; unread_count: number; message_unread_count: number };

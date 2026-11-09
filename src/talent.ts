@@ -8,6 +8,7 @@ export const categories = [
 ] as const;
 export type Category = (typeof categories)[number];
 export type Talent = {
+  verifiedCreator?: boolean;
   id: string;
   name: string;
   category: Category;

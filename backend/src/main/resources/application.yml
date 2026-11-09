@@ -24,6 +24,9 @@ spring:
       fail-on-unknown-properties: true
       accept-float-as-int: false
 castly:
+  trust:
+    verification-enabled: ${CASTLY_VERIFICATION_ENABLED:false}
+    verification-valid-days: ${CASTLY_VERIFICATION_VALID_DAYS:365}
   google:
     enabled: ${CASTLY_GOOGLE_PLAY_ENABLED:false}
     checkout-enabled: ${CASTLY_GOOGLE_PLAY_CHECKOUT_ENABLED:false}
