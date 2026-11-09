@@ -25,6 +25,7 @@ export default function configuration({ config }: ConfigContext): ExpoConfig {
     ...(projectId ? { extra: { ...config.extra, eas: { ...config.extra?.eas, projectId } } } : {}),
     plugins: [
       ...(config.plugins || []),
+      ...(process.env.EXPO_PUBLIC_GOOGLE_PLAY_BILLING_ENABLED === 'true' ? ['react-native-iap'] : []),
       [
         'expo-image-picker',
         {

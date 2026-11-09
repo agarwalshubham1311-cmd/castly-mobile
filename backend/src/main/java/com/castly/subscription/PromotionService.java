@@ -16,6 +16,10 @@ public class PromotionService {
    if(!"https".equals(u.getScheme())||u.getUserInfo()!=null||u.getPort()!=-1||host==null||!Set.of("instagram.com","www.instagram.com","youtube.com","www.youtube.com","youtu.be","tiktok.com","www.tiktok.com","x.com","www.x.com").contains(host.toLowerCase(Locale.ROOT))||u.getRawPath()==null||u.getRawPath().length()<2)throw new IllegalArgumentException();
    host=host.toLowerCase(Locale.ROOT).replaceFirst("^www\\.","");
    String path=u.getRawPath().replaceFirst("/$","");
+   if(host.equals("youtu.be")||(host.equals("youtube.com")&&path.startsWith("/shorts/"))){
+    String id=path.substring(path.lastIndexOf('/')+1);if(!id.matches("[A-Za-z0-9_-]{6,100}"))throw new IllegalArgumentException();
+    return "https://youtube.com/watch?v="+id;
+   }
    // YouTube watch video identity is its v parameter, not tracking parameters.
    if(host.equals("youtube.com")&&path.equals("/watch")){
     String id=Arrays.stream(Optional.ofNullable(u.getRawQuery()).orElse("").split("&")).filter(p->p.matches("v=[A-Za-z0-9_-]{6,100}")).findFirst().orElseThrow();

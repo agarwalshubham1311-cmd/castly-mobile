@@ -1,3 +1,4 @@
+import { PlayBilling } from './PlayBilling';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
@@ -18,6 +19,7 @@ export default function SubscriptionScreen() {
  {plans.map(plan=><View key={plan.id} style={{padding:20,borderRadius:20,backgroundColor:c.white,borderColor:c.border,borderWidth:1,gap:12}}><Text style={{fontFamily:f.bold,fontSize:20}}>{plan.name}</Text><Text>{plan.premium_discovery?'Premium discovery eligibility and enhanced portfolio options.':'Marketplace access, standard profile, portfolio, bookings and messaging.'}</Text>{plan.portfolio_limit!==null?<Text>Up to {plan.portfolio_limit} portfolio items</Text>:null}{plan.id==='creator_pro'?<><Text>Pricing will appear from Google Play when purchases are available.</Text><PrimaryButton title="Purchases unavailable" disabled onPress={()=>{}} /></>:null}</View>)}
  {orders.map(o=><Text key={o.id}>{o.state} · {o.auto_renewing?'Renews automatically':'Does not renew'}{o.expires_at?` · ${new Date(o.expires_at).toLocaleDateString()}`:''}</Text>)}
  <PrimaryButton title={busy?'Refreshing…':'Refresh membership'} disabled={busy} onPress={()=>void load()}/>
+ <PlayBilling onVerified={()=>void load()}/>
  <PrimaryButton title="Founding Creator Offer" onPress={()=>router.push('/subscriptions/founding')}/>
  </Screen>;
 }

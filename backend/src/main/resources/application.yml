@@ -24,6 +24,13 @@ spring:
       fail-on-unknown-properties: true
       accept-float-as-int: false
 castly:
+  google:
+    enabled: ${CASTLY_GOOGLE_PLAY_ENABLED:false}
+    package-name: ${GOOGLE_PLAY_PACKAGE_NAME:}
+    credentials-file: ${GOOGLE_PLAY_CREDENTIALS_FILE:}
+    account-key: ${GOOGLE_PLAY_ACCOUNT_KEY:}
+    rtdn-audience: ${GOOGLE_RTDN_AUDIENCE:}
+    rtdn-email: ${GOOGLE_RTDN_SERVICE_ACCOUNT_EMAIL:}
   subscriptions:
     enabled: ${CASTLY_SUBSCRIPTIONS_ENABLED:false}
   booking-diagnostics:

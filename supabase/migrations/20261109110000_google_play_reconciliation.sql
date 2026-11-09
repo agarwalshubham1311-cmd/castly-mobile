@@ -1,0 +1,12 @@
+begin;
+alter table public.subscription_orders add column superseded_by_hash text;
+grant update(superseded_by_hash) on public.subscription_orders to castly_api;
+create table private.subscription_replaced_tokens(token_hash text primary key, replacement_hash text not null, user_id uuid not null references public.users(id));
+alter table private.subscription_replaced_tokens enable row level security;
+grant select,insert on private.subscription_replaced_tokens to castly_api;
+create policy replaced_own on private.subscription_replaced_tokens for all to castly_api using(user_id=private.request_user_id()) with check(user_id=private.request_user_id() and current_setting('castly.subscription_verified',true)='yes');
+create table private.subscription_rtdn_receipts(message_id text primary key check(length(message_id)<=200), payload_hash text not null, received_at timestamptz not null default now());
+alter table private.subscription_rtdn_receipts enable row level security;
+grant select,insert on private.subscription_rtdn_receipts to castly_api;
+create policy receipt_server on private.subscription_rtdn_receipts for all to castly_api using(current_setting('castly.subscription_verified',true)='yes') with check(current_setting('castly.subscription_verified',true)='yes');
+commit;

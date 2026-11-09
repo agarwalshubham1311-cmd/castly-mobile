@@ -24,6 +24,9 @@ import org.springframework.test.web.servlet.*;
       "castly.jwt.mode=jwks",
       "castly.notifications.enabled=true",
       "castly.subscriptions.enabled=true",
+      "castly.google.enabled=true",
+      "castly.google.package-name=com.castly.fixture",
+      "castly.google.account-key=local-fixture-account-association-key-32-characters",
       "castly.booking-diagnostics.enabled=true",
       "castly.cors-origins=http://localhost:8081"
     })
@@ -40,6 +43,8 @@ class BusinessApiTest {
     }
   }
 
+  @org.springframework.test.context.bean.override.mockito.MockitoBean com.castly.subscription.GooglePlayGateway google;
+  @Autowired com.castly.subscription.GooglePlayService googleService;
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper json;
   @Autowired ActorDatabase data;
@@ -1589,6 +1594,43 @@ class BusinessApiTest {
     } finally {
       var cleanup=new ProcessBuilder("docker","exec","castly-spring-test-db","psql","-U","postgres","-d","castly_spring_test","-c","delete from public.subscription_audit_logs where resource_id='"+id+"'; delete from public.subscription_grants where source_key='promotion:"+id+"'; delete from public.subscription_entitlements where user_id='"+TALENT+"'; delete from public.promotion_claims where id='"+id+"'; delete from private.subscription_admins where user_id='"+OUTSIDER+"'").start();
       assertEquals(0,cleanup.waitFor());
+    }
+  }
+
+  private void ownerFixture(String sql) throws Exception {
+    var process=new ProcessBuilder("docker","exec","castly-spring-test-db","psql","-U","postgres","-d","castly_spring_test","-v","ON_ERROR_STOP=1","-c",sql).start();
+    assertEquals(0,process.waitFor(),new String(process.getErrorStream().readAllBytes()));
+  }
+  @Test
+  void googleLifecycleIsAuthoritativeIdempotentAndReplaySafe() throws Exception {
+    ownerFixture("update public.subscription_plans set google_product_id='creator_pro_fixture',google_base_plan_id='annual' where id='creator_pro'");
+    org.mockito.Mockito.when(google.configured()).thenReturn(true);
+    String token="fixture-purchase-token-123456789";
+    String hash=com.castly.subscription.GooglePlayService.hash(token);
+    var state=new java.util.concurrent.atomic.AtomicReference<>("ACTIVE");
+    org.mockito.Mockito.when(google.get("com.castly.fixture",token)).thenAnswer(invocation->json.readTree("{\"subscriptionState\":\"SUBSCRIPTION_STATE_"+state.get()+"\",\"acknowledgementState\":\"ACKNOWLEDGEMENT_STATE_PENDING\",\"externalAccountIdentifiers\":{\"obfuscatedExternalAccountId\":\""+googleService.accountId(UUID.fromString(TALENT))+"\"},\"lineItems\":[{\"productId\":\"creator_pro_fixture\",\"offerDetails\":{\"basePlanId\":\"annual\"},\"expiryTime\":\"2030-11-09T00:00:00Z\",\"latestSuccessfulOrderId\":\"GPA.fixture.123\",\"autoRenewingPlan\":{\"autoRenewEnabled\":true}}]}"));
+    String body=json.writeValueAsString(Map.of("purchase_token",token));
+    try {
+      call("GET","/api/v1/subscriptions/google-play/configuration",TALENT,null).andExpect(status().isOk()).andExpect(jsonPath("$.enabled").value(true));
+      for(int n=0;n<2;n++)call("POST","/api/v1/subscriptions/google-play/verify",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(true));
+      assertEquals((Object)1L,data.as(UUID.fromString(TALENT),db->db.sql("select count(*) from public.subscription_orders where token_hash=:h").param("h",hash).query(Long.class).single()));
+      call("POST","/api/v1/subscriptions/google-play/verify",OUTSIDER,body).andExpect(status().isForbidden());
+      assertThrows(org.springframework.dao.DataAccessException.class,()->data.as(UUID.fromString(OUTSIDER),db->db.sql("insert into public.subscription_grants(user_id,entitlement,source,source_key) values(:u,'creator_pro','google_play','forged-google')").param("u",UUID.fromString(OUTSIDER)).update()));
+      assertEquals((Object)0,data.as(UUID.fromString(TALENT),db->db.sql("update public.subscription_orders set state='revoked' where token_hash=:h").param("h",hash).update()));
+      state.set("ON_HOLD");call("POST","/api/v1/subscriptions/google-play/restore",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(false));
+      state.set("IN_GRACE_PERIOD");call("POST","/api/v1/subscriptions/google-play/restore",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(true));
+      state.set("CANCELED");call("POST","/api/v1/subscriptions/google-play/restore",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(true));
+      String event=Base64.getEncoder().encodeToString(json.writeValueAsBytes(Map.of("packageName","com.castly.fixture","subscriptionNotification",Map.of("purchaseToken",token,"notificationType",12))));
+      googleService.rtdn("fixture-rtdn-1",event);googleService.rtdn("fixture-rtdn-1",event);
+      call("GET","/api/v1/subscriptions/me",TALENT,null).andExpect(status().isOk()).andExpect(jsonPath("$.is_creator_pro").value(false));
+      state.set("ACTIVE");call("POST","/api/v1/subscriptions/google-play/restore",TALENT,body).andExpect(status().isOk()).andExpect(jsonPath("$.purchase_state").value("revoked"));
+      call("GET","/api/v1/subscriptions/history",TALENT,null).andExpect(status().isOk()).andExpect(jsonPath("$[0].token_hash").doesNotExist()).andExpect(jsonPath("$[0].provider_order_id").doesNotExist());
+      mvc.perform(post("/api/v1/subscriptions/google-play/rtdn").header("Authorization","Bearer forged").contentType("application/json").content("{}" )).andExpect(status().isUnauthorized());
+      org.mockito.Mockito.when(google.get("com.castly.fixture","fixture-error-token-1234")).thenThrow(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,"Google unavailable"));
+      call("POST","/api/v1/subscriptions/google-play/verify",TALENT,"{\"purchase_token\":\"fixture-error-token-1234\"}").andExpect(status().isServiceUnavailable());
+      assertEquals((Object)0L,data.as(UUID.fromString(TALENT),db->db.sql("select count(*) from public.subscription_orders where token_hash=:h").param("h",com.castly.subscription.GooglePlayService.hash("fixture-error-token-1234")).query(Long.class).single()));
+    }finally{
+      ownerFixture("delete from public.subscription_audit_logs where action like 'google_%'; delete from public.subscription_events; delete from public.subscription_grants where source='google_play'; delete from public.subscription_orders; delete from private.subscription_purchase_owners; delete from private.subscription_rtdn_receipts; delete from public.subscription_entitlements where user_id='"+TALENT+"'; update public.subscription_plans set google_product_id=null,google_base_plan_id=null where id='creator_pro'");
     }
   }
 

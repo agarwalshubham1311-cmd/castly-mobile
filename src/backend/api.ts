@@ -1,3 +1,4 @@
+import type { BillingConfiguration, BillingResult } from '../subscriptions/billing';
 import type { Plan, Membership, PromotionClaim, SubscriptionOrder } from '../subscriptions/catalog';
 import type {
   Account,
@@ -157,13 +158,14 @@ export type BookingRequest = {
 export function createApiServices(request: ReturnType<typeof createApiTransport>) {
   return {
     subscriptions: {
+      billingConfiguration: () => request<BillingConfiguration>('subscriptions/google-play/configuration'),
       plans: () => request<Plan[]>('subscriptions/plans', 'GET', undefined, {authenticated: false}),
       current: () => request<Membership>('subscriptions/me'),
       history: () => request<SubscriptionOrder[]>('subscriptions/history'),
       claims: () => request<PromotionClaim[]>('subscriptions/promotions/me'),
       claim: (postUrl: string, actor: string) => request<PromotionClaim>('subscriptions/promotions/claims', 'POST', {post_url: postUrl}, {expectedSubject: actor}),
-      verify: (token: string, actor: string) => request<Membership>('subscriptions/google-play/verify', 'POST', {purchase_token: token}, {expectedSubject: actor}),
-      restore: (token: string, actor: string) => request<Membership>('subscriptions/google-play/restore', 'POST', {purchase_token: token}, {expectedSubject: actor}),
+      verify: (token: string, actor: string) => request<BillingResult>('subscriptions/google-play/verify', 'POST', {purchase_token: token}, {expectedSubject: actor}),
+      restore: (token: string, actor: string) => request<BillingResult>('subscriptions/google-play/restore', 'POST', {purchase_token: token}, {expectedSubject: actor}),
     },
     account: {
       get: (id: string) => {
