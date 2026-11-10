@@ -64,6 +64,7 @@ export type ConversationRow = {
   client_name?: string;
   talent_name?: string;
   can_send?: boolean;
+  contact_blocked?: boolean;
   id: string;
   client_id: string;
   talent_id: string;

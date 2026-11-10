@@ -1,4 +1,28 @@
 import type { createApiTransport } from '../backend/api';
+export type SafetyReport = {
+  id: string;
+  target_kind: string;
+  target_id: string;
+  category: string;
+  description?: string;
+  status: string;
+  action_id?: string;
+  decision?: string;
+  reason?: string;
+  target_snapshot?: Record<string, unknown>;
+};
+export type ModerationAction = {
+  id: string;
+  decision: string;
+  reason: string;
+  policy_version: string;
+};
+export type ModerationAppeal = {
+  id: string;
+  statement: string;
+  status: string;
+  resolution?: string;
+};
 export type Verification = {
   id?: string;
   status:
@@ -30,6 +54,7 @@ export function createTrustServices(request: ReturnType<typeof createApiTranspor
         booking: import('../backend/types').BookingRow;
         confirmed_by_me: boolean;
         confirmation_count: number;
+        review_eligible: boolean;
       }>(`bookings/${encodeURIComponent(id)}/completion`),
     confirmCompletion: (id: string, actor: string) =>
       request(`bookings/${encodeURIComponent(id)}/completion`, 'POST', undefined, {
@@ -61,6 +86,44 @@ export function createTrustServices(request: ReturnType<typeof createApiTranspor
         `admin/reviews/${encodeURIComponent(id)}/moderation`,
         'POST',
         { hidden, reason },
+        { expectedSubject: actor },
+      ),
+    blocks: () => request<{ blocked_id: string; created_at: string }[]>('blocks'),
+    block: (id: string, blocked: boolean, actor: string) =>
+      request(`blocks/${encodeURIComponent(id)}`, blocked ? 'PUT' : 'DELETE', undefined, {
+        expectedSubject: actor,
+      }),
+    report: (kind: string, id: string, category: string, description: string, actor: string) =>
+      request<{ id: string; status: string }>(
+        'reports',
+        'POST',
+        { target_kind: kind, target_id: id, category, description },
+        { expectedSubject: actor },
+      ),
+    reports: () => request<SafetyReport[]>('reports'),
+    actions: () => request<ModerationAction[]>('safety/actions'),
+    moderationQueue: () => request<SafetyReport[]>('admin/moderation'),
+    moderationDecision: (id: string, decision: string, reason: string, actor: string) =>
+      request(
+        `admin/moderation/${encodeURIComponent(id)}/decision`,
+        'POST',
+        { decision, reason },
+        { expectedSubject: actor },
+      ),
+    appeal: (id: string, statement: string, actor: string) =>
+      request(
+        `safety/actions/${encodeURIComponent(id)}/appeal`,
+        'POST',
+        { statement },
+        { expectedSubject: actor },
+      ),
+    appeals: () => request<ModerationAppeal[]>('safety/appeals'),
+    appealQueue: () => request<ModerationAppeal[]>('admin/moderation/appeals'),
+    resolveAppeal: (id: string, status: string, reason: string, actor: string) =>
+      request(
+        `admin/moderation/appeals/${encodeURIComponent(id)}/decision`,
+        'POST',
+        { status, reason },
         { expectedSubject: actor },
       ),
     configuration: () => request<SafetyConfiguration>('safety/configuration'),

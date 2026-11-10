@@ -1,3 +1,4 @@
+import { SafetyActions } from './SafetyActions';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../auth/AuthProvider';
@@ -7,12 +8,12 @@ import { useTrustGuard } from './useTrustGuard';
 export default function ReviewsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useAuth();
-  const begin = useTrustGuard(session?.user.id);
   const [page, setPage] = useState(0),
     [data, setData] = useState<Awaited<
       ReturnType<NonNullable<typeof services>['trust']['reviews']>
     > | null>(null),
     [error, setError] = useState('');
+  const begin = useTrustGuard(`${session?.user.id}:${id}:${page}`);
   async function load() {
     const valid = begin();
     setError('');
@@ -44,6 +45,7 @@ export default function ReviewsScreen() {
                 {item.rating} / 5 · {new Date(item.created_at).toLocaleDateString()}
               </Label>
               <Label>{item.body || 'No written review'}</Label>
+              <SafetyActions kind="review" id={item.id} />
             </React.Fragment>
           ))}
           {!data.reviews.length ? <Label>No visible reviews on this page.</Label> : null}

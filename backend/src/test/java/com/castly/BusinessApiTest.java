@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.*;
       "castly.subscriptions.enabled=true",
       "castly.trust.verification-enabled=true",
       "castly.trust.reviews-enabled=true",
+      "castly.trust.reporting-enabled=true",
       "castly.google.enabled=true",
       "castly.google.checkout-enabled=true",
       "castly.google.package-name=com.castly.fixture",
@@ -2396,6 +2397,192 @@ class BusinessApiTest {
           .andExpect(jsonPath("$.summary.average_rating").value(4.0));
     } finally {
       ownerFixture("delete from trust_private.reviewers where user_id='" + OUTSIDER + "'");
+    }
+  }
+
+  @Test
+  void symmetricBlocksDenyNewContactButPreserveHistoryCancellationAndUnblock() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+        .andExpect(status().isOk());
+    String conversation =
+        object(
+                call(
+                    "POST",
+                    "/api/v1/conversations",
+                    CLIENT,
+                    "{\"booking_id\":\"" + booking + "\"}"))
+            .get("id")
+            .toString();
+    call(
+            "POST",
+            "/api/v1/conversations/" + conversation + "/messages",
+            CLIENT,
+            "{\"body\":\"Preserved historic message\"}")
+        .andExpect(status().isCreated());
+    call("PUT", "/api/v1/blocks/" + CLIENT, talent, null).andExpect(status().isOk());
+    for (String actor : List.of(CLIENT, talent))
+      call(
+              "POST",
+              "/api/v1/conversations/" + conversation + "/messages",
+              actor,
+              "{\"body\":\"Blocked new message\"}")
+          .andExpect(status().isForbidden());
+    call("GET", "/api/v1/conversations/" + conversation, CLIENT, null)
+        .andExpect(jsonPath("$.can_send").value(false))
+        .andExpect(jsonPath("$.contact_blocked").value(true));
+    call("GET", "/api/v1/conversations/" + conversation + "/messages", CLIENT, null)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1));
+    assertThrows(
+        org.springframework.dao.DataAccessException.class,
+        () ->
+            data.as(
+                UUID.fromString(CLIENT),
+                db ->
+                    db.sql(
+                            "insert into public.messages(conversation_id,sender_id,body)"
+                                + " values(:c,:u,'Direct SQL blocked')")
+                        .param("c", UUID.fromString(conversation))
+                        .param("u", UUID.fromString(CLIENT))
+                        .update()));
+    assertThrows(
+        org.springframework.dao.DataAccessException.class,
+        () ->
+            data.as(
+                UUID.fromString(CLIENT),
+                db ->
+                    db.sql(
+                            "insert into"
+                                + " public.bookings(client_id,talent_id,project_type,proposed_date,location,requirements,indicative_budget)"
+                                + " values(:u,:t,'Test project',current_date+1,'Mumbai','Blocked"
+                                + " direct booking',100)")
+                        .param("u", UUID.fromString(CLIENT))
+                        .param("t", UUID.fromString(talent))
+                        .update()));
+    call("DELETE", "/api/v1/blocks/" + talent, CLIENT, null).andExpect(status().isOk());
+    call(
+            "POST",
+            "/api/v1/conversations/" + conversation + "/messages",
+            CLIENT,
+            "{\"body\":\"Reverse unblock cannot remove their block\"}")
+        .andExpect(status().isForbidden());
+    call("DELETE", "/api/v1/blocks/" + CLIENT, talent, null).andExpect(status().isOk());
+    call(
+            "POST",
+            "/api/v1/conversations/" + conversation + "/messages",
+            CLIENT,
+            "{\"body\":\"Message after proper unblock\"}")
+        .andExpect(status().isCreated());
+    call("PUT", "/api/v1/blocks/" + CLIENT, talent, null).andExpect(status().isOk());
+    call("POST", "/api/v1/bookings/" + booking + "/cancel", CLIENT, null)
+        .andExpect(status().isOk());
+    call("DELETE", "/api/v1/blocks/" + CLIENT, talent, null).andExpect(status().isOk());
+  }
+
+  @Test
+  void reportsArePrivateReplaySafeAndAppealsExcludeAllInterestedReviewers() throws Exception {
+    String booking = newBooking(),
+        talent = talentFor(booking),
+        independent = "00000000-0000-0000-0000-000000000088";
+    String body =
+        json.writeValueAsString(
+            Map.of(
+                "target_kind",
+                "user",
+                "target_id",
+                talent,
+                "category",
+                "fraud",
+                "description",
+                "Specific reported incident for manual review"));
+    String id =
+        object(call("POST", "/api/v1/reports", CLIENT, body).andExpect(status().isOk()))
+            .get("id")
+            .toString();
+    call("POST", "/api/v1/reports", CLIENT, body).andExpect(jsonPath("$.id").value(id));
+    call("GET", "/api/v1/reports", talent, null).andExpect(jsonPath("$.length()").value(0));
+    call("GET", "/api/v1/admin/moderation", talent, null).andExpect(status().isForbidden());
+    ownerFixture(
+        "insert into trust_private.reviewers values('"
+            + OUTSIDER
+            + "','moderation'),('"
+            + CLIENT
+            + "','moderation'),('"
+            + independent
+            + "','moderation')");
+    try {
+      call(
+              "POST",
+              "/api/v1/admin/moderation/" + id + "/decision",
+              CLIENT,
+              "{\"decision\":\"warning\",\"reason\":\"Reporter cannot decide\"}")
+          .andExpect(status().isForbidden());
+      String action =
+          object(
+                  call(
+                          "POST",
+                          "/api/v1/admin/moderation/" + id + "/decision",
+                          OUTSIDER,
+                          "{\"decision\":\"warning\",\"reason\":\"Public policy explanation without"
+                              + " private details\"}")
+                      .andExpect(status().isOk()))
+              .get("id")
+              .toString();
+      call(
+              "POST",
+              "/api/v1/admin/moderation/" + id + "/decision",
+              OUTSIDER,
+              "{\"decision\":\"warning\",\"reason\":\"Public policy explanation without private"
+                  + " details\"}")
+          .andExpect(jsonPath("$.id").value(action));
+      call("GET", "/api/v1/safety/actions", talent, null)
+          .andExpect(jsonPath("$[0].reporter_id").doesNotExist())
+          .andExpect(jsonPath("$[0].report_id").doesNotExist())
+          .andExpect(jsonPath("$[0].target_snapshot").doesNotExist());
+      String appeal =
+          object(
+                  call(
+                          "POST",
+                          "/api/v1/safety/actions/" + action + "/appeal",
+                          talent,
+                          "{\"statement\":\"Please reconsider this decision with my explanation\"}")
+                      .andExpect(status().isOk()))
+              .get("id")
+              .toString();
+      for (String reviewer : List.of(CLIENT, OUTSIDER, talent))
+        call(
+                "POST",
+                "/api/v1/admin/moderation/appeals/" + appeal + "/decision",
+                reviewer,
+                "{\"status\":\"OVERTURNED\",\"reason\":\"Interested party cannot decide\"}")
+            .andExpect(status().isForbidden());
+      call(
+              "POST",
+              "/api/v1/admin/moderation/appeals/" + appeal + "/decision",
+              independent,
+              "{\"status\":\"OVERTURNED\",\"reason\":\"Independent review accepted the appeal\"}")
+          .andExpect(status().isOk());
+      String next =
+          object(
+                  call(
+                          "POST",
+                          "/api/v1/reports",
+                          CLIENT,
+                          body.replace("Specific reported incident", "A separate later incident"))
+                      .andExpect(status().isOk()))
+              .get("id")
+              .toString();
+      assertNotEquals(id, next);
+    } finally {
+      ownerFixture(
+          "delete from trust_private.reviewers where user_id in('"
+              + OUTSIDER
+              + "','"
+              + CLIENT
+              + "','"
+              + independent
+              + "')");
     }
   }
 }

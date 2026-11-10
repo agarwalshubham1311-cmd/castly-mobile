@@ -1,3 +1,4 @@
+import { SafetyActions } from '../trust/SafetyActions';
 import { TrustLinks } from '../trust/TrustLinks';
 import { usePublishedTalent } from '../backend/usePublishedTalent';
 import React, { useState } from 'react';
@@ -113,7 +114,12 @@ export default function TalentProfile() {
         contentContainerStyle={{ paddingBottom: 24 }}
       >
         <View style={{ paddingHorizontal: padding, paddingTop: 8, gap: 10 }}>
-          {!mock ? <TrustLinks talentId={talent.id} /> : null}
+          {!mock ? (
+            <>
+              <TrustLinks talentId={talent.id} />
+              <SafetyActions kind="user" id={talent.id} allowBlock />
+            </>
+          ) : null}
           {!mock && talent.verifiedCreator ? (
             <Label accessibilityLabel="Verified Creator: profile and portfolio manually reviewed">
               ✓ Verified Creator
@@ -256,6 +262,11 @@ export default function TalentProfile() {
                   })
                 }
               />
+              {!mock
+                ? talent.portfolio.map((item) => (
+                    <SafetyActions key={item.image} kind="portfolio" id={item.image} />
+                  ))
+                : null}
               <SampleNote
                 text={
                   mock
@@ -303,6 +314,11 @@ export default function TalentProfile() {
                     ? 'Currently unavailable in the sample catalog.'
                     : 'Currently unavailable for projects.'}
               </Label>
+              {!mock
+                ? talent.portfolio.map((item) => (
+                    <SafetyActions key={item.image} kind="portfolio" id={item.image} />
+                  ))
+                : null}
               <SampleNote
                 text={
                   mock

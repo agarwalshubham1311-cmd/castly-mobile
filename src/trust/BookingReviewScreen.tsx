@@ -13,6 +13,7 @@ export default function BookingReviewScreen() {
     booking: BookingRow;
     confirmed_by_me: boolean;
     confirmation_count: number;
+    review_eligible: boolean;
   } | null>(null);
   const [rating, setRating] = useState('5'),
     [body, setBody] = useState(''),
@@ -28,6 +29,7 @@ export default function BookingReviewScreen() {
       ]);
       if (valid()) {
         setCompletion(state);
+        setReview(own[0] ?? null);
         if (own[0]) {
           setReview(own[0]);
           setRating(String(own[0].rating));
@@ -73,7 +75,8 @@ export default function BookingReviewScreen() {
             Status: {completion.booking.status} · Confirmations: {completion.confirmation_count} of
             2
           </Label>
-          {completion.booking.status === 'accepted' ? (
+          {['accepted', 'completed'].includes(completion.booking.status) &&
+          !completion.review_eligible ? (
             <PrimaryButton
               title={
                 completion.confirmed_by_me
@@ -84,7 +87,7 @@ export default function BookingReviewScreen() {
               onPress={() => void act(true)}
             />
           ) : null}
-          {completion.booking.status === 'completed' ? (
+          {completion.review_eligible ? (
             <>
               <Label>
                 Reviews reflect this completed booking. Avoid personal or confidential information.
@@ -109,11 +112,7 @@ export default function BookingReviewScreen() {
               ) : null}
               <PrimaryButton
                 title={review ? 'Save review changes' : 'Submit booking review'}
-                disabled={
-                  busy ||
-                  !/^[1-5]$/.test(rating) ||
-                  (!!review && new Date(review.editable_until).getTime() <= Date.now())
-                }
+                disabled={busy || !/^[1-5]$/.test(rating)}
                 onPress={() => void act(false)}
               />
             </>

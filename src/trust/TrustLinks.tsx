@@ -1,6 +1,6 @@
+import { safetyConfiguration } from './configuration';
 import React, { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { services } from '../backend';
 import { useAuth } from '../auth/AuthProvider';
 import { PrimaryButton } from '../components/ui';
 import { useTrustGuard } from './useTrustGuard';
@@ -10,8 +10,7 @@ export function TrustLinks({ bookingId, talentId }: { bookingId?: string; talent
   const [enabled, setEnabled] = useState(false);
   useEffect(() => {
     const valid = begin();
-    void services?.trust
-      .configuration()
+    void safetyConfiguration(session?.user.id || '')
       .then((config) => {
         if (valid()) setEnabled(config.features.reviews);
       })

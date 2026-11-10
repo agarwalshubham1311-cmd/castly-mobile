@@ -26,6 +26,7 @@ spring:
 castly:
   trust:
     verification-enabled: ${CASTLY_VERIFICATION_ENABLED:false}
+    reporting-enabled: ${CASTLY_SAFETY_REPORTING_ENABLED:false}
     reviews-enabled: ${CASTLY_REVIEWS_ENABLED:false}
     review-edit-hours: ${CASTLY_REVIEW_EDIT_HOURS:48}
     verification-valid-days: ${CASTLY_VERIFICATION_VALID_DAYS:365}

@@ -1,3 +1,4 @@
+import { SafetyActions } from '../trust/SafetyActions';
 import { TrustLinks } from '../trust/TrustLinks';
 import { DecisionDialog, type Decision } from '../components/DecisionDialog';
 import { BookingStatus } from '../components/BookingStatus';
@@ -249,6 +250,11 @@ export function LiveBookingDetail() {
         <>
           <BookingSummary booking={booking} />
           <TrustLinks bookingId={booking.id} />
+          <SafetyActions
+            kind="user"
+            id={client ? booking.talent_id : booking.client_id}
+            allowBlock
+          />
           <Heading>Project requirements</Heading>
           <Label>{booking.requirements}</Label>
           <Label>No payment is collected through this booking.</Label>
@@ -600,7 +606,11 @@ function ChatThread({ id }: { id: string }) {
       footer={
         <View style={{ gap: 8 }}>
           {conversation && !conversation.can_send && (
-            <Label>Messaging is paused because there is no active accepted booking.</Label>
+            <Label>
+              {conversation.contact_blocked
+                ? 'New messages are unavailable between these accounts. History remains accessible.'
+                : 'Messaging is paused because there is no active accepted booking.'}
+            </Label>
           )}
           {!!error && (
             <Label accessibilityRole="alert" style={{ color: c.error }}>
@@ -728,6 +738,7 @@ function ChatThread({ id }: { id: string }) {
               >
                 {row.body}
               </Text>
+              {!mine ? <SafetyActions kind="message" id={row.id} /> : null}
               <Text
                 style={{
                   fontFamily: f.medium,

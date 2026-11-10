@@ -40,28 +40,26 @@ public class ReviewService {
             if (!Set.of("accepted", "completed").contains(booking.get("status")))
               throw new ResponseStatusException(
                   HttpStatus.CONFLICT, "Only accepted bookings can be confirmed complete");
-            if (!"completed".equals(booking.get("status"))) {
-              db.sql(
-                      "insert into public.booking_completion_confirmations(booking_id,user_id)"
-                          + " values(:b,:u) on conflict do nothing")
-                  .param("b", id)
-                  .param("u", actor)
-                  .update();
-              long count =
-                  db.sql(
-                          "select count(*) from public.booking_completion_confirmations where"
-                              + " booking_id=:b")
-                      .param("b", id)
-                      .query(Long.class)
-                      .single();
-              if (count == 2)
-                booking =
-                    one(
-                        db.sql(
-                                "update public.bookings set status='completed' where id=:b"
-                                    + " returning *")
-                            .param("b", id));
-            }
+            db.sql(
+                    "insert into public.booking_completion_confirmations(booking_id,user_id)"
+                        + " values(:b,:u) on conflict do nothing")
+                .param("b", id)
+                .param("u", actor)
+                .update();
+            long count =
+                db.sql(
+                        "select count(*) from public.booking_completion_confirmations where"
+                            + " booking_id=:b")
+                    .param("b", id)
+                    .query(Long.class)
+                    .single();
+            if (count == 2 && !"completed".equals(booking.get("status")))
+              booking =
+                  one(
+                      db.sql(
+                              "update public.bookings set status='completed' where id=:b"
+                                  + " returning *")
+                          .param("b", id));
           }
           var confirmations =
               rows(
@@ -76,7 +74,9 @@ public class ReviewService {
               confirmations.stream()
                   .anyMatch(row -> actor.toString().equals(row.get("user_id").toString())),
               "confirmation_count",
-              confirmations.size());
+              confirmations.size(),
+              "review_eligible",
+              "completed".equals(booking.get("status")) && confirmations.size() == 2);
         });
   }
 
@@ -93,6 +93,16 @@ public class ReviewService {
           if (!"completed".equals(booking.get("status")))
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT, "Both participants must confirm completion before reviews");
+          if (db.sql(
+                      "select count(*) from public.booking_completion_confirmations where"
+                          + " booking_id=:b")
+                  .param("b", bookingId)
+                  .query(Long.class)
+                  .single()
+              != 2)
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Both participants must explicitly attest completion before reviews");
           UUID target =
               TrustAccess.id(
                   booking,
@@ -207,6 +217,16 @@ public class ReviewService {
                   db.sql("update public.user_reviews set hidden=:h where id=:id returning *")
                       .param("h", hidden)
                       .param("id", id));
+          db.sql(
+                  "insert into"
+                      + " public.moderation_actions(review_id,subject_id,reviewer_id,decision,reason)"
+                      + " values(:r,:s,:u,:d,:reason)")
+              .param("r", id)
+              .param("s", TrustAccess.id(result, "reviewer_id"))
+              .param("u", actor)
+              .param("d", hidden ? "review_hidden" : "review_restored")
+              .param("reason", reason.trim())
+              .update();
           TrustAccess.audit(
               db,
               actor,
