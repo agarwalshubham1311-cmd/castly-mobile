@@ -8,6 +8,10 @@ export type Account = {
 };
 export type TalentProfile = {
   verified_creator?: boolean;
+  trust_signals_enabled?: boolean;
+  completed_bookings?: number;
+  booking_review_count?: number;
+  booking_average_rating?: number | null;
   id: string;
   display_name: string;
   category_id: string;

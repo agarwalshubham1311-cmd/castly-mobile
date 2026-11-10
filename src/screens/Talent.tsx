@@ -120,6 +120,18 @@ export default function TalentProfile() {
               <SafetyActions kind="user" id={talent.id} allowBlock />
             </>
           ) : null}
+          {!mock && talent.trustIndicators ? (
+            <>
+              <Label>
+                {talent.trustIndicators.completedBookings} mutually confirmed completed bookings ·{' '}
+                {talent.trustIndicators.reviewCount} booking-based reviews
+                {talent.trustIndicators.averageRating !== null
+                  ? ` · ${talent.trustIndicators.averageRating} / 5`
+                  : ''}
+              </Label>
+              <Label>These are factual indicators, not a guarantee of safety.</Label>
+            </>
+          ) : null}
           {!mock && talent.verifiedCreator ? (
             <Label accessibilityLabel="Verified Creator: profile and portfolio manually reviewed">
               ✓ Verified Creator

@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class ReviewService {
   private final ActorDatabase data;
+  private final TrustSignals signals;
   private final TrustAccess access;
   private final boolean enabled;
   private final int editHours;
@@ -19,9 +20,11 @@ public class ReviewService {
   public ReviewService(
       ActorDatabase data,
       TrustAccess access,
+      TrustSignals signals,
       @Value("${castly.trust.reviews-enabled:false}") boolean enabled,
       @Value("${castly.trust.review-edit-hours:48}") int editHours) {
     this.data = data;
+    this.signals = signals;
     this.access = access;
     this.enabled = enabled;
     this.editHours = editHours;
@@ -166,8 +169,11 @@ public class ReviewService {
           var summary =
               one(
                   db.sql(
-                          "select count(*) as review_count,round(avg(rating),2) as average_rating"
-                              + " from public.user_reviews where target_id=:t and not hidden")
+                          "select coalesce(s.review_count,0) as review_count,case when"
+                              + " s.review_count>0 then"
+                              + " round(s.rating_total::numeric/s.review_count,2) else null end as"
+                              + " average_rating from (values(cast(:t as uuid))) t(id) left join"
+                              + " public.trust_signal_snapshots s on s.user_id=t.id")
                       .param("t", talent));
           return Map.of(
               "summary",
@@ -176,8 +182,8 @@ public class ReviewService {
               rows(
                   db.sql(
                           "select id,rating,body,created_at,updated_at,true as booking_based from"
-                              + " public.user_reviews where target_id=:t and not hidden order by"
-                              + " created_at desc,id desc limit :l offset :o")
+                              + " public.user_reviews where target_id=:t and eligible and not"
+                              + " hidden order by created_at desc,id desc limit :l offset :o")
                       .param("t", talent)
                       .param("l", limit)
                       .param("o", offset)));
@@ -235,6 +241,7 @@ public class ReviewService {
               hidden ? "review_hidden" : "review_restored",
               id,
               reason);
+          signals.schedule(TrustAccess.id(result, "reviewer_id"));
           return result;
         });
   }

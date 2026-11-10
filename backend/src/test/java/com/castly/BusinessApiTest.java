@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.*;
       "castly.trust.verification-enabled=true",
       "castly.trust.reviews-enabled=true",
       "castly.trust.reporting-enabled=true",
+      "castly.trust.signals-enabled=true",
       "castly.google.enabled=true",
       "castly.google.checkout-enabled=true",
       "castly.google.package-name=com.castly.fixture",
@@ -2584,5 +2585,73 @@ class BusinessApiTest {
               + independent
               + "')");
     }
+  }
+
+  @Test
+  void legacyCompletedBookingsNeedAttestationsAndPublicSignalsCannotBeForged() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    ownerFixture("update public.bookings set status='completed' where id='" + booking + "'");
+    call("GET", "/api/v1/talents/" + talent, null, null)
+        .andExpect(jsonPath("$.completed_bookings").value(0));
+    call("GET", "/api/v1/bookings/" + booking + "/completion", CLIENT, null)
+        .andExpect(jsonPath("$.review_eligible").value(false));
+    call(
+            "POST",
+            "/api/v1/bookings/" + booking + "/reviews",
+            CLIENT,
+            "{\"rating\":5,\"body\":\"Legacy status is not evidence\"}")
+        .andExpect(status().isConflict());
+    for (String participant : List.of(CLIENT, talent))
+      call("POST", "/api/v1/bookings/" + booking + "/completion", participant, null)
+          .andExpect(status().isOk());
+    call("POST", "/api/v1/bookings/" + booking + "/completion", CLIENT, null)
+        .andExpect(jsonPath("$.review_eligible").value(true));
+    call("GET", "/api/v1/talents/" + talent, null, null)
+        .andExpect(jsonPath("$.completed_bookings").value(1))
+        .andExpect(jsonPath("$.booking_review_count").value(0))
+        .andExpect(jsonPath("$.manual_review_recommended").doesNotExist());
+    call(
+            "POST",
+            "/api/v1/bookings/" + booking + "/reviews",
+            CLIENT,
+            "{\"rating\":4,\"body\":\"Both participants attested completion\"}")
+        .andExpect(status().isOk());
+    call("GET", "/api/v1/talents/" + talent, null, null)
+        .andExpect(jsonPath("$.booking_review_count").value(1))
+        .andExpect(jsonPath("$.booking_average_rating").value(4.0));
+    assertThrows(
+        org.springframework.dao.DataAccessException.class,
+        () ->
+            data.as(
+                UUID.fromString(talent),
+                db ->
+                    db.sql(
+                            "insert into public.trust_signal_snapshots(user_id,completed_bookings)"
+                                + " values(:u,999) on conflict(user_id) do update set"
+                                + " completed_bookings=999")
+                        .param("u", UUID.fromString(talent))
+                        .update()));
+    call("GET", "/api/v1/admin/trust/" + talent, talent, null).andExpect(status().isForbidden());
+    assertEquals(
+        (Object) 0L,
+        data.as(
+            UUID.fromString(talent),
+            db ->
+                db.sql("select count(*) from trust_private.risk_snapshots where user_id=:u")
+                    .param("u", UUID.fromString(talent))
+                    .query(Long.class)
+                    .single()));
+    ownerFixture(
+        "delete from public.booking_completion_confirmations where booking_id='"
+            + booking
+            + "' and user_id='"
+            + CLIENT
+            + "'");
+    call("GET", "/api/v1/talents/" + talent, null, null)
+        .andExpect(jsonPath("$.completed_bookings").value(0))
+        .andExpect(jsonPath("$.booking_review_count").value(0));
+    call("GET", "/api/v1/talents/" + talent + "/reviews", CLIENT, null)
+        .andExpect(jsonPath("$.summary.review_count").value(0))
+        .andExpect(jsonPath("$.reviews.length()").value(0));
   }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class SafetyService {
   private final ActorDatabase data;
+  private final TrustSignals signals;
   private final TrustAccess access;
   private final boolean enabled;
   private final TrustSchema schema;
@@ -21,8 +22,10 @@ public class SafetyService {
       ActorDatabase data,
       TrustAccess access,
       TrustSchema schema,
+      TrustSignals signals,
       @Value("${castly.trust.reporting-enabled:false}") boolean enabled) {
     this.data = data;
+    this.signals = signals;
     this.access = access;
     this.enabled = enabled;
     this.schema = schema;
@@ -239,6 +242,7 @@ public class SafetyService {
               decision,
               TrustAccess.id(action, "id"),
               reason.trim());
+          signals.schedule(TrustAccess.id(action, "subject_id"));
           return action;
         });
   }
@@ -343,6 +347,7 @@ public class SafetyService {
               "appeal_" + status,
               id,
               reason.trim());
+          signals.schedule(TrustAccess.id(action, "subject_id"));
           return result;
         });
   }

@@ -16,12 +16,17 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1")
 public class MarketplaceController {
   private final ActorDatabase data;
+  private final com.castly.trust.TrustSignals trust;
   private final com.castly.trust.VerificationService verification;
   private final com.castly.subscription.SubscriptionService subscriptions;
 
   public MarketplaceController(
-      ActorDatabase data, com.castly.subscription.SubscriptionService subscriptions, com.castly.trust.VerificationService verification) {
-    this.verification=verification;
+      ActorDatabase data,
+      com.castly.subscription.SubscriptionService subscriptions,
+      com.castly.trust.VerificationService verification,
+      com.castly.trust.TrustSignals trust) {
+    this.trust = trust;
+    this.verification = verification;
     this.subscriptions = subscriptions;
     this.data = data;
   }
@@ -103,9 +108,15 @@ public class MarketplaceController {
         db ->
             rows(
                 db.sql(
-                        "select *,"
-                            + subscriptions.discoveryField() + "," + verification.badgeField()
-                            + " from public.talent_profiles where published and (:query='' or"
+                        "select talent_profiles.*,"
+                            + subscriptions.discoveryField()
+                            + ","
+                            + verification.badgeField()
+                            + ","
+                            + trust.fields()
+                            + " from public.talent_profiles "
+                            + trust.join()
+                            + " where published and (:query='' or"
                             + " position(lower(:query) in lower(display_name||' '||city||'"
                             + " '||bio||' '||array_to_string(skills,' ')))>0) and (:category='' or"
                             + " category_id=:category) and (:city='' or lower(city)=lower(:city))"
@@ -144,9 +155,15 @@ public class MarketplaceController {
         db ->
             one(
                 db.sql(
-                        "select *,"
-                            + subscriptions.discoveryField() + "," + verification.badgeField()
-                            + " from public.talent_profiles where id=:id and published")
+                        "select talent_profiles.*,"
+                            + subscriptions.discoveryField()
+                            + ","
+                            + verification.badgeField()
+                            + ","
+                            + trust.fields()
+                            + " from public.talent_profiles "
+                            + trust.join()
+                            + " where id=:id and published")
                     .param("id", id)));
   }
 
