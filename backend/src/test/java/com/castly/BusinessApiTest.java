@@ -2889,6 +2889,25 @@ class BusinessApiTest {
       call("GET", "/api/v1/disputes/" + id + "/evidence/" + evidence + "/url", OUTSIDER, null)
           .andExpect(status().isOk());
       ownerFixture(
+          "begin;alter table public.booking_disputes disable trigger dispute_guard;update"
+              + " public.booking_disputes set status='FINAL_RESOLVED' where id='"
+              + id
+              + "';alter table public.booking_disputes enable trigger dispute_guard;commit;");
+      call("GET", "/api/v1/disputes/" + id + "/evidence/" + evidence + "/url", OUTSIDER, null)
+          .andExpect(status().isNotFound());
+      ownerFixture(
+          storageActor(
+              OUTSIDER,
+              "do $$begin if exists(select 1 from storage.objects where bucket_id='trust-evidence'"
+                  + " and name='"
+                  + path.get()
+                  + "') then raise exception 'Closed case image leaked to reviewer';end if;end$$"));
+      ownerFixture(
+          "begin;alter table public.booking_disputes disable trigger dispute_guard;update"
+              + " public.booking_disputes set status='OPEN' where id='"
+              + id
+              + "';alter table public.booking_disputes enable trigger dispute_guard;commit;");
+      ownerFixture(
           "begin;alter table public.dispute_evidence disable trigger evidence_guard;update"
               + " public.dispute_evidence set expires_at=now()-interval '1 second' where id='"
               + evidence
