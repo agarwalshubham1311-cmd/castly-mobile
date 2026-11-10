@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { services } from '../backend';
@@ -82,6 +83,24 @@ export default function ModerationScreen() {
         maxLength={1000}
       />
       {error ? <Label accessibilityRole="alert">{error}</Label> : null}
+      {config?.reviewer_scopes.includes('disputes') ? (
+        <PrimaryButton
+          title="Review booking disputes"
+          onPress={() => router.push({ pathname: '/safety/disputes', params: { admin: '1' } })}
+        />
+      ) : null}
+      {config?.reviewer_scopes.includes('retention') ? (
+        <PrimaryButton
+          title="Delete expired image evidence (up to 10 objects)"
+          disabled={busy}
+          onPress={() =>
+            void act(async () => {
+              const result = await services!.trust.evidenceCleanup(session!.user.id);
+              setError(`${result.deleted} expired private objects deleted.`);
+            })
+          }
+        />
+      ) : null}
       <Label>Verification queue</Label>
       {verification.map((item) => (
         <React.Fragment key={item.id}>

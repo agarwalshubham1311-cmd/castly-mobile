@@ -28,6 +28,9 @@ import org.springframework.test.web.servlet.*;
       "castly.trust.reviews-enabled=true",
       "castly.trust.reporting-enabled=true",
       "castly.trust.signals-enabled=true",
+      "castly.trust.disputes-enabled=true",
+      "castly.trust.evidence-enabled=true",
+      "castly.trust.evidence-policy-version=fixture-image-v1",
       "castly.google.enabled=true",
       "castly.google.checkout-enabled=true",
       "castly.google.package-name=com.castly.fixture",
@@ -50,6 +53,9 @@ class BusinessApiTest {
 
   @org.springframework.test.context.bean.override.mockito.MockitoBean
   com.castly.subscription.GooglePlayGateway google;
+
+  @org.springframework.test.context.bean.override.mockito.MockitoBean
+  com.castly.trust.EvidenceGateway evidenceGateway;
 
   @Autowired com.castly.subscription.GooglePlayService googleService;
   @Autowired com.castly.subscription.PromotionService promotionService;
@@ -2653,5 +2659,291 @@ class BusinessApiTest {
     call("GET", "/api/v1/talents/" + talent + "/reviews", CLIENT, null)
         .andExpect(jsonPath("$.summary.review_count").value(0))
         .andExpect(jsonPath("$.reviews.length()").value(0));
+  }
+
+  private String fixturePng(int color) throws Exception {
+    var image = new java.awt.image.BufferedImage(2, 2, java.awt.image.BufferedImage.TYPE_INT_RGB);
+    image.setRGB(0, 0, color);
+    var bytes = new java.io.ByteArrayOutputStream();
+    javax.imageio.ImageIO.write(image, "png", bytes);
+    return Base64.getEncoder().encodeToString(bytes.toByteArray());
+  }
+
+  private String storageActor(String actor, String sql) {
+    return "begin; set local role authenticated; select set_config('request.jwt.claim.sub','"
+        + actor
+        + "',true),set_config('request.jwt.claims','{\"sub\":\""
+        + actor
+        + "\",\"role\":\"authenticated\"}',true); "
+        + sql
+        + ";commit;";
+  }
+
+  @Test
+  void disputesAreParticipantPrivateAndAppealsRequireAnotherIndependentReviewer() throws Exception {
+    String booking = newBooking(),
+        talent = talentFor(booking),
+        second = "00000000-0000-0000-0000-000000000087";
+    String body =
+        json.writeValueAsString(
+            Map.of(
+                "booking_id",
+                booking,
+                "statement",
+                "The project scope needs independent review and clarification.",
+                "consent_version",
+                "dispute-text-v1"));
+    call("POST", "/api/v1/disputes", OUTSIDER, body).andExpect(status().isNotFound());
+    String id =
+        object(call("POST", "/api/v1/disputes", CLIENT, body).andExpect(status().isOk()))
+            .get("id")
+            .toString();
+    call("POST", "/api/v1/disputes", CLIENT, body).andExpect(jsonPath("$.id").value(id));
+    String other =
+        object(call("POST", "/api/v1/disputes", talent, body).andExpect(status().isOk()))
+            .get("id")
+            .toString();
+    assertNotEquals(id, other);
+    call("GET", "/api/v1/disputes/" + id, talent, null).andExpect(status().isNotFound());
+    call("GET", "/api/v1/disputes/" + other, CLIENT, null).andExpect(status().isNotFound());
+    call("PUT", "/api/v1/blocks/" + CLIENT, talent, null).andExpect(status().isOk());
+    call(
+            "POST",
+            "/api/v1/disputes/" + id + "/notes",
+            CLIENT,
+            "{\"note\":\"The existing booking remains accessible after a"
+                + " block.\",\"consent_version\":\"dispute-text-v1\"}")
+        .andExpect(status().isOk());
+    call("GET", "/api/v1/disputes/" + id, CLIENT, null)
+        .andExpect(jsonPath("$.evidence.length()").value(1));
+    ownerFixture(
+        "insert into trust_private.reviewers values('"
+            + OUTSIDER
+            + "','disputes'),('"
+            + second
+            + "','disputes')");
+    try {
+      call(
+              "POST",
+              "/api/v1/admin/disputes/" + id + "/decision",
+              OUTSIDER,
+              "{\"status\":\"RESOLVED\",\"reason\":\"Clarified project scope without a payment"
+                  + " guarantee.\"}")
+          .andExpect(status().isOk());
+      call(
+              "POST",
+              "/api/v1/disputes/" + id + "/appeal",
+              CLIENT,
+              "{\"statement\":\"Please have another independent reviewer consider this"
+                  + " explanation.\"}")
+          .andExpect(status().isOk());
+      call(
+              "POST",
+              "/api/v1/admin/disputes/" + id + "/decision",
+              OUTSIDER,
+              "{\"status\":\"FINAL_RESOLVED\",\"reason\":\"Original reviewer cannot decide"
+                  + " appeal\"}")
+          .andExpect(status().isForbidden());
+      call(
+              "POST",
+              "/api/v1/admin/disputes/" + id + "/decision",
+              second,
+              "{\"status\":\"FINAL_RESOLVED\",\"reason\":\"Independent appeal review completed\"}")
+          .andExpect(status().isOk());
+      call("GET", "/api/v1/disputes/" + id, CLIENT, null)
+          .andExpect(jsonPath("$.decisions.length()").value(2));
+    } finally {
+      ownerFixture(
+          "delete from trust_private.reviewers where user_id in('"
+              + OUTSIDER
+              + "','"
+              + second
+              + "') and scope='disputes'");
+      call("DELETE", "/api/v1/blocks/" + CLIENT, talent, null);
+    }
+  }
+
+  @Test
+  void privateImagesRequireApprovedConsentAndCannotBeReplacedDuringFinalization() throws Exception {
+    ownerFixture(
+        "delete from trust_private.rate_limits where user_id='"
+            + CLIENT
+            + "' and operation='dispute_create'");
+    String booking = newBooking(),
+        talent = talentFor(booking),
+        operator = "00000000-0000-0000-0000-000000000086";
+    String id =
+        object(
+                call(
+                        "POST",
+                        "/api/v1/disputes",
+                        CLIENT,
+                        json.writeValueAsString(
+                            Map.of(
+                                "booking_id",
+                                booking,
+                                "statement",
+                                "Private image evidence for this real booking dispute.",
+                                "consent_version",
+                                "dispute-text-v1")))
+                    .andExpect(status().isOk()))
+            .get("id")
+            .toString();
+    org.mockito.Mockito.when(evidenceGateway.configured()).thenReturn(true);
+    String upload =
+        json.writeValueAsString(
+            Map.of("image_base64", fixturePng(0x123456), "consent_version", "fixture-image-v1"));
+    call("POST", "/api/v1/disputes/" + id + "/images", CLIENT, upload)
+        .andExpect(status().isServiceUnavailable());
+    org.mockito.Mockito.verify(evidenceGateway, org.mockito.Mockito.never())
+        .upload(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.any());
+    ownerFixture(
+        "insert into"
+            + " trust_private.evidence_policies(version,approved,accepting_uploads,retention_days,approved_at)"
+            + " values('fixture-image-v1',true,true,7,now());insert into trust_private.reviewers"
+            + " values('"
+            + OUTSIDER
+            + "','disputes'),('"
+            + operator
+            + "','retention')");
+    var started = new java.util.concurrent.CountDownLatch(1);
+    var finish = new java.util.concurrent.CountDownLatch(1);
+    var path = new java.util.concurrent.atomic.AtomicReference<String>();
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              String objectPath = invocation.getArgument(1);
+              path.set(objectPath);
+              byte[] sanitized = invocation.getArgument(2);
+              assertNotNull(
+                  javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(sanitized)));
+              ownerFixture(
+                  storageActor(
+                      CLIENT,
+                      "insert into storage.objects(bucket_id,name) values('trust-evidence','"
+                          + objectPath
+                          + "');do $$begin delete from storage.objects where"
+                          + " bucket_id='trust-evidence' and name='"
+                          + objectPath
+                          + "';if found then raise exception 'Reserved image was deletable';end"
+                          + " if;end$$"));
+              started.countDown();
+              assertTrue(finish.await(10, java.util.concurrent.TimeUnit.SECONDS));
+              return null;
+            })
+        .when(evidenceGateway)
+        .upload(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.any());
+    try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      call("POST", "/api/v1/disputes/" + id + "/images", talent, upload)
+          .andExpect(status().isNotFound());
+      var pending =
+          executor.submit(() -> call("POST", "/api/v1/disputes/" + id + "/images", CLIENT, upload));
+      assertTrue(started.await(10, java.util.concurrent.TimeUnit.SECONDS));
+      String evidence =
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql("select id::text from public.dispute_evidence where object_path=:p")
+                      .param("p", path.get())
+                      .query(String.class)
+                      .single());
+      call("DELETE", "/api/v1/disputes/evidence/" + evidence, CLIENT, null)
+          .andExpect(status().isConflict());
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () ->
+              data.as(
+                  UUID.fromString(CLIENT),
+                  db ->
+                      db.sql(
+                              "update public.dispute_evidence set sha256=repeat('f',64) where"
+                                  + " id=:id")
+                          .param("id", UUID.fromString(evidence))
+                          .update()));
+      finish.countDown();
+      pending
+          .get(10, java.util.concurrent.TimeUnit.SECONDS)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.state").value("READY"));
+      call("POST", "/api/v1/disputes/" + id + "/images", CLIENT, upload)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.id").value(evidence));
+      org.mockito.Mockito.verify(evidenceGateway, org.mockito.Mockito.times(1))
+          .upload(
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.any());
+      org.mockito.Mockito.when(
+              evidenceGateway.sign(
+                  org.mockito.ArgumentMatchers.anyString(),
+                  org.mockito.ArgumentMatchers.anyString(),
+                  org.mockito.ArgumentMatchers.any()))
+          .thenReturn("https://storage.example.test/authorized-fixture");
+      call("GET", "/api/v1/disputes/" + id + "/evidence/" + evidence + "/url", talent, null)
+          .andExpect(status().isNotFound());
+      call("GET", "/api/v1/disputes/" + id + "/evidence/" + evidence + "/url", OUTSIDER, null)
+          .andExpect(status().isOk());
+      ownerFixture(
+          "begin;alter table public.dispute_evidence disable trigger evidence_guard;update"
+              + " public.dispute_evidence set expires_at=now()-interval '1 second' where id='"
+              + evidence
+              + "';alter table public.dispute_evidence enable trigger evidence_guard;commit;");
+      call("GET", "/api/v1/disputes/" + id + "/evidence/" + evidence + "/url", OUTSIDER, null)
+          .andExpect(status().isNotFound());
+      ownerFixture(
+          storageActor(
+              OUTSIDER,
+              "do $$begin if exists(select 1 from storage.objects where bucket_id='trust-evidence'"
+                  + " and name='"
+                  + path.get()
+                  + "') then raise exception 'Expired image leaked to reviewer';end if;end$$"));
+      org.mockito.Mockito.doThrow(
+              new org.springframework.web.server.ResponseStatusException(
+                  org.springframework.http.HttpStatus.BAD_GATEWAY, "Fixture storage retry"))
+          .doAnswer(
+              invocation -> {
+                ownerFixture(
+                    storageActor(
+                        operator,
+                        "delete from storage.objects where bucket_id='trust-evidence' and name='"
+                            + path.get()
+                            + "'"));
+                return null;
+              })
+          .when(evidenceGateway)
+          .remove(
+              org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
+      call("POST", "/api/v1/admin/disputes/evidence/cleanup", operator, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.failed").value(1));
+      assertEquals(
+          "DELETING",
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql("select state from public.dispute_evidence where id=:id")
+                      .param("id", UUID.fromString(evidence))
+                      .query(String.class)
+                      .single()));
+      call("POST", "/api/v1/admin/disputes/evidence/cleanup", operator, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.deleted").value(1));
+      call("GET", "/api/v1/disputes/" + id, CLIENT, null)
+          .andExpect(jsonPath("$.evidence[0].state").value("DELETED"));
+    } finally {
+      finish.countDown();
+      ownerFixture(
+          "delete from trust_private.reviewers where user_id in('"
+              + OUTSIDER
+              + "','"
+              + operator
+              + "') and scope in('disputes','retention');update trust_private.evidence_policies set"
+              + " accepting_uploads=false where version='fixture-image-v1'");
+    }
   }
 }

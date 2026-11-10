@@ -27,6 +27,7 @@ const services = {
 };
 const original = Module._load;
 Module._load = function (name, parent, main) {
+  if (name === 'react-native') return { Image: 'Image', Pressable: 'Pressable' };
   if (name === 'expo-router') return { useLocalSearchParams: () => route };
   if (name.endsWith('/AuthProvider'))
     return { useAuth: () => ({ session: { user: { id: actor } } }) };
@@ -98,5 +99,56 @@ test('route remount and late previous-resource read cannot edit another booking 
   writes = [];
   await act(async () => tree.root.findByProps({ title: 'Submit booking review' }).props.onPress());
   assert.deepEqual(writes, [['submit', 'booking-b', 'creator-a']]);
+  await act(() => tree.unmount());
+});
+
+const Dispute = require('../src/trust/DisputeScreen.tsx').default;
+test('private image consent is bound to the displayed approved policy version', async () => {
+  route = { id: 'case-one' };
+  let version = 'approved-v1';
+  services.trust.dispute = async () => ({
+    dispute: {
+      id: route.id,
+      owner_id: actor,
+      status: 'OPEN',
+      statement: 'A private booking case',
+      retention_until: '2027-01-01',
+    },
+    decisions: [],
+    evidence: [],
+  });
+  services.trust.evidenceConfiguration = async () => ({
+    enabled: true,
+    version,
+    retention_days: 7,
+    max_bytes: 5242880,
+  });
+  services.trust.configuration = async () => ({
+    reviewer_scopes: [],
+    features: { disputes: true },
+  });
+  let tree;
+  await act(async () => {
+    tree = create(React.createElement(Dispute));
+  });
+  assert.equal(
+    tree.root.findByProps({ title: 'Choose and upload private image' }).props.disabled,
+    true,
+  );
+  await act(async () => tree.root.findByProps({ accessibilityRole: 'checkbox' }).props.onPress());
+  assert.equal(
+    tree.root.findByProps({ title: 'Choose and upload private image' }).props.disabled,
+    false,
+  );
+  version = 'approved-v2';
+  await act(async () => tree.root.findByProps({ title: 'Refresh case' }).props.onPress());
+  assert.equal(
+    tree.root.findByProps({ title: 'Choose and upload private image' }).props.disabled,
+    true,
+  );
+  assert.equal(
+    tree.root.findByProps({ accessibilityRole: 'checkbox' }).props.accessibilityState.checked,
+    false,
+  );
   await act(() => tree.unmount());
 });

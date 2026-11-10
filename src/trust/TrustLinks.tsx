@@ -8,22 +8,39 @@ export function TrustLinks({ bookingId, talentId }: { bookingId?: string; talent
   const { session } = useAuth();
   const begin = useTrustGuard(session?.user.id);
   const [enabled, setEnabled] = useState(false);
+  const [disputes, setDisputes] = useState(false);
   useEffect(() => {
     const valid = begin();
     void safetyConfiguration(session?.user.id || '')
       .then((config) => {
-        if (valid()) setEnabled(config.features.reviews);
+        if (valid()) {
+          setEnabled(config.features.reviews);
+          setDisputes(config.features.disputes);
+        }
       })
       .catch(() => {});
   }, [session?.user.id]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!enabled) return null;
+  if (!enabled && !disputes) return null;
   return (
-    <PrimaryButton
-      secondary
-      title={bookingId ? 'Completion and review' : 'Booking-based reviews'}
-      onPress={() =>
-        router.push(bookingId ? `/safety/booking/${bookingId}` : `/safety/reviews/${talentId}`)
-      }
-    />
+    <>
+      {enabled ? (
+        <PrimaryButton
+          secondary
+          title={bookingId ? 'Completion and review' : 'Booking-based reviews'}
+          onPress={() =>
+            router.push(bookingId ? `/safety/booking/${bookingId}` : `/safety/reviews/${talentId}`)
+          }
+        />
+      ) : null}
+      {bookingId && disputes ? (
+        <PrimaryButton
+          secondary
+          title="Open a booking dispute"
+          onPress={() =>
+            router.push({ pathname: '/safety/disputes', params: { booking: bookingId } })
+          }
+        />
+      ) : null}
+    </>
   );
 }

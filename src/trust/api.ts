@@ -126,6 +126,57 @@ export function createTrustServices(request: ReturnType<typeof createApiTranspor
         { status, reason },
         { expectedSubject: actor },
       ),
+    disputes: (admin = false, offset = 0) =>
+      request<Dispute[]>(`${admin ? 'admin/' : ''}disputes?offset=${offset}`),
+    fileDispute: (bookingId: string, statement: string, actor: string) =>
+      request<Dispute>(
+        'disputes',
+        'POST',
+        { booking_id: bookingId, statement, consent_version: 'dispute-text-v1' },
+        { expectedSubject: actor },
+      ),
+    dispute: (id: string) => request<DisputeDetails>(`disputes/${encodeURIComponent(id)}`),
+    disputeNote: (id: string, note: string, actor: string) =>
+      request(
+        `disputes/${encodeURIComponent(id)}/notes`,
+        'POST',
+        { note, consent_version: 'dispute-text-v1' },
+        { expectedSubject: actor },
+      ),
+    disputeAppeal: (id: string, statement: string, actor: string) =>
+      request(
+        `disputes/${encodeURIComponent(id)}/appeal`,
+        'POST',
+        { statement },
+        { expectedSubject: actor },
+      ),
+    disputeDecision: (id: string, status: string, reason: string, actor: string) =>
+      request(
+        `admin/disputes/${encodeURIComponent(id)}/decision`,
+        'POST',
+        { status, reason },
+        { expectedSubject: actor },
+      ),
+    evidenceConfiguration: () => request<EvidenceConfiguration>('disputes/evidence/configuration'),
+    evidenceUpload: (id: string, imageBase64: string, consentVersion: string, actor: string) =>
+      request(
+        `disputes/${encodeURIComponent(id)}/images`,
+        'POST',
+        { image_base64: imageBase64, consent_version: consentVersion },
+        { expectedSubject: actor },
+      ),
+    evidenceUrl: (dispute: string, id: string) =>
+      request<{ url: string; expires_in: number }>(
+        `disputes/${encodeURIComponent(dispute)}/evidence/${encodeURIComponent(id)}/url`,
+      ),
+    evidenceRemove: (id: string, actor: string) =>
+      request(`disputes/evidence/${encodeURIComponent(id)}`, 'DELETE', undefined, {
+        expectedSubject: actor,
+      }),
+    evidenceCleanup: (actor: string) =>
+      request<{ deleted: number }>('admin/disputes/evidence/cleanup', 'POST', undefined, {
+        expectedSubject: actor,
+      }),
     configuration: () => request<SafetyConfiguration>('safety/configuration'),
     verification: () => request<Verification>('verification/me'),
     contact: () =>
@@ -160,3 +211,35 @@ export function createTrustServices(request: ReturnType<typeof createApiTranspor
       ),
   };
 }
+export type Dispute = {
+  id: string;
+  booking_id: string;
+  owner_id: string;
+  status: string;
+  statement: string;
+  resolution?: string;
+  appeal_statement?: string;
+  resolved_at?: string;
+  created_at: string;
+  retention_until: string;
+};
+export type DisputeEvidence = {
+  id: string;
+  kind: 'note' | 'image';
+  state: string;
+  note?: string | null;
+  expires_at: string;
+  created_at: string;
+  consent_version: string;
+};
+export type DisputeDetails = {
+  dispute: Dispute;
+  decisions: { id: string; status: string; resolution: string; created_at: string }[];
+  evidence: DisputeEvidence[];
+};
+export type EvidenceConfiguration = {
+  enabled: boolean;
+  version?: string;
+  retention_days?: number;
+  max_bytes?: number;
+};

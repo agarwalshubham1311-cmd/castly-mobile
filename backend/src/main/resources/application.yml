@@ -26,6 +26,9 @@ spring:
 castly:
   trust:
     verification-enabled: ${CASTLY_VERIFICATION_ENABLED:false}
+    disputes-enabled: ${CASTLY_DISPUTES_ENABLED:false}
+    evidence-enabled: ${CASTLY_DISPUTE_EVIDENCE_ENABLED:false}
+    evidence-policy-version: ${CASTLY_DISPUTE_EVIDENCE_POLICY_VERSION:}
     signals-enabled: ${CASTLY_TRUST_SIGNALS_ENABLED:false}
     reporting-enabled: ${CASTLY_SAFETY_REPORTING_ENABLED:false}
     reviews-enabled: ${CASTLY_REVIEWS_ENABLED:false}
