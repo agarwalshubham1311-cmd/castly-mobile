@@ -1,4 +1,5 @@
 import { createTrustServices } from '../trust/api.ts';
+import type { CampaignConstraints, DiscoveryCandidate, DiscoveryConfiguration, Shortlist } from '../discovery/types';
 import type { BillingConfiguration, BillingResult } from '../subscriptions/billing';
 import type { Plan, Membership, PromotionClaim, SubscriptionOrder } from '../subscriptions/catalog';
 import type {
@@ -159,6 +160,34 @@ export type BookingRequest = {
 export function createApiServices(request: ReturnType<typeof createApiTransport>) {
   return {
     trust: createTrustServices(request),
+    discovery: {
+      configuration: () => request<DiscoveryConfiguration>('discovery/configuration'),
+      forget: (actor: string) => request<void>('discovery/me/ai-cache', 'DELETE', undefined, { expectedSubject: actor }),
+      advanced: (filters: Record<string, string | number | boolean | undefined>) => {
+        const params = new URLSearchParams();
+        for (const [key, value] of Object.entries(filters))
+          if (value !== undefined && value !== '') params.set(key, String(value));
+        return request<DiscoveryCandidate[]>(`discovery/advanced?${params.toString()}`);
+      },
+      parse: (description: string, actor: string) =>
+        request<Record<string, unknown>>('matching/parse', 'POST', { description }, { expectedSubject: actor }),
+      shortlist: (constraints: CampaignConstraints, actor: string, personalized = false) =>
+        request<Shortlist>(personalized ? 'recommendations' : 'matching/shortlist',
+          'POST', constraints, { expectedSubject: actor }),
+      brief: (constraints: CampaignConstraints, talentId: string, actor: string) =>
+        request<{ label: string; draft: string; persisted: boolean }>('assistance/brief',
+          'POST', { constraints, talent_id: talentId }, { expectedSubject: actor }),
+      compare: (talentIds: string[], actor: string) =>
+        request<{ label: string; items: DiscoveryCandidate[]; availability: string }>('assistance/compare',
+          'POST', { talent_ids: talentIds }, { expectedSubject: actor }),
+      profile: (actor: string) =>
+        request<{ label: string; suggestions: string[] }>('assistance/profile',
+          'POST', {}, { expectedSubject: actor }),
+      preference: (region: string, shareRegion: boolean, actor: string) =>
+        request('discovery/me/preferences', 'PUT', { region, share_region: shareRegion }, { expectedSubject: actor }),
+      availability: (day: string, available: boolean, actor: string) =>
+        request('discovery/me/availability', 'PUT', { day, available }, { expectedSubject: actor }),
+    },
     subscriptions: {
       reviewQueue: (offset = 0) =>
         request<(PromotionClaim & { user_id: string })[]>(

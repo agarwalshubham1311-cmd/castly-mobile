@@ -34,6 +34,11 @@ castly:
     reviews-enabled: ${CASTLY_REVIEWS_ENABLED:false}
     review-edit-hours: ${CASTLY_REVIEW_EDIT_HOURS:48}
     verification-valid-days: ${CASTLY_VERIFICATION_VALID_DAYS:365}
+  phase5:
+    advanced-search-enabled: ${CASTLY_ADVANCED_SEARCH_ENABLED:false}
+    ai-recommendations-enabled: ${CASTLY_AI_RECOMMENDATIONS_ENABLED:false}
+    smart-matching-enabled: ${CASTLY_SMART_MATCHING_ENABLED:false}
+    ai-assistance-enabled: ${CASTLY_AI_ASSISTANCE_ENABLED:false}
   google:
     enabled: ${CASTLY_GOOGLE_PLAY_ENABLED:false}
     checkout-enabled: ${CASTLY_GOOGLE_PLAY_CHECKOUT_ENABLED:false}
