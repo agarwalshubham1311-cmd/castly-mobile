@@ -18,11 +18,10 @@ export default function CreatorDiscoveryScreen() {
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     const current = ++generation.current;
-    setRegion(''); setDay(''); setTips([]); setShare(false); setMessage(''); setConfig(null); setBusy(false);
     if (actor && services) void services.discovery.configuration().then((value) => {
       if (current === generation.current) setConfig(value);
     }).catch(() => { if (current === generation.current) setMessage('Discovery controls are unavailable.'); });
-    return () => { generation.current++; };
+    return () => { const sequence = generation; sequence.current++; };
   }, [actor]);
   async function run(task: () => Promise<string>) {
     if (!actor) return;
@@ -47,6 +46,7 @@ export default function CreatorDiscoveryScreen() {
         <Label>{available ? '✓ ' : ''}I declare this date available for inquiry</Label>
       </Pressable>
       <PrimaryButton title="Save date declaration" disabled={busy || !day} onPress={() => void run(async () => { await services!.discovery.availability(day, available, actor!); return 'Date declaration saved. Clients still need direct confirmation.'; })} />
+      <PrimaryButton secondary title="Clear date declaration" disabled={busy || !day} onPress={() => void run(async () => { await services!.discovery.withdrawAvailability(day, actor!); return 'Date declaration cleared; future availability is unknown.'; })} />
     </> : null}
     {config?.ai_assistance ? <PrimaryButton title="Suggest profile improvements" disabled={busy} onPress={() => void run(async () => { const result = await services!.discovery.profile(actor!); setTips(result.suggestions); return 'Local suggestions only. Nothing was edited.'; })} /> : null}
     {tips.map((tip) => <Label key={tip}>Suggestion: {tip}</Label>)}

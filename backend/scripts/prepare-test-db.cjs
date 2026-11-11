@@ -156,6 +156,14 @@ if (schemaPath === 'reconciliation') {
       fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
       'castly_spring_test',
     );
+  // Rehearse the new forward-only Phase 5 change after the synthetic Phase 3 cutover.
+  sql(
+    fs.readFileSync(
+      path.join(root, 'supabase/migrations/20261111100000_phase5_discovery.sql'),
+      'utf8',
+    ),
+    'castly_spring_test',
+  );
 }
 // Reproduce hosted restrictions for EVERY Java business operation, on both schema paths.
 sql('revoke usage on schema auth from castly_api;', 'castly_spring_test');
