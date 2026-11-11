@@ -1,0 +1,12 @@
+# Local validation, 2026-11-11
+
+- `npm ci --cache /tmp/castly-phase5-npm --prefer-offline --no-audit --no-fund`: 796 packages installed in the isolated Phase 5 worktree.
+- `npm run typecheck`, `npm run lint`: passed after Phase 5 implementation. `npm test`: 71 passed. `npm run test:components`: 10 passed, including actor-switch and late-response coverage.
+- `JAVA_HOME=/workspace/tools/jdk21 /workspace/tools/apache-maven-3.9.11/bin/mvn -o -Dmaven.repo.local=/workspace/.m2/repository clean verify` from `backend/`: 118 tests, zero failures on fresh repository schema. Same command with `CASTLY_TEST_SCHEMA_PATH=reconciliation`: 118 tests, zero failures on synthetic Phase 3 reconciliation plus forward Phase 5 migration. The reconciliation fixture is not a claim of hosted equivalence.
+- `npm run test:sql`: passed all disposable PostgreSQL policy suites, including 11 new Phase 5 cross-user/RLS/index assertions and forced-plan GIN usability. `npm run test:reconciliation`: 286 SQL assertions/catalog gates passed on disposable PostgreSQL. No hosted DB was contacted.
+- Focused tests cover protected-targeting and unsupported-currency rejection, date and budget-unit confirmation, >50 candidate ranking, declared-day conflict exclusion, indistinguishable booked/unbooked undeclared dates, owner withdrawal, cross-user write denial, malformed/slow/throwing provider fallback, consent/cache isolation and unpublished creator removal after a provider wait.
+
+- Dedicated Supabase-auth/Spring-business web export and `npm run test:backend`: real browser + Java HTTP/JWT/JWKS + disposable PostgreSQL passed the Phase 5 campaign parse → confirmed constraints → creator-declared date shortlist → editable brief → factual comparison flow. Existing subscription and booking/message flows also passed. Auth/JWKS are local fixtures; hosted Realtime is not tested.
+- Dedicated mock web export: `npm run test:browser`, `npm run test:portraits`, `npm run test:ui` (ten screens, 30 PNGs) and `npm run test:accessibility` (three viewport widths) passed. `npm run test:mobile-api` passed against the dedicated Spring-mode export with a deterministic HTTP fixture and 201-profile pagination. All generated baseline screenshots were restored after review.
+
+Only the disabled provider was configured; no live AI model, external cost, native device, hosted database or production deployment was tested. The forced-plan GIN EXPLAIN demonstrates index usability, not production latency or planner preference.
