@@ -1,0 +1,11 @@
+# Phase 5 API contract
+
+All routes are under `/api/v1`, use existing Supabase JWT auth and Spring transaction-scoped `castly_api` identity, and return JSON. Disabled features return 503. Requests are capped, validated and use bounded error messages.
+
+- `GET /discovery/advanced?category=actors&city=Mumbai&region=Maharashtra&skills=Video&max_rate=20000&from=2026-12-01&through=2026-12-02&availability=confirmed&sort=rate_asc&limit=25&offset=0`: published, eligible public profiles, `availability_status` (`confirmed`, `unknown`, `conflict`) and public source facts. City is pre-existing public profile data; region is exposed only if creator opted in. No calendar entry means `unknown`.
+- `PUT /discovery/me/preferences`: creator sets `{region,share_region}`. `PUT /discovery/me/availability`: creator sets an explicit day and available boolean. Both require profile ownership; no direct client write grants.
+- `POST /matching/parse`: `{description}` returns structured `inferred` fields plus `needs_confirmation:true`; it does not search or persist.
+- `POST /matching/shortlist`: `{confirmed:true,personalize:false,allow_external_ai:false,constraints:{category,skills,city,region,remote,from,through,max_budget,deliverables,format,audience}}`. Hard filters run first; response contains bounded candidate IDs, deterministic score, sourced reasons, missing facts and `method:"deterministic"`. `allow_external_ai` is accepted only with a separate future approved provider; current provider status remains disabled.
+- `POST /assistance/brief`: confirmed constraints and selected public talent ID yield an editable labeled draft. `POST /assistance/profile`: creator-owned profile yields editable suggestions, never an automatic edit. `POST /assistance/compare`: up to three authorized public shortlist candidate IDs yield factual comparison. No route writes a booking/message/profile or retains generated text.
+
+Example parse: `{"description":"Mumbai actor, video reel, under INR 20000 on 2026-12-01"}` -> `{"needs_confirmation":true,"inferred":{"city":"Mumbai","category":"actors","max_budget":20000,"from":"2026-12-01","through":"2026-12-01","skills":["video"]}}`. The client must confirm/edit fields before shortlist. Unknown text is never treated as an instruction to the server.
