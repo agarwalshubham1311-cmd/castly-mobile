@@ -187,6 +187,8 @@ export function createApiServices(request: ReturnType<typeof createApiTransport>
         request('discovery/me/preferences', 'PUT', { region, share_region: shareRegion }, { expectedSubject: actor }),
       availability: (day: string, available: boolean, actor: string) =>
         request('discovery/me/availability', 'PUT', { day, available }, { expectedSubject: actor }),
+      withdrawAvailability: (day: string, actor: string) =>
+        request<void>(`discovery/me/availability/${encodeURIComponent(day)}`, 'DELETE', undefined, { expectedSubject: actor }),
     },
     subscriptions: {
       reviewQueue: (offset = 0) =>

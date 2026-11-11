@@ -40,8 +40,9 @@ public class Phase5Service {
     if (!flag) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "This discovery feature is not enabled");
   }
 
-  public Map<String, Object> parse(String description, CampaignParser parser) {
+  public Map<String, Object> parse(UUID actor, String description, CampaignParser parser) {
     enabled(matching);
+    rate.check(actor, "campaign_parse", 20);
     return parser.parse(description);
   }
 
@@ -85,15 +86,17 @@ public class Phase5Service {
   public List<Map<String, Object>> search(UUID actor, Search filters) {
     enabled(advanced);
     rate.check(actor, "advanced_search", 60);
-    return data.as(actor, db -> candidates(db, filters, List.of(), 0));
+    return data.as(actor, db -> candidates(db, filters, List.of(), 0, List.of()));
   }
 
-  private List<Map<String, Object>> candidates(JdbcClient db, Search f, List<String> preferred, int rankingBudget) {
+  private List<Map<String, Object>> candidates(JdbcClient db, Search f, List<String> preferred,
+      int rankingBudget, List<String> deliverables) {
     String order = switch (f.sort()) {
       case "rate_asc" -> "day_rate asc,id";
       case "rate_desc" -> "day_rate desc,id";
       case "recent" -> "created_at desc,id";
-      case "relevance" -> "(least(10,skill_score*5)+case when availability_status='confirmed'"
+      case "relevance" -> "(least(10,skill_score*5)+case when portfolio_match then 5 else 0 end"
+          + "+case when availability_status='confirmed'"
           + " then 15 else 0 end+case when ranking_budget>0 then"
           + " greatest(0,15-day_rate*15/nullif(ranking_budget,0)) else 0 end) desc,id";
       default -> "lower(display_name),id";
@@ -102,14 +105,19 @@ public class Phase5Service {
         " and public.phase5_normalized_skills(t.skills) @> string_to_array(lower(:skill_text),chr(31))";
     String sql = "with found as (select t.id,t.display_name,t.category_id,t.city,t.day_rate,"
         + " t.skills,t.available,t.created_at,p.region,:ranking_budget as ranking_budget,"
+        + " exists(select 1 from public.portfolio_assets a where a.talent_id=t.id"
+        + " and exists(select 1 from unnest(string_to_array(:deliverable_text,chr(31))) wanted"
+        + " where position(lower(wanted) in lower(a.label))>0)) as portfolio_match,"
         + " (select count(*) from unnest(t.skills) actual where lower(actual)=any"
         + " (string_to_array(:preferred_text,chr(31)))) as skill_score,"
         + " case when cast(:from_day as date) is null"
         + " then 'unknown' when not t.available then 'unavailable'"
         + " when exists(select 1 from public.talent_availability_days a where a.talent_id=t.id"
         + " and not a.available and a.day between cast(:from_day as date) and cast(:through_day as date))"
-        + " then 'unavailable' when exists(select 1 from public.talent_booking_busy_days b where"
-        + " b.talent_id=t.id and b.day between cast(:from_day as date) and cast(:through_day as date))"
+        + " then 'unavailable' when exists(select 1 from public.talent_booking_busy_days b join"
+        + " public.talent_availability_days a on a.talent_id=b.talent_id and a.day=b.day"
+        + " and a.available where b.talent_id=t.id and b.day between"
+        + " cast(:from_day as date) and cast(:through_day as date))"
         + " then 'unavailable' when (select count(*) from"
         + " public.talent_availability_days a where a.talent_id=t.id and a.available and a.day"
         + " between cast(:from_day as date) and cast(:through_day as date))=:days"
@@ -120,7 +128,7 @@ public class Phase5Service {
         + " and (:region='' or lower(p.region)=lower(:region))"
         + " and t.day_rate between :min_rate and :max_rate"
         + skillCondition + ")"
-        + " select id,display_name,category_id,city,day_rate,skills,available,region,skill_score,"
+        + " select id,display_name,category_id,city,day_rate,skills,available,region,skill_score,portfolio_match,"
         + " availability_status from found where (:availability='any' or"
         + " availability_status='confirmed') order by " + order + " limit :limit offset :offset";
     return rows(db.sql(sql)
@@ -130,12 +138,14 @@ public class Phase5Service {
         .param("min_rate", f.minRate()).param("max_rate", f.maxRate())
         .param("skill_text", String.join("\u001f", f.skills()))
         .param("preferred_text", String.join("\u001f", preferred))
+        .param("deliverable_text", String.join("\u001f", deliverables))
         .param("ranking_budget", rankingBudget)
         .param("availability", f.availability()).param("limit", f.limit()).param("offset", f.offset()));
   }
 
   public Map<String, Object> preferences(UUID actor, String region, boolean share) {
     enabled(advanced);
+    rate.check(actor, "region_preference", 10);
     if (region != null && !region.matches("[\\p{L}][\\p{L} .'-]{1,99}") || share && region == null)
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Use a city/region label, not coordinates");
     return data.as(actor, db -> one(db.sql(
@@ -147,6 +157,7 @@ public class Phase5Service {
 
   public Map<String, Object> availability(UUID actor, LocalDate day, boolean available) {
     enabled(advanced);
+    rate.check(actor, "availability_write", 30);
     if (day == null || day.isBefore(LocalDate.now()) || day.isAfter(LocalDate.now().plusYears(2)))
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose a future day within two years");
     return data.as(actor, db -> one(db.sql(
@@ -154,6 +165,16 @@ public class Phase5Service {
             + " on conflict(talent_id,day) do update set available=excluded.available,"
             + " updated_at=statement_timestamp() returning *")
         .param("u", actor).param("d", day).param("a", available)));
+  }
+
+  public void withdrawAvailability(UUID actor, LocalDate day) {
+    enabled(advanced);
+    rate.check(actor, "availability_write", 30);
+    data.as(actor, db -> {
+      db.sql("delete from public.talent_availability_days where talent_id=:u and day=:d")
+          .param("u", actor).param("d", day).update();
+      return null;
+    });
   }
 
   public Map<String, Object> shortlist(UUID actor, Campaign campaign, boolean recommendation) {
@@ -171,7 +192,8 @@ public class Phase5Service {
         "relevance", 50, 0);
     var source = data.as(actor, db -> candidates(db, filters,
         campaign.personalize() ? campaign.preferredSkills() : List.of(),
-        "per_day".equals(campaign.budgetUnit()) && campaign.maxBudget()!=null ? campaign.maxBudget() : 0));
+        "per_day".equals(campaign.budgetUnit()) && campaign.maxBudget()!=null ? campaign.maxBudget() : 0,
+        campaign.deliverables()));
     var ranked = new ArrayList<Map<String, Object>>();
     for (var row : source) {
       if ("unavailable".equals(row.get("availability_status"))) continue;
@@ -187,16 +209,23 @@ public class Phase5Service {
       if (campaign.maxBudget() != null && "per_day".equals(campaign.budgetUnit()))
         score += Math.max(0, 15 - ((Number) row.get("day_rate")).intValue() * 15 / campaign.maxBudget());
       if ("confirmed".equals(row.get("availability_status"))) score += 15;
+      if (Boolean.TRUE.equals(row.get("portfolio_match"))) score += 5;
       var reasons = new ArrayList<String>();
       if (campaign.category() != null) reasons.add("Declared creator category matches");
       if (overlap > 0) reasons.add(overlap + " declared skill" + (overlap == 1 ? "" : "s") + " match");
       if (campaign.maxBudget() != null && "per_day".equals(campaign.budgetUnit()))
         reasons.add("Indicative day rate is within the confirmed per-day cap; final quote is unknown");
       if ("confirmed".equals(row.get("availability_status"))) reasons.add("Creator-declared days have no accepted-booking conflict");
+      if (Boolean.TRUE.equals(row.get("portfolio_match")))
+        reasons.add("Public portfolio label mentions a requested deliverable; example is creator supplied");
       var missing = new ArrayList<String>();
       if (campaign.from() != null && !"confirmed".equals(row.get("availability_status"))) missing.add("date availability needs confirmation");
       if (campaign.maxBudget() != null && "campaign_total".equals(campaign.budgetUnit())) missing.add("total campaign quote is unknown");
       if (campaign.skills().size() > overlap) missing.add("some requested skills are not declared");
+      if (!campaign.deliverables().isEmpty() && !Boolean.TRUE.equals(row.get("portfolio_match")))
+        missing.add("no public portfolio label mentions a requested deliverable");
+      if (campaign.format()!=null) missing.add("requested format needs direct confirmation");
+      if (campaign.audience()!=null) missing.add("audience suitability is not assessed");
       var item = new LinkedHashMap<String, Object>(row);
       item.put("score", Math.min(100, score)); item.put("reasons", reasons); item.put("missing_data", missing);
       ranked.add(item);
@@ -220,7 +249,8 @@ public class Phase5Service {
       }
       var fresh = data.as(actor, db -> candidates(db, filters,
           campaign.personalize() ? campaign.preferredSkills() : List.of(),
-          "per_day".equals(campaign.budgetUnit()) && campaign.maxBudget()!=null ? campaign.maxBudget() : 0));
+          "per_day".equals(campaign.budgetUnit()) && campaign.maxBudget()!=null ? campaign.maxBudget() : 0,
+          campaign.deliverables()));
       if (!fresh.equals(source)) return computeShortlist(actor, campaign, false);
     }
     return Map.of("method", method, "provider_available", provider.available(), "suggestions_only", true,

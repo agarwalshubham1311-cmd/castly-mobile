@@ -40,15 +40,12 @@ export default function DiscoveryScreen() {
   const [error, setError] = useState('');
   useEffect(() => {
     generation.current++;
-    setRows([]); setSelected([]); setDraft(''); setComparison(''); setCampaign(blank);
-    setConfig(null); setDescription(''); setSkillsText(''); setPreferredText('');
-    setDeliverablesText(''); setBudgetText(''); setMethod(''); setError(''); setBusy(false); setOffset(0);
     if (!actor || !services) return;
     const current = generation.current;
     void services.discovery.configuration().then((value) => {
       if (current === generation.current) setConfig(value);
     }).catch(() => { if (current === generation.current) setError('Discovery is unavailable. Retry.'); });
-    return () => { generation.current++; };
+    return () => { const sequence = generation; sequence.current++; };
   }, [actor]);
   function change(value: Partial<CampaignConstraints>) {
     generation.current++; setBusy(false); setMethod(''); setOffset(0);
@@ -137,10 +134,10 @@ export default function DiscoveryScreen() {
     <Label>Describe a campaign, then review and confirm the structured fields. Suggestions do not book, message or edit anyone. No external AI provider is configured.</Label>
     {error ? <Label accessibilityRole="alert">{error}</Label> : null}
     {!config ? <Label>Loading discovery features…</Label> : null}
-    <Field label="Campaign description" value={description} onChangeText={(v) => { generation.current++; setBusy(false); setDescription(v); }} multiline maxLength={1000} />
+    <Field label="Campaign description" value={description} onChangeText={(v) => { setDescription(v); change({}); }} multiline maxLength={1000} />
     {config?.smart_matching ? <PrimaryButton title="Parse campaign locally" disabled={busy || !description.trim()} onPress={() => void parse()} /> : null}
     <Field label="Creator category (actors, models, creators, musicians, photographers)" value={campaign.category || ''} onChangeText={(v) => change({ category: v.toLowerCase() })} />
-    <Field label="Required or preferred skills, comma separated" value={skillsText} onChangeText={(v) => { setSkillsText(v); change({}); }} />
+    <Field label="Required skills, comma separated" value={skillsText} onChangeText={(v) => { setSkillsText(v); change({}); }} />
     <Field label="City (public profile label)" value={campaign.city || ''} onChangeText={(v) => change({ city: v })} />
     <Field label="Region (only creator-shared)" value={campaign.region || ''} onChangeText={(v) => change({ region: v })} />
     <Toggle title="Remote work is acceptable" value={campaign.remote} onPress={() => change({ remote: !campaign.remote })} />

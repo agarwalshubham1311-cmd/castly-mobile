@@ -14,7 +14,7 @@ class BoundedProviderTest {
 
   @Test
   void timeoutThrowAndMalformedOutputFallBackWithoutAddingCandidates() {
-    for (int mode = 0; mode < 3; mode++) {
+    for (int mode = 0; mode < 4; mode++) {
       final int behavior = mode;
       var provider = new SuggestionProvider() {
         public boolean available() { return true; }
@@ -23,11 +23,14 @@ class BoundedProviderTest {
             try { Thread.sleep(1000); } catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); }
           }
           if (behavior == 1) throw new IllegalStateException("provider fixture");
+          if (behavior == 3) return null;
           return Optional.of(List.of(1, 1));
         }
       };
       long start = System.nanoTime();
-      assertTrue(new BoundedProvider(provider).reorder(ACTOR,List.of("a","b"),SIGNALS,"confirmed").isEmpty());
+      var bounded = new BoundedProvider(provider);
+      assertTrue(bounded.reorder(ACTOR,List.of("a","b"),SIGNALS,"confirmed").isEmpty());
+      bounded.shutdown();
       assertTrue(TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-start) < 700);
     }
   }
@@ -61,5 +64,6 @@ class BoundedProviderTest {
       bounded.reorder(ACTOR,List.of("b","a"),SIGNALS,"consent-v1");
       assertEquals(5,calls.get());
     }
+    bounded.shutdown();
   }
 }

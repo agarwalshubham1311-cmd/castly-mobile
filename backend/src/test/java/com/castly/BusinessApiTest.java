@@ -57,6 +57,8 @@ class BusinessApiTest {
 
   @org.springframework.test.context.bean.override.mockito.MockitoBean
   com.castly.subscription.GooglePlayGateway google;
+  @org.springframework.test.context.bean.override.mockito.MockitoBean
+  com.castly.discovery.SuggestionProvider suggestionProvider;
 
   @org.springframework.test.context.bean.override.mockito.MockitoBean
   com.castly.trust.EvidenceGateway evidenceGateway;
@@ -3001,12 +3003,24 @@ class BusinessApiTest {
         + "&through=" + date + "&availability=confirmed";
     call("GET", query, CLIENT, null).andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.id=='" + talent + "')].availability_status").value("confirmed"));
+    call("DELETE", "/api/v1/discovery/me/availability/" + date, CLIENT, null)
+        .andExpect(status().isOk());
+    call("GET", query, CLIENT, null).andExpect(jsonPath("$[?(@.id=='" + talent
+        + "')].availability_status").value("confirmed"));
     call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null).andExpect(status().isOk());
     call("GET", query, CLIENT, null).andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.id=='" + talent + "')]").isEmpty());
     call("GET", "/api/v1/discovery/advanced?city=Pune&from=" + date + "&through=" + date,
         CLIENT, null).andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.id=='" + talent + "')].availability_status").value("unavailable"));
+    call("DELETE", "/api/v1/discovery/me/availability/" + date, talent, null)
+        .andExpect(status().isOk());
+    call("GET", "/api/v1/discovery/advanced?city=Pune&from=" + date + "&through=" + date,
+        CLIENT, null).andExpect(jsonPath("$[?(@.id=='" + talent
+        + "')].availability_status").value("unknown"));
+    call("GET", "/api/v1/discovery/advanced?city=Pune&from=" + date.plusDays(1)
+        + "&through=" + date.plusDays(1), CLIENT, null)
+        .andExpect(jsonPath("$[?(@.id=='" + talent + "')].availability_status").value("unknown"));
     var another = date.plusDays(2);
     call("PUT", "/api/v1/discovery/me/availability", talent,
         "{\"day\":\"" + another + "\",\"available\":false}").andExpect(status().isOk());
@@ -3016,6 +3030,10 @@ class BusinessApiTest {
     call("PUT", "/api/v1/discovery/me/availability", talent,
         "{\"day\":\"" + partial + "\",\"available\":true}").andExpect(status().isOk());
     call("GET", "/api/v1/discovery/advanced?city=Pune&from=" + partial + "&through=" + partial.plusDays(1),
+        CLIENT, null).andExpect(jsonPath("$[?(@.id=='" + talent + "')].availability_status").value("unknown"));
+    call("DELETE", "/api/v1/discovery/me/availability/" + partial, talent, null)
+        .andExpect(status().isOk());
+    call("GET", "/api/v1/discovery/advanced?city=Pune&from=" + partial + "&through=" + partial,
         CLIENT, null).andExpect(jsonPath("$[?(@.id=='" + talent + "')].availability_status").value("unknown"));
     ownerFixture("update public.talent_profiles set available=false where id='" + talent + "'");
     call("GET", "/api/v1/discovery/advanced?city=Pune&from=" + partial + "&through=" + partial,
@@ -3039,20 +3057,25 @@ class BusinessApiTest {
     call("POST", "/api/v1/matching/shortlist", CLIENT,
         campaign.replace("\"confirmed\":true", "\"confirmed\":false"))
         .andExpect(status().isBadRequest());
+    ownerFixture("insert into auth.users(id,email) select ('00000000-0000-0000-0000-'||lpad(g.n::text,12,'0'))::uuid,"
+        + " 'phase5-creator-'||g.n||'@fixture.invalid' from generate_series(200,251) g(n) on conflict(id) do nothing");
     ownerFixture("insert into public.talent_profiles(id,display_name,category_id,city,day_rate,bio,skills,available,published)"
         + " select u.id,'Phase5 creator '||g.n,'actors','Pune',1000,'Fixture work',"
-        + " case when g.n=91 then array['acting','video'] else array['acting'] end,true,true"
-        + " from generate_series(40,91) g(n) join public.users u on u.id=('00000000-0000-0000-0000-'||lpad(g.n::text,12,'0'))::uuid"
+        + " case when g.n=251 then array['acting','video'] else array['acting'] end,true,true"
+        + " from generate_series(200,251) g(n) join public.users u on u.id=('00000000-0000-0000-0000-'||lpad(g.n::text,12,'0'))::uuid"
         + " on conflict(id) do nothing");
     try {
-      String far = "00000000-0000-0000-0000-000000000091";
+      String far = "00000000-0000-0000-0000-000000000251";
       call("PUT", "/api/v1/discovery/me/availability", far,
           "{\"day\":\"" + day + "\",\"available\":true}").andExpect(status().isOk());
+      ownerFixture("insert into public.portfolio_assets(talent_id,path,label,position) values('"
+          + far + "','" + far + "/reel.jpg','Creator supplied video reel example',0)");
       call("POST", "/api/v1/matching/shortlist", CLIENT, campaign)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.method").value("deterministic"))
           .andExpect(jsonPath("$.candidates[0].id").value(far))
-          .andExpect(jsonPath("$.candidates[0].availability_status").value("confirmed"));
+          .andExpect(jsonPath("$.candidates[0].availability_status").value("confirmed"))
+          .andExpect(jsonPath("$.candidates[0].portfolio_match").value(true));
       call("POST", "/api/v1/recommendations", CLIENT, campaign)
           .andExpect(status().isOk()).andExpect(jsonPath("$.method").value("deterministic"));
       call("POST", "/api/v1/matching/shortlist", CLIENT,
@@ -3068,7 +3091,40 @@ class BusinessApiTest {
           "{\"talent_ids\":[\"" + far + "\"]}")
           .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].id").value(far));
     } finally {
-      ownerFixture("delete from public.talent_profiles where id between '00000000-0000-0000-0000-000000000040' and '00000000-0000-0000-0000-000000000091'");
+      ownerFixture("delete from auth.users where id between '00000000-0000-0000-0000-000000000200' and '00000000-0000-0000-0000-000000000251'");
+    }
+  }
+
+  @Test
+  void phase5RechecksPublicFactsAfterProviderWait() throws Exception {
+    String talent = "00000000-0000-0000-0000-000000000250";
+    ownerFixture("insert into auth.users(id,email) values('" + talent
+        + "','phase5-provider@fixture.invalid') on conflict(id) do nothing");
+    ownerFixture("insert into public.talent_profiles(id,display_name,category_id,city,day_rate,bio,skills,available,published)"
+        + " values('" + talent + "','Provider fixture','actors','Pune',1000,'Fixture',array['acting'],true,true)");
+    var entered = new java.util.concurrent.CountDownLatch(1);
+    var release = new java.util.concurrent.CountDownLatch(1);
+    org.mockito.Mockito.when(suggestionProvider.available()).thenReturn(true);
+    org.mockito.Mockito.when(suggestionProvider.reorder(org.mockito.ArgumentMatchers.any()))
+        .thenAnswer(invocation -> {
+          entered.countDown();
+          release.await(1, java.util.concurrent.TimeUnit.SECONDS);
+          return java.util.Optional.of(List.of(0));
+        });
+    try (var tasks = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      var pending = tasks.submit(() -> call("POST", "/api/v1/matching/shortlist", CLIENT,
+          phase5Campaign(java.time.LocalDate.now().plusDays(6), 2000, "per_day", true, false)
+              .replace("\"allow_external_ai\":false", "\"allow_external_ai\":true")));
+      assertTrue(entered.await(2, java.util.concurrent.TimeUnit.SECONDS));
+      ownerFixture("update public.talent_profiles set published=false where id='" + talent + "'");
+      release.countDown();
+      String response = pending.get(2, java.util.concurrent.TimeUnit.SECONDS)
+          .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+      assertFalse(response.contains(talent), "Unpublished talent must be removed after provider wait");
+    } finally {
+      release.countDown();
+      ownerFixture("delete from auth.users where id='" + talent + "'");
+      org.mockito.Mockito.reset(suggestionProvider);
     }
   }
 }

@@ -152,6 +152,8 @@ if (schemaPath === 'reconciliation') {
         (process.env.CASTLY_TEST_SKIP_PHASE4 !== 'true' && name.startsWith('20261110')),
     ))
     sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), testDatabase);
+  // Forward Phase 5 integration follows all Phase 3 and Phase 4 fixture migrations.
+  sql(fs.readFileSync(path.join(root, 'supabase/migrations/20261111100000_phase5_discovery.sql'), 'utf8'), testDatabase);
 }
 // Reproduce hosted restrictions for EVERY Java business operation, on both schema paths.
 sql('revoke usage on schema auth from castly_api;', testDatabase);

@@ -3,7 +3,6 @@ import { useCatalog } from '../backend/CatalogProvider';
 import React, { useEffect, useState } from 'react';
 import { services } from '../backend';
 import { useAuth } from '../auth/AuthProvider';
-import { PrimaryButton } from '../components/ui';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useDemo } from '../store';
@@ -19,19 +18,21 @@ import {
   SampleNote,
   Screen,
   SearchBar,
+  PrimaryButton,
   TalentGrid,
 } from '../components/ui';
 export default function Search() {
   const { session } = useAuth();
+  const actorId = session?.user.id;
   const [phase5Enabled, setPhase5Enabled] = useState(false);
   useEffect(() => {
-    if (!session || !services) return;
+    if (!actorId || !services) return;
     let active = true;
     void services.discovery.configuration().then((flags) => {
       if (active) setPhase5Enabled(Object.values(flags).some(Boolean));
     }).catch(() => {});
     return () => { active = false; setPhase5Enabled(false); };
-  }, [session?.user.id]);
+  }, [actorId]);
   const catalog = useCatalog();
   const { categories } = catalog;
   const store = useDemo();

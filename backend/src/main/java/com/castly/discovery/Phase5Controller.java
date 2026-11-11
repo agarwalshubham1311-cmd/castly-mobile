@@ -57,8 +57,14 @@ public class Phase5Controller {
   public Map<String,Object> availability(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody Day body) {
     return service.availability(actor(jwt),body.day(),body.available());
   }
+  @DeleteMapping("/discovery/me/availability/{day}")
+  public void withdrawAvailability(@AuthenticationPrincipal Jwt jwt, @PathVariable LocalDate day) {
+    service.withdrawAvailability(actor(jwt),day);
+  }
   @PostMapping("/matching/parse")
-  public Map<String,Object> parse(@Valid @RequestBody Description body) { return service.parse(body.description(), parser); }
+  public Map<String,Object> parse(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody Description body) {
+    return service.parse(actor(jwt), body.description(), parser);
+  }
   @PostMapping("/matching/shortlist")
   public Map<String,Object> shortlist(@AuthenticationPrincipal Jwt jwt, @RequestBody Campaign body) {
     return service.shortlist(actor(jwt),body,false);
