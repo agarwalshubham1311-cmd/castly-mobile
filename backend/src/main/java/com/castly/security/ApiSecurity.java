@@ -22,6 +22,10 @@ import org.springframework.web.cors.*;
 public class ApiSecurity {
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.addFilterAfter(
+        new com.castly.trust.EvidenceUploadLimitFilter(),
+        org.springframework.security.oauth2.server.resource.web.authentication
+            .BearerTokenAuthenticationFilter.class);
     return http.csrf(csrf -> csrf.disable())
         .cors(cors -> {})
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

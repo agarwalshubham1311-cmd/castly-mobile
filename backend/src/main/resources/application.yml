@@ -24,6 +24,16 @@ spring:
       fail-on-unknown-properties: true
       accept-float-as-int: false
 castly:
+  trust:
+    verification-enabled: ${CASTLY_VERIFICATION_ENABLED:false}
+    disputes-enabled: ${CASTLY_DISPUTES_ENABLED:false}
+    evidence-enabled: ${CASTLY_DISPUTE_EVIDENCE_ENABLED:false}
+    evidence-policy-version: ${CASTLY_DISPUTE_EVIDENCE_POLICY_VERSION:}
+    signals-enabled: ${CASTLY_TRUST_SIGNALS_ENABLED:false}
+    reporting-enabled: ${CASTLY_SAFETY_REPORTING_ENABLED:false}
+    reviews-enabled: ${CASTLY_REVIEWS_ENABLED:false}
+    review-edit-hours: ${CASTLY_REVIEW_EDIT_HOURS:48}
+    verification-valid-days: ${CASTLY_VERIFICATION_VALID_DAYS:365}
   google:
     enabled: ${CASTLY_GOOGLE_PLAY_ENABLED:false}
     checkout-enabled: ${CASTLY_GOOGLE_PLAY_CHECKOUT_ENABLED:false}

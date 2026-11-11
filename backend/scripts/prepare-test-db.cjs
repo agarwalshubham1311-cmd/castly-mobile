@@ -1,3 +1,6 @@
+const testDatabase = process.env.CASTLY_TEST_DATABASE || 'castly_spring_test';
+if (!/^castly_[a-z0-9_]+_test$/.test(testDatabase))
+  throw new Error('Invalid disposable fixture database');
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -38,12 +41,12 @@ if (!ready) throw new Error('PostgreSQL did not start');
 function sql(text, db = 'postgres') {
   run(['exec', '-i', container, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1'], text);
 }
-sql('drop database if exists castly_spring_test; create database castly_spring_test;');
+sql(`drop database if exists ${testDatabase}; create database ${testDatabase};`);
 const root = path.resolve(__dirname, '../..');
 const identityMigration = '20261107150000_private_request_identity.sql';
 const notificationMigration = '20261107170000_invoker_notifications.sql';
 function beforeIdentityMigration() {
-  sql('revoke usage on schema auth from castly_api;', 'castly_spring_test');
+  sql('revoke usage on schema auth from castly_api;', testDatabase);
   const snapshot = run(
     [
       'exec',
@@ -55,7 +58,7 @@ function beforeIdentityMigration() {
       '-U',
       'postgres',
       '-d',
-      'castly_spring_test',
+      testDatabase,
       '-v',
       'ON_ERROR_STOP=1',
     ],
@@ -82,7 +85,7 @@ function afterIdentityMigration() {
       '-U',
       'postgres',
       '-d',
-      'castly_spring_test',
+      testDatabase,
       '-v',
       'ON_ERROR_STOP=1',
     ],
@@ -97,21 +100,16 @@ function afterIdentityMigration() {
     snapshot,
   );
 }
-sql(
-  fs.readFileSync(path.join(root, 'supabase/tests/bootstrap-local.sql'), 'utf8'),
-  'castly_spring_test',
-);
+sql(fs.readFileSync(path.join(root, 'supabase/tests/bootstrap-local.sql'), 'utf8'), testDatabase);
 
 const schemaPath = process.env.CASTLY_TEST_SCHEMA_PATH || 'repository';
 if (!['repository', 'reconciliation'].includes(schemaPath))
   throw new Error('Unknown disposable schema path');
 if (schemaPath === 'repository') {
   for (const name of fs.readdirSync(path.join(root, 'supabase/migrations')).sort()) {
+    if (process.env.CASTLY_TEST_SKIP_PHASE4 === 'true' && name.startsWith('20261110')) continue;
     if (name === identityMigration) beforeIdentityMigration();
-    sql(
-      fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
-      'castly_spring_test',
-    );
+    sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), testDatabase);
     if (name === identityMigration) afterIdentityMigration();
   }
 } else {
@@ -119,55 +117,53 @@ if (schemaPath === 'repository') {
     '20261022000100_accounts_and_marketplace.sql',
     '20261022000200_media_storage.sql',
   ])
-    sql(
-      fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
-      'castly_spring_test',
-    );
+    sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), testDatabase);
   // Synthetic approximation of the reported baseline; never a claim of hosted equivalence.
   sql(
     "create schema supabase_migrations; create table supabase_migrations.schema_migrations(version text primary key); insert into supabase_migrations.schema_migrations values('20261027032615');",
-    'castly_spring_test',
+    testDatabase,
   );
   run(['exec', container, 'mkdir', '-p', '/tmp/castly-sql']);
   run(['cp', path.join(root, 'supabase') + '/.', container + ':/tmp/castly-sql']);
   sql(
     "set castly.reconciliation_schema_reviewed='issue-1-reviewed';\n\\i /tmp/castly-sql/reconciliation/issue-1/02-prepare.sql\n",
-    'castly_spring_test',
+    testDatabase,
   );
 }
 if (schemaPath === 'reconciliation') {
   beforeIdentityMigration();
   sql(
     fs.readFileSync(path.join(root, 'supabase/migrations', identityMigration), 'utf8'),
-    'castly_spring_test',
+    testDatabase,
   );
   afterIdentityMigration();
   sql(
     fs.readFileSync(path.join(root, 'supabase/migrations', notificationMigration), 'utf8'),
-    'castly_spring_test',
+    testDatabase,
   );
 }
 if (schemaPath === 'reconciliation') {
   for (const name of fs
     .readdirSync(path.join(root, 'supabase/migrations'))
     .sort()
-    .filter((name) => name.startsWith('20261109')))
-    sql(
-      fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'),
-      'castly_spring_test',
-    );
+    .filter(
+      (name) =>
+        name.startsWith('20261109') ||
+        (process.env.CASTLY_TEST_SKIP_PHASE4 !== 'true' && name.startsWith('20261110')),
+    ))
+    sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), testDatabase);
 }
 // Reproduce hosted restrictions for EVERY Java business operation, on both schema paths.
-sql('revoke usage on schema auth from castly_api;', 'castly_spring_test');
-sql("alter role castly_api login password 'castly-api-local-test';", 'castly_spring_test');
+sql('revoke usage on schema auth from castly_api;', testDatabase);
+sql("alter role castly_api login password 'castly-api-local-test';", testDatabase);
 for (let n = 1; n <= 100; n++)
   sql(
     `insert into auth.users(id,email,raw_user_meta_data) values ('00000000-0000-0000-0000-${String(n).padStart(12, '0')}','user${n}@example.test','{"display_name":"Test user ${n}"}');`,
-    'castly_spring_test',
+    testDatabase,
   );
 sql(
   "update public.users set primary_role='client' where id='00000000-0000-0000-0000-000000000001'; update public.users set primary_role='talent' where id in ('00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000005') or id>='00000000-0000-0000-0000-000000000006';",
-  'castly_spring_test',
+  testDatabase,
 );
 console.log(
   `Prepared isolated castly_spring_test database (${schemaPath}). Application tests connect ONLY as castly_api.`,

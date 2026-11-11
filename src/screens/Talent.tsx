@@ -1,3 +1,5 @@
+import { SafetyActions } from '../trust/SafetyActions';
+import { TrustLinks } from '../trust/TrustLinks';
 import { usePublishedTalent } from '../backend/usePublishedTalent';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, Share, Text, View } from 'react-native';
@@ -112,6 +114,29 @@ export default function TalentProfile() {
         contentContainerStyle={{ paddingBottom: 24 }}
       >
         <View style={{ paddingHorizontal: padding, paddingTop: 8, gap: 10 }}>
+          {!mock ? (
+            <>
+              <TrustLinks talentId={talent.id} />
+              <SafetyActions kind="user" id={talent.id} allowBlock />
+            </>
+          ) : null}
+          {!mock && talent.trustIndicators ? (
+            <>
+              <Label>
+                {talent.trustIndicators.completedBookings} mutually confirmed completed bookings ·{' '}
+                {talent.trustIndicators.reviewCount} booking-based reviews
+                {talent.trustIndicators.averageRating !== null
+                  ? ` · ${talent.trustIndicators.averageRating} / 5`
+                  : ''}
+              </Label>
+              <Label>These are factual indicators, not a guarantee of safety.</Label>
+            </>
+          ) : null}
+          {!mock && talent.verifiedCreator ? (
+            <Label accessibilityLabel="Verified Creator: profile and portfolio manually reviewed">
+              ✓ Verified Creator
+            </Label>
+          ) : null}
           <View style={{ position: 'relative' }}>
             <TalentImage
               source={imageSource(talent.portrait, talent.portraitUri)}
@@ -249,6 +274,11 @@ export default function TalentProfile() {
                   })
                 }
               />
+              {!mock
+                ? talent.portfolio.map((item) => (
+                    <SafetyActions key={item.image} kind="portfolio" id={item.image} />
+                  ))
+                : null}
               <SampleNote
                 text={
                   mock
@@ -296,6 +326,11 @@ export default function TalentProfile() {
                     ? 'Currently unavailable in the sample catalog.'
                     : 'Currently unavailable for projects.'}
               </Label>
+              {!mock
+                ? talent.portfolio.map((item) => (
+                    <SafetyActions key={item.image} kind="portfolio" id={item.image} />
+                  ))
+                : null}
               <SampleNote
                 text={
                   mock

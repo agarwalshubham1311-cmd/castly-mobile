@@ -70,6 +70,14 @@ export async function mapTalent(
   return {
     talent: {
       id: profile.id,
+      verifiedCreator: profile.verified_creator === true,
+      trustIndicators: profile.trust_signals_enabled
+        ? {
+            completedBookings: profile.completed_bookings ?? 0,
+            reviewCount: profile.booking_review_count ?? 0,
+            averageRating: profile.booking_average_rating ?? null,
+          }
+        : undefined,
       name: profile.display_name,
       city: profile.city,
       category: categoryNames[profile.category_id] || 'Creators',

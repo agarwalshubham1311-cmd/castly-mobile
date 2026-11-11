@@ -1,3 +1,4 @@
+import { createTrustServices } from '../trust/api.ts';
 import type { BillingConfiguration, BillingResult } from '../subscriptions/billing';
 import type { Plan, Membership, PromotionClaim, SubscriptionOrder } from '../subscriptions/catalog';
 import type {
@@ -157,6 +158,7 @@ export type BookingRequest = {
 };
 export function createApiServices(request: ReturnType<typeof createApiTransport>) {
   return {
+    trust: createTrustServices(request),
     subscriptions: {
       reviewQueue: (offset = 0) =>
         request<(PromotionClaim & { user_id: string })[]>(

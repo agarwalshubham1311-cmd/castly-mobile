@@ -127,6 +127,7 @@ async function until(url) {
           CASTLY_NOTIFICATIONS_ENABLED: 'true',
           CASTLY_SUBSCRIPTIONS_ENABLED: 'true',
           CASTLY_GOOGLE_PLAY_ENABLED: 'false',
+          CASTLY_DISPUTES_ENABLED: 'true',
           CORS_ALLOWED_ORIGINS: new URL(process.env.TEST_URL).origin,
           PORT: '8080',
         },
@@ -291,6 +292,23 @@ async function until(url) {
     await a.getByRole('button', { name: 'Cancel booking', exact: true }).click();
     await a.getByRole('button', { name: 'Confirm cancel booking', exact: true }).click();
     await a.getByText('Cancelled', { exact: true }).waitFor();
+    await go(a, '/safety/disputes?booking=' + bookingId, 'Booking disputes');
+    await a.getByRole('textbox', { name: 'Describe the booking dispute', exact: true })
+      .fill('The cancellation affected our agreed creative project schedule.');
+    await a.getByRole('checkbox').click();
+    await a.getByRole('button', { name: 'Submit dispute', exact: true }).click();
+    await a.getByText('Status: OPEN', { exact: true }).waitFor();
+    const disputeId = new URL(a.url()).pathname.split('/').pop();
+    const outsiderDispute = await fetch(api + '/disputes/' + disputeId, {
+      headers: { Authorization: 'Bearer ' + token(outsider) },
+    });
+    assert.equal(outsiderDispute.status, 404);
+    await a.getByRole('textbox', { name: 'Additional note or appeal explanation', exact: true })
+      .fill('The call time and location had already been agreed in messages.');
+    await a.getByRole('button', { name: 'Add private note', exact: true }).click();
+    await a.getByText('The call time and location had already been agreed in messages.', { exact: true }).waitFor();
+    await noOverflow(a);
+    console.log('PASS: real browser + Spring + PostgreSQL dispute filing, private note and outsider denial.');
     await b.reload();
     await b
       .getByText('Messaging is paused because there is no active accepted booking.', {
