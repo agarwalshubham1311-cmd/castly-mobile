@@ -1,6 +1,7 @@
 import { portfolioImageType } from '../backend/media';
 import { TalentImage } from '../TalentImage';
 import React, { useEffect, useState } from 'react';
+import { router } from 'expo-router';
 import { Platform, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../auth/AuthProvider';
@@ -46,6 +47,15 @@ export default function TalentEditor() {
   const [message, setMessage] = useState('');
   const [assets, setAssets] = useState<PortfolioAsset[]>([]);
   const [revision, setRevision] = useState(0);
+  const [phase5Creator, setPhase5Creator] = useState(false);
+  useEffect(() => {
+    if (!userId || !services) return;
+    let active = true;
+    void services.discovery.configuration().then((flags) => {
+      if (active) setPhase5Creator(flags.advanced_search || flags.ai_assistance);
+    }).catch(() => {});
+    return () => { active = false; setPhase5Creator(false); };
+  }, [userId]);
   useEffect(() => {
     let active = true;
     if (!services || !userId) return;
@@ -292,6 +302,7 @@ export default function TalentEditor() {
           void save();
         }}
       />
+      {exists && phase5Creator ? <PrimaryButton secondary title="Discovery region, availability and profile tips" onPress={() => router.push('/discovery/creator')} /> : null}
       {exists && (
         <>
           <Heading>Portrait & portfolio</Heading>

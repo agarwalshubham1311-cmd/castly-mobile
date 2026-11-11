@@ -1,6 +1,9 @@
 import { BackendNotice } from '../components/BackendNotice';
 import { useCatalog } from '../backend/CatalogProvider';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { services } from '../backend';
+import { useAuth } from '../auth/AuthProvider';
+import { PrimaryButton } from '../components/ui';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useDemo } from '../store';
@@ -19,6 +22,16 @@ import {
   TalentGrid,
 } from '../components/ui';
 export default function Search() {
+  const { session } = useAuth();
+  const [phase5Enabled, setPhase5Enabled] = useState(false);
+  useEffect(() => {
+    if (!session || !services) return;
+    let active = true;
+    void services.discovery.configuration().then((flags) => {
+      if (active) setPhase5Enabled(Object.values(flags).some(Boolean));
+    }).catch(() => {});
+    return () => { active = false; setPhase5Enabled(false); };
+  }, [session?.user.id]);
   const catalog = useCatalog();
   const { categories } = catalog;
   const store = useDemo();
@@ -28,6 +41,7 @@ export default function Search() {
   const header = (
     <View style={{ gap: 12, marginBottom: 16 }}>
       <BackendNotice />
+      {phase5Enabled ? <PrimaryButton title="Campaign discovery and matching" onPress={() => router.push('/discovery')} /> : null}
       <SearchBar value={query} onChange={setQuery} onFilters={() => router.push('/filters')} />
       <Chips>
         {categories.map((cat) => (
