@@ -127,6 +127,8 @@ async function until(url) {
           CASTLY_NOTIFICATIONS_ENABLED: 'true',
           CASTLY_SUBSCRIPTIONS_ENABLED: 'true',
           CASTLY_GOOGLE_PLAY_ENABLED: 'false',
+          CASTLY_DISPUTES_ENABLED: 'true',
+          CASTLY_SAFETY_REPORTING_ENABLED: 'true',
           CASTLY_ADVANCED_SEARCH_ENABLED: 'true',
           CASTLY_AI_RECOMMENDATIONS_ENABLED: 'true',
           CASTLY_SMART_MATCHING_ENABLED: 'true',
@@ -245,6 +247,20 @@ async function until(url) {
     await a.getByRole('checkbox', { name: 'Compare Spring API Talent' }).click();
     await a.getByRole('button', { name: 'Compare selected creators' }).click();
     await a.getByText(/Spring API Talent: actors, Mumbai, INR .*\/day indicative/).first().waitFor();
+    const blockedResponse = await fetch(api + '/blocks/' + talent, {
+      method: 'PUT', headers: { Authorization: 'Bearer ' + token(client) },
+    });
+    assert.equal(blockedResponse.status, 200);
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByText('No matches. Edit a filter or allow clearly labeled unknown availability.', { exact: true }).waitFor();
+    assert.equal(await a.getByRole('button', { name: 'Open Spring API Talent profile' }).count(), 0);
+    const unblockedResponse = await fetch(api + '/blocks/' + talent, {
+      method: 'DELETE', headers: { Authorization: 'Bearer ' + token(client) },
+    });
+    assert.equal(unblockedResponse.status, 200);
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByRole('button', { name: 'Draft brief for Spring API Talent' }).waitFor();
+    console.log('PASS: integrated Phase 4 block/unblock excludes and restores Phase 5 shortlist through real browser + Spring + PostgreSQL.');
     console.log('PASS: real browser + Spring + PostgreSQL campaign parse, confirmed constraints, declared-date shortlist, editable brief and factual comparison.');
     await go(a, '/search', 'Search talent');
     await a.getByRole('button', { name: 'Save Spring API Talent', exact: true }).click();
@@ -324,6 +340,23 @@ async function until(url) {
     await a.getByRole('button', { name: 'Cancel booking', exact: true }).click();
     await a.getByRole('button', { name: 'Confirm cancel booking', exact: true }).click();
     await a.getByText('Cancelled', { exact: true }).waitFor();
+    await go(a, '/safety/disputes?booking=' + bookingId, 'Booking disputes');
+    await a.getByRole('textbox', { name: 'Describe the booking dispute', exact: true })
+      .fill('The cancellation affected our agreed creative project schedule.');
+    await a.getByRole('checkbox').click();
+    await a.getByRole('button', { name: 'Submit dispute', exact: true }).click();
+    await a.getByText('Status: OPEN', { exact: true }).waitFor();
+    const disputeId = new URL(a.url()).pathname.split('/').pop();
+    const outsiderDispute = await fetch(api + '/disputes/' + disputeId, {
+      headers: { Authorization: 'Bearer ' + token(outsider) },
+    });
+    assert.equal(outsiderDispute.status, 404);
+    await a.getByRole('textbox', { name: 'Additional note or appeal explanation', exact: true })
+      .fill('The call time and location had already been agreed in messages.');
+    await a.getByRole('button', { name: 'Add private note', exact: true }).click();
+    await a.getByText('The call time and location had already been agreed in messages.', { exact: true }).waitFor();
+    await noOverflow(a);
+    console.log('PASS: real browser + Spring + PostgreSQL dispute filing, private note and outsider denial.');
     await b.reload();
     await b
       .getByText('Messaging is paused because there is no active accepted booking.', {

@@ -1,3 +1,9 @@
+# Current integration validation
+
+Issue #10 validation is recorded in `docs/issue10/test-report.md`: 136 Java tests on each schema path, 72 Node tests, 13 component tests and 344 reconciliation assertions, plus the browser/mobile/export/security checks.
+
+The following is historical evidence from the original Phase 5-only branch, not the current integration test count.
+
 # Local validation, 2026-11-11
 
 - `npm ci --cache /tmp/castly-phase5-npm --prefer-offline --no-audit --no-fund`: 796 packages installed in the isolated Phase 5 worktree.

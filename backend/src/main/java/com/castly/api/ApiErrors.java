@@ -27,6 +27,11 @@ public class ApiErrors {
     IllegalArgumentException.class
   })
   ProblemDetail invalid(Exception e) {
+    Throwable cause = e;
+    for (int depth = 0; cause != null && depth < 12; depth++, cause = cause.getCause())
+      if (cause instanceof com.castly.trust.EvidenceUploadLimitFilter.TooLarge)
+        return ProblemDetail.forStatusAndDetail(
+            HttpStatus.PAYLOAD_TOO_LARGE, "Evidence request exceeds size limit");
     var result =
         ProblemDetail.forStatusAndDetail(
             HttpStatus.BAD_REQUEST, "Invalid request. Check required fields, formats and limits.");

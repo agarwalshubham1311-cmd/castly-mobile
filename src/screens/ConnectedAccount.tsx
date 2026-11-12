@@ -166,6 +166,11 @@ export default function ConnectedAccount() {
           onPress={() => router.push('/notifications')}
         />
         <AccountRow
+          title="Safety Center"
+          icon="shield-checkmark-outline"
+          onPress={() => router.push('/safety')}
+        />
+        <AccountRow
           title="Help & support"
           icon="help-circle-outline"
           onPress={() => router.push('/settings/help')}

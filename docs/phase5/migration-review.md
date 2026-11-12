@@ -1,6 +1,10 @@
+# Issue #10 integration update
+
+For the current deployed Phase 4 baseline, use `docs/issue10/migration-release.md`: there are now two forward migrations, both required before enabling Phase 5. The original Phase 5 SQL below is unchanged; its original Phase 3-only assumption is superseded by Issue #10. No production migration has run.
+
 # Forward migration and privacy review
 
-The only new SQL is `supabase/migrations/20261111100000_phase5_discovery.sql`, SHA-256 `5060bf600b32375e1292fce54f2dc256fe053dd46969ed7d31d7d1afc5ce223c`. Apply it after the actual hosted Phase 3 ledger entries `20261111052131` subscription_catalog, `20261111052140` founding_creator_offer, `20261111052149` google_play_reconciliation and `20261111052157` subscription_discovery_projection. Those hosted versions differ from repository filenames. Do not replay old migrations, repair the ledger by guesswork, or use unrestricted `supabase db push`.
+The original Phase 5 SQL is `supabase/migrations/20261111100000_phase5_discovery.sql`, SHA-256 `5060bf600b32375e1292fce54f2dc256fe053dd46969ed7d31d7d1afc5ce223c`. Apply it after the actual hosted Phase 3 ledger entries `20261111052131` subscription_catalog, `20261111052140` founding_creator_offer, `20261111052149` google_play_reconciliation and `20261111052157` subscription_discovery_projection. Those hosted versions differ from repository filenames. Do not replay old migrations, repair the ledger by guesswork, or use unrestricted `supabase db push`.
 
 Before any owner-approved production migration, capture a read-only hosted inventory: migration ledger version/name/hash or reviewed source, `talent_profiles`, `bookings`, auth/private identity functions, triggers, RLS policies, grants, dependencies and existing index names. Compare exact objects and the four hosted Phase 3 entries with the reviewed inventory; reject unexpected differences. Rehearse this migration on an isolated copy with the same catalog and role grants, and record EXPLAIN with representative data. Hosted inventory and approval were unavailable in this task; no hosted SQL was run and equivalence is not asserted.
 

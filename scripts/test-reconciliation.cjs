@@ -100,6 +100,17 @@ for (const withOldRpcs of [false, true]) {
   // The ledger has not been repaired or populated with fictitious repository history.
   if (sql(db, 'select version from supabase_migrations.schema_migrations;').includes('20261022000100'))
     throw new Error('Historical migration ledger was altered');
+  // Rehearse the deployed Phase 3+4 contracts and both new Phase 5 changes
+  // on the prepared legacy path. This is synthetic, not hosted-ledger evidence.
+  for (const name of ['20261107150000_private_request_identity.sql',
+    '20261107170000_invoker_notifications.sql',
+    ...fs.readdirSync(path.resolve(__dirname, '../supabase/migrations')).sort()
+      .filter((name) => /^(20261109|20261110|20261111|20261112)/.test(name))])
+    file(db, 'migrations/' + name);
+  sql(db, 'revoke usage on schema auth from castly_api;');
+  file(db, 'tests/phase4.sql');
+  file(db, 'tests/phase5.sql');
+  file(db, 'tests/phase5-trust-integration.sql');
   console.log(`PASS ${db}: inventory, refusal gates, preparation preserving legacy M1, API/RLS/Storage actors, cutover, data and ledger preservation`);
 }
 console.log(`PASS reconciliation scenarios: ${assertions} SQL assertions/catalog gates on disposable PostgreSQL; no hosted database contacted.`);
