@@ -205,6 +205,7 @@ function session(subject) {
           },
           body: status === 204 ? '' : JSON.stringify(value),
         });
+      if (relative === 'engagement/configuration') return finish({push:false,email:false,engagement:false,analytics:false,push_delivery:false,email_delivery:false});
       if (method === 'OPTIONS') return finish({}, 204);
       if (relative === 'categories') return finish(categories);
       if (relative === 'talents' || relative === 'portfolio') {

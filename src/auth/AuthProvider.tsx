@@ -1,3 +1,4 @@
+import { cleanupBeforeLogout } from '../engagement/logout';
 import * as Linking from 'expo-linking';
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { AppState, Platform } from 'react-native';
@@ -130,6 +131,7 @@ function useAuthState() {
     },
     logout: async () => {
       if (!services) return;
+      if (acceptedUser.current) await cleanupBeforeLogout(acceptedUser.current);
       await services.auth.logout();
       acceptedUser.current = null;
       setSession(null);

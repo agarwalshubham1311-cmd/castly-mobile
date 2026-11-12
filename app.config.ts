@@ -27,6 +27,7 @@ export default function configuration({ config }: ConfigContext): ExpoConfig {
     ...(androidPackage ? { android: { ...config.android, package: androidPackage } } : {}),
     ...(projectId ? { extra: { ...config.extra, eas: { ...config.extra?.eas, projectId } } } : {}),
     plugins: [
+      ...(process.env.EXPO_PUBLIC_PUSH_ENABLED === 'true' ? [['expo-notifications', { defaultChannel: 'castly-updates' }] as [string, Record<string, unknown>]] : []),
       ...(config.plugins || []),
       ...(process.env.EXPO_PUBLIC_GOOGLE_PLAY_BILLING_ENABLED === 'true'
         ? ['expo-iap']
