@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { useAuth } from '../auth/AuthProvider';
 import { services } from '../backend';
 import { beforeLogout } from './logout';
 import { pushBuildEnabled, registerPush, unregisterPush } from './push';
-import { deliveryId, safeNotificationRoute } from './types';
+import { deliveryId, deliveryPathId, safeNotificationRoute } from './types';
 export default function PushBridge() {
   const auth = useAuth(), actor = auth.session?.user.id;
   const [pending, setPending] = useState<string | null>(null);
+  const path = usePathname();
+  useEffect(() => { const id = deliveryPathId(path); if (!actor && id) void Promise.resolve().then(() => setPending(id)); }, [actor, path]);
   const handled = useRef(new Set<string>());
   useEffect(() => beforeLogout(unregisterPush), []);
   useEffect(() => {
@@ -31,6 +33,7 @@ export default function PushBridge() {
     if (!actor || !pending || !services || handled.current.has(actor + ':' + pending)) return;
     let current = true;
     const id = pending;
+    if (deliveryPathId(path) === id) { handled.current.add(actor + ':' + id); void Promise.resolve().then(() => { if(current)setPending(null); }); return () => { current=false; }; }
     void services.engagement.open(actor, id).then((result) => {
       if (!current) return;
       if (handled.current.size > 100) handled.current.clear();
@@ -38,6 +41,6 @@ export default function PushBridge() {
       if (safeNotificationRoute(result.route)) router.push(result.route as '/notifications');
     }).catch(() => { if (current) setPending(null); });
     return () => { current = false; };
-  }, [actor, pending]);
+  }, [actor, pending, path]);
   return null;
 }

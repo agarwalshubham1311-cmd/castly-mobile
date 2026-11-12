@@ -78,6 +78,12 @@ public class EngagementController {
     return service.save(actor(jwt), id, s.label(), s.filters(), s.alerts());
   }
 
+  @PostMapping("/saved-searches/{id}/results")
+  public List<Map<String, Object>> results(
+      @AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
+    return service.results(actor(jwt), id);
+  }
+
   @DeleteMapping("/saved-searches/{id}")
   public void remove(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
     service.remove(actor(jwt), id);

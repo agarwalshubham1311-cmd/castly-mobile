@@ -89,6 +89,8 @@ create policy phase6_expired_device_delete on public.push_devices for delete to 
  using(expires_at<statement_timestamp() and token=current_setting('castly.phase6.device_token',true));
 create function engagement_private.device_guard() returns trigger language plpgsql security invoker set search_path='' as $$begin
  if current_user='castly_api' then
+  perform 1 from public.engagement_preferences where user_id=new.user_id and(push_bookings or push_messages) for update;
+  if not found then raise exception 'Push consent required' using errcode='42501';end if;
   delete from public.push_devices where token=new.token and expires_at<statement_timestamp() and token=current_setting('castly.phase6.device_token',true);
   perform pg_advisory_xact_lock(hashtextextended(new.user_id::text,601));
   if TG_OP='INSERT' and not exists(select 1 from public.push_devices where user_id=new.user_id and device_key=new.device_key) and(select count(*) from public.push_devices where user_id=new.user_id)>=10 then raise exception 'Device limit' using errcode='23514';end if;
@@ -173,12 +175,15 @@ create function engagement_private.account_event() returns trigger language plpg
  if current_user='castly_api' and (to_jsonb(new)-array['revision','last_active_at','updated_at']) is distinct from(to_jsonb(old)-array['revision','last_active_at','updated_at']) then perform engagement_private.enqueue(new.user_id,'account:'||new.user_id||':'||new.revision,'account_activity',null,null,null,null,null);end if;return new;end$$;
 create trigger phase6_account_event after update on public.engagement_preferences for each row execute function engagement_private.account_event();
 create function engagement_private.record_event(kind text) returns void language plpgsql security invoker set search_path='' as $$begin
- if current_setting('castly.phase6.analytics',true)='true' and current_setting('castly.phase6.subject',true) ~ '^[a-f0-9]{64}$' and exists(select 1 from public.engagement_preferences where user_id=private.request_user_id() and analytics) then
+ if current_setting('castly.phase6.analytics',true)='true' and current_setting('castly.phase6.subject',true) ~ '^[a-f0-9]{64}$' then
+ perform 1 from public.engagement_preferences where user_id=private.request_user_id() and analytics for update;
+ if found then
  perform pg_advisory_xact_lock(hashtextextended(current_setting('castly.phase6.subject',true),606));
  if kind in('activation','search','profile','save','request','accept','message','complete') and not exists(select 1 from engagement_private.events where subject_key=current_setting('castly.phase6.subject',true) and event='activation') then
  insert into engagement_private.events(subject_key,day,event) values(current_setting('castly.phase6.subject',true),(statement_timestamp() at time zone 'UTC')::date,'activation') on conflict do nothing;
  end if;
  if kind<>'activation' then insert into engagement_private.events(subject_key,day,event) values(current_setting('castly.phase6.subject',true),(statement_timestamp() at time zone 'UTC')::date,kind) on conflict do nothing;end if;
+ end if;
  end if;
  if current_setting('castly.phase6.engagement',true)='true' then update public.engagement_preferences set last_active_at=statement_timestamp() where user_id=private.request_user_id() and reengagement;end if;
 end$$;

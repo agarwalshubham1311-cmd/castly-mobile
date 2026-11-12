@@ -219,8 +219,8 @@ public class EngagementWorker implements AutoCloseable {
                 rows(
                     db.sql(
                             "select email from engagement_private.contacts c where user_id=:u and"
-                                + " verified_at>:now-interval '1 day' and not exists(select 1 from"
-                                + " engagement_private.suppressions s where"
+                                + " verified_at>:now-interval '90 days' and not exists(select 1"
+                                + " from engagement_private.suppressions s where"
                                 + " s.email_hash=encode(sha256(convert_to(lower(c.email),'UTF8')),'hex'))")
                         .param("u", recipient)
                         .param("now", at(now)));
@@ -271,6 +271,9 @@ public class EngagementWorker implements AutoCloseable {
                   kind,
                   flags.appOrigin + "/engagement/open/" + id,
                   unsubscribe);
+          io.micrometer.core.instrument.Metrics.counter(
+                  "castly.phase6.attempts", "channel", channel)
+              .increment();
           DeliveryProvider.Result result;
           try {
             result = provider.send(envelope);
@@ -296,6 +299,9 @@ public class EngagementWorker implements AutoCloseable {
   private void apply(
       Map<String, Object> job, DeliveryProvider.Result r, Instant now, int attempts) {
     UUID id = uuid(job, "id");
+    io.micrometer.core.instrument.Metrics.counter(
+            "castly.phase6.outcomes", "outcome", r.status().name())
+        .increment();
     switch (r.status()) {
       case ACCEPTED -> {
         if (r.receipt() == null || !r.receipt().matches("[A-Za-z0-9-]{1,200}")) {
@@ -591,9 +597,21 @@ public class EngagementWorker implements AutoCloseable {
                 rows(
                     db.sql(
                             "select * from engagement_private.outbox where channel='email' and"
-                                + " receipt=:r for update")
+                                + " receipt=:r order by recipient_id,id")
                         .param("r", receipt));
-            for (var job : jobs) {
+            for (var seed : jobs) {
+              db.sql(
+                      "select user_id from public.engagement_preferences where user_id=:u for"
+                          + " update")
+                  .param("u", uuid(seed, "recipient_id"))
+                  .query()
+                  .listOfRows();
+              var current =
+                  rows(
+                      db.sql("select * from engagement_private.outbox where id=:id for update")
+                          .param("id", uuid(seed, "id")));
+              if (current.isEmpty()) continue;
+              var job = current.getFirst();
               if (type.equals("email.delivered")) {
                 if (job.get("state").equals("ticket")) {
                   finish(uuid(job, "id"), "delivered", null, null, now);

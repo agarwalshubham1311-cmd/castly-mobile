@@ -31,6 +31,15 @@ select phase6_test.denied($q$insert into engagement_private.events(subject_key,e
 select phase6_test.denied($q$insert into engagement_private.outbox(recipient_id,event_key,kind,channel) values(private.request_user_id(),'fake','account_activity','email')$q$,'cannot forge outbox event');
 select phase6_test.denied($q$select engagement_private.enqueue(private.request_user_id(),'fake','account_activity',null,null,null,null,null)$q$,'direct enqueue cannot bypass source trigger');
 select phase6_test.denied($q$insert into engagement_private.schedule_sources(user_id,kind,source_id,local_day,event_key) values(private.request_user_id(),'reengagement',private.request_user_id(),current_date,'forged')$q$,'scheduler cannot ignore consent/source');
+select set_config('castly.phase6.push','false',true),set_config('castly.phase6.email','false',true);
+update public.engagement_preferences set reengagement=true,last_active_at=statement_timestamp()-interval '15 days' where user_id=private.request_user_id();
+insert into engagement_private.schedule_sources(user_id,kind,source_id,local_day,event_key)
+ select private.request_user_id(),'reengagement',private.request_user_id(),current_date,'reengagement:'||private.request_user_id()||':'||date_trunc('week',current_date::timestamp)::date on conflict do nothing;
+insert into engagement_private.schedule_sources(user_id,kind,source_id,local_day,event_key)
+ select private.request_user_id(),'reengagement',private.request_user_id(),current_date,'reengagement:'||private.request_user_id()||':'||date_trunc('week',current_date::timestamp)::date on conflict do nothing;
+select phase6_test.eq((select count(*) from engagement_private.schedule_sources where kind='reengagement'),1,'consented reengagement dedupes within local week');
+update public.engagement_preferences set reengagement=false where user_id=private.request_user_id();
+select phase6_test.denied($q$insert into engagement_private.schedule_sources(user_id,kind,source_id,local_day,event_key) select private.request_user_id(),'reengagement',private.request_user_id(),current_date,'reengagement:'||private.request_user_id()||':'||date_trunc('week',current_date::timestamp)::date on conflict do nothing$q$,'withdrawn reengagement cannot queue');
 select phase6_test.eq((select count(*) from engagement_private.analytics_admins),0,'admin roster is isolated');
 reset role;
 set local role castly_engagement_worker;

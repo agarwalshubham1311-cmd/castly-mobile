@@ -3551,7 +3551,10 @@ class BusinessApiTest {
   @Test
   void phase6PreferencesValidationDeviceOwnershipRotationAndPrivacy() throws Exception {
     p6Opt(CLIENT);
+    p6Opt(OUTSIDER);
     try {
+      call("PUT", "/api/v1/engagement/preferences", CLIENT, " ".repeat(70000))
+          .andExpect(status().isPayloadTooLarge());
       call(
               "PUT",
               "/api/v1/engagement/preferences",
@@ -3607,6 +3610,20 @@ class BusinessApiTest {
                               "insert into engagement_private.contacts(user_id,email,verified_at)"
                                   + " values(private.request_user_id(),'forged@fixture.invalid',now())")
                           .update()));
+      call("DELETE", "/api/v1/engagement/data", CLIENT, null).andExpect(status().isOk());
+      call(
+              "POST",
+              "/api/v1/engagement/devices",
+              CLIENT,
+              "{\"device_key\":\""
+                  + CLIENT
+                  + "\",\"token\":\"ExpoPushToken[after_deletion_fixture]\",\"platform\":\"android\"}")
+          .andExpect(status().isConflict());
+      call("GET", "/api/v1/engagement/preferences", CLIENT, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.push_bookings").value(false));
+      assertEquals(0, p6Count(CLIENT, "public.engagement_preferences", "true"));
+      assertEquals(0, p6Count(CLIENT, "public.push_devices", "true"));
     } finally {
       p6Clear(CLIENT, OUTSIDER);
     }
@@ -3778,6 +3795,10 @@ class BusinessApiTest {
                       .andExpect(status().isOk()))
               .get("id")
               .toString();
+      call("POST", "/api/v1/engagement/saved-searches/" + id + "/results", OUTSIDER, "{}")
+          .andExpect(status().isNotFound());
+      call("POST", "/api/v1/engagement/saved-searches/" + id + "/results", CLIENT, "{}")
+          .andExpect(status().isOk());
       call("GET", "/api/v1/engagement/saved-searches", OUTSIDER, null)
           .andExpect(jsonPath("$.length()").value(0));
       call("PUT", "/api/v1/engagement/saved-searches/" + id, OUTSIDER, body)
@@ -3802,6 +3823,22 @@ class BusinessApiTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
+      ownerFixture(
+          "insert into engagement_private.events(subject_key,day,event) select"
+              + " lpad(g::text,64,'a'),current_date-7,'search' from generate_series(1,6) g");
+      var cohorts =
+          object(
+              call("GET", "/api/v1/engagement/admin/analytics", CLIENT, null)
+                  .andExpect(status().isOk()));
+      @SuppressWarnings("unchecked")
+      var weekly = (java.util.List<java.util.Map<String, Object>>) cohorts.get("weekly_retention");
+      assertTrue(
+          weekly.stream()
+              .anyMatch(
+                  row ->
+                      !row.get("cohort").equals(row.get("week"))
+                          && ((Number) row.get("retained")).intValue() == 6
+                          && ((Number) row.get("cohort_size")).intValue() == 6));
       assertFalse(report.contains("subject_key"));
       assertFalse(report.contains(CLIENT));
       call("PUT", "/api/v1/engagement/preferences", CLIENT, p6Prefs(false))
@@ -3822,7 +3859,8 @@ class BusinessApiTest {
       ownerFixture(
           "delete from engagement_private.analytics_admins where user_id='"
               + CLIENT
-              + "';delete from engagement_private.events where event='activation'");
+              + "';delete from engagement_private.events where subject_key in(select"
+              + " lpad(g::text,64,'a') from generate_series(1,6) g)");
       p6Clear(CLIENT);
     }
   }
@@ -3852,6 +3890,11 @@ class BusinessApiTest {
     var provider = new P6Provider();
     try (var worker = p6Worker(provider)) {
       var now = java.time.Instant.now();
+      ownerFixture(
+          "update engagement_private.contacts set verified_at=now()-interval '15 days' where"
+              + " user_id='"
+              + CLIENT
+              + "'");
       worker.tick(now);
       assertEquals(1, provider.sends.get());
       String id =
@@ -4106,8 +4149,8 @@ class BusinessApiTest {
       assertTrue(p6Count(CLIENT, "engagement_private.outbox", "error_code='frequency_cap'") > 0);
       // Yesterday's deferred jobs count against TODAY's actual dispatch cap.
       ownerFixture(
-          "update engagement_private.outbox set created_at=now()-interval '1 day' where"
-              + " recipient_id='"
+          "update engagement_private.outbox set created_at=now()-interval '1 day',next_at=case when"
+              + " state='queued' then now() else next_at end where recipient_id='"
               + CLIENT
               + "' and kind='booking_reminder'");
       worker.tick(java.time.Instant.now().plusSeconds(60));

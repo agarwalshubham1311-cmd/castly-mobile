@@ -10,13 +10,20 @@ import java.util.*;
 public class HttpDeliveryProvider implements DeliveryProvider {
   private final Phase6Settings flags;
   private final ObjectMapper json;
-  private final HttpClient http =
-      HttpClient.newBuilder()
-          .connectTimeout(Duration.ofSeconds(3))
-          .followRedirects(HttpClient.Redirect.NEVER)
-          .build();
+  private final HttpClient http;
 
   public HttpDeliveryProvider(Phase6Settings flags, ObjectMapper json) {
+    this(
+        flags,
+        json,
+        HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(3))
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .build());
+  }
+
+  HttpDeliveryProvider(Phase6Settings flags, ObjectMapper json, HttpClient http) {
+    this.http = http;
     this.flags = flags;
     this.json = json;
   }
@@ -29,17 +36,16 @@ public class HttpDeliveryProvider implements DeliveryProvider {
     if (key != null)
       b.header("Authorization", "Bearer " + key).header("Idempotency-Key", id.toString());
     var r =
-        http.send(
+        BoundedHttpBody.send(
+            http,
             b.POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body))).build(),
-            HttpResponse.BodyHandlers.ofInputStream());
-    try (var input = r.body()) {
-      byte[] bytes = input.readNBytes(65537);
-      if (r.statusCode() == 429) return json.createObjectNode().put("retry", true);
-      if (r.statusCode() >= 500) return json.createObjectNode().put("uncertain", true);
-      if (r.statusCode() < 200 || r.statusCode() >= 300 || bytes.length > 65536)
-        return json.createObjectNode().put("permanent", true);
-      return json.readTree(bytes);
-    }
+            Duration.ofSeconds(4));
+    byte[] bytes = r.body();
+    if (r.statusCode() == 429) return json.createObjectNode().put("retry", true);
+    if (r.statusCode() >= 500) return json.createObjectNode().put("uncertain", true);
+    if (r.statusCode() < 200 || r.statusCode() >= 300 || bytes.length > 65536)
+      return json.createObjectNode().put("permanent", true);
+    return json.readTree(bytes);
   }
 
   public Result send(Envelope e) {

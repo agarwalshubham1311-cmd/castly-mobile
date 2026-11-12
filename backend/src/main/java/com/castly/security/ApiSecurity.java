@@ -23,6 +23,10 @@ public class ApiSecurity {
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.addFilterAfter(
+        new com.castly.engagement.EngagementBodyLimit(),
+        org.springframework.security.oauth2.server.resource.web.authentication
+            .BearerTokenAuthenticationFilter.class);
+    http.addFilterAfter(
         new com.castly.trust.EvidenceUploadLimitFilter(),
         org.springframework.security.oauth2.server.resource.web.authentication
             .BearerTokenAuthenticationFilter.class);

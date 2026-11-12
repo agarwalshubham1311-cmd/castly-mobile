@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class EngagementService {
   private final ActorDatabase data;
+  @org.springframework.beans.factory.annotation.Autowired private Phase5Service discovery;
   private final Phase6Settings flags;
   private final ObjectMapper json;
   private final VerifiedEmailGateway email;
@@ -58,14 +59,26 @@ public class EngagementService {
     return data.as(
         actor,
         db -> {
-          db.sql(
-                  "insert into public.engagement_preferences(user_id) values(:u) on conflict do"
-                      + " nothing")
-              .param("u", actor)
-              .update();
-          return one(
-              db.sql("select * from public.engagement_preferences where user_id=:u")
-                  .param("u", actor));
+          var stored =
+              rows(
+                  db.sql("select * from public.engagement_preferences where user_id=:u")
+                      .param("u", actor));
+          if (!stored.isEmpty()) return stored.getFirst();
+          var defaults = new LinkedHashMap<String, Object>();
+          defaults.put("timezone", "UTC");
+          defaults.put("quiet_start", 22);
+          defaults.put("quiet_end", 8);
+          for (String key :
+              List.of(
+                  "push_bookings",
+                  "push_messages",
+                  "email_transactional",
+                  "email_optional",
+                  "reminders",
+                  "saved_alerts",
+                  "reengagement",
+                  "analytics")) defaults.put(key, false);
+          return defaults;
         });
   }
 
@@ -77,10 +90,14 @@ public class EngagementService {
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose an IANA timezone");
     }
-    preferences(actor);
     return data.as(
         actor,
         db -> {
+          db.sql(
+                  "insert into public.engagement_preferences(user_id) values(:u) on conflict do"
+                      + " nothing")
+              .param("u", actor)
+              .update();
           var result =
               one(
                   db.sql(
@@ -113,11 +130,22 @@ public class EngagementService {
     if (!Set.of("android", "ios").contains(platform)
         || !token.matches("^(ExponentPushToken|ExpoPushToken)\\[[A-Za-z0-9_-]{10,200}\\]$"))
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid device registration");
-    preferences(actor);
     try {
       return data.as(
           actor,
           db -> {
+            var choices =
+                rows(
+                    db.sql(
+                            "select push_bookings,push_messages from public.engagement_preferences"
+                                + " where user_id=:u for update")
+                        .param("u", actor));
+            if (choices.isEmpty()
+                || !Boolean.TRUE.equals(choices.getFirst().get("push_bookings"))
+                    && !Boolean.TRUE.equals(choices.getFirst().get("push_messages")))
+              throw new ResponseStatusException(
+                  HttpStatus.CONFLICT,
+                  "Choose and save a push preference before registering this device");
             db.sql("select set_config('castly.phase6.device_token',:token,true)")
                 .param("token", token)
                 .query()
@@ -141,7 +169,7 @@ public class EngagementService {
   }
 
   public void unregister(UUID actor, UUID key) {
-    enabled(flags.push);
+    enabled(flags.any());
     data.as(
         actor,
         db -> {
@@ -267,6 +295,32 @@ public class EngagementService {
     } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filters");
     }
+  }
+
+  public List<Map<String, Object>> results(UUID actor, UUID id) {
+    enabled(flags.engagement);
+    limits.rate(actor, "phase6_results", 20);
+    return data.as(
+        actor,
+        db -> {
+          var row =
+              one(
+                  db.sql("select filters from public.saved_searches where id=:id and user_id=:u")
+                      .param("id", id)
+                      .param("u", actor));
+          String zone =
+              db.sql("select timezone from public.engagement_preferences where user_id=:u")
+                  .param("u", actor)
+                  .query(String.class)
+                  .optional()
+                  .orElse("UTC");
+          try {
+            var filters = json.readValue(row.get("filters").toString(), Filters.class);
+            return discovery.search(actor, filters.search(LocalDate.now(ZoneId.of(zone))));
+          } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid saved search");
+          }
+        });
   }
 
   public void remove(UUID actor, UUID id) {
@@ -403,6 +457,10 @@ public class EngagementService {
     data.as(
         actor,
         db -> {
+          db.sql("select user_id from public.engagement_preferences where user_id=:u for update")
+              .param("u", actor)
+              .query()
+              .listOfRows();
           db.sql("delete from engagement_private.events where subject_key=:s")
               .param("s", flags.subject(actor))
               .update();

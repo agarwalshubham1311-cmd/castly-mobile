@@ -7,3 +7,5 @@ export const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-
 export function deliveryId(data: unknown): string | null { if (!data || typeof data !== 'object') return null; const value = (data as Record<string, unknown>).delivery_id; return typeof value === 'string' && uuidPattern.test(value) ? value : null; }
 export function safeNotificationRoute(value: string): boolean { return value === '/notifications' || value === '/engagement' || /^\/(booking-detail|chat)\/[0-9a-f-]{36}$/i.test(value) && uuidPattern.test(value.split('/')[2]); }
 export function preferenceInput(value: Preferences): Preferences { return Object.fromEntries(Object.keys(defaultPreferences).map((key) => [key, value[key as keyof Preferences]])) as Preferences; }
+
+export function deliveryPathId(path: string): string | null { const match = /^\/engagement\/open\/([0-9a-f-]{36})$/i.exec(path); return match && uuidPattern.test(match[1]) ? match[1] : null; }
