@@ -128,6 +128,11 @@ async function until(url) {
           CASTLY_SUBSCRIPTIONS_ENABLED: 'true',
           CASTLY_GOOGLE_PLAY_ENABLED: 'false',
           CASTLY_DISPUTES_ENABLED: 'true',
+          CASTLY_SAFETY_REPORTING_ENABLED: 'true',
+          CASTLY_ADVANCED_SEARCH_ENABLED: 'true',
+          CASTLY_AI_RECOMMENDATIONS_ENABLED: 'true',
+          CASTLY_SMART_MATCHING_ENABLED: 'true',
+          CASTLY_AI_ASSISTANCE_ENABLED: 'true',
           CORS_ALLOWED_ORIGINS: new URL(process.env.TEST_URL).origin,
           PORT: '8080',
         },
@@ -190,6 +195,7 @@ async function until(url) {
     await b
       .getByRole('textbox', { name: 'Biography', exact: true })
       .fill('A profile created through the real Spring API.');
+    await b.getByRole('textbox', { name: 'Skills, separated by commas', exact: true }).fill('video');
     await b.getByRole('button', { name: 'Save talent profile', exact: true }).click();
     await b
       .getByText('Draft profile saved. It is not visible in discovery.', { exact: true })
@@ -197,6 +203,15 @@ async function until(url) {
     await b.getByRole('switch', { name: 'Published in discovery', exact: true }).click();
     await b.getByRole('button', { name: 'Save talent profile', exact: true }).click();
     await b.getByText('Talent profile published.', { exact: true }).waitFor();
+    const phase5Day = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+    await go(b, '/discovery/creator', 'Creator discovery controls');
+    await b.getByRole('textbox', { name: 'Broad region (no coordinates or address)' }).fill('Maharashtra');
+    await b.getByRole('checkbox', { name: 'Share this region in discovery' }).click();
+    await b.getByRole('button', { name: 'Save region choice' }).click();
+    await b.getByText('Region choice saved.', { exact: true }).waitFor();
+    await b.getByRole('textbox', { name: 'Availability day (YYYY-MM-DD)' }).fill(phase5Day);
+    await b.getByRole('button', { name: 'Save date declaration' }).click();
+    await b.getByText('Date declaration saved. Clients still need direct confirmation.', { exact: true }).waitFor();
     let expiredOnce = false;
     await a.route('**/api/v1/account', async (route) => {
       if (!expiredOnce && route.request().method() === 'GET') {
@@ -214,6 +229,39 @@ async function until(url) {
       true,
       'Private API 401 must refresh the same Auth user and restore the account',
     );
+    await go(a, '/discovery', 'Campaign discovery');
+    await a.getByRole('textbox', { name: 'Campaign description' })
+      .fill(`Actors with video for a reel in Mumbai under INR 20000 on ${phase5Day}`);
+    await a.getByRole('button', { name: 'Parse campaign locally' }).click();
+    await a.getByRole('textbox', { name: 'City (public profile label)' }).waitFor();
+    await a.getByRole('checkbox', { name: 'Budget is an indicative per-day rate ceiling' }).click();
+    await a.getByRole('checkbox', { name: 'I confirm these structured campaign fields' }).click();
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByRole('button', { name: 'Draft brief for Spring API Talent' }).waitFor();
+    await a.getByText('Date availability: confirmed', { exact: false }).waitFor();
+    await a.getByRole('button', { name: 'Draft brief for Spring API Talent' }).click();
+    const editableBrief = a.getByRole('textbox', { name: 'Editable booking brief suggestion (not sent)' });
+    await editableBrief.waitFor();
+    await editableBrief.fill('Edited by the client before any booking.');
+    assert.equal(await editableBrief.inputValue(), 'Edited by the client before any booking.');
+    await a.getByRole('checkbox', { name: 'Compare Spring API Talent' }).click();
+    await a.getByRole('button', { name: 'Compare selected creators' }).click();
+    await a.getByText(/Spring API Talent: actors, Mumbai, INR .*\/day indicative/).first().waitFor();
+    const blockedResponse = await fetch(api + '/blocks/' + talent, {
+      method: 'PUT', headers: { Authorization: 'Bearer ' + token(client) },
+    });
+    assert.equal(blockedResponse.status, 200);
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByText('No matches. Edit a filter or allow clearly labeled unknown availability.', { exact: true }).waitFor();
+    assert.equal(await a.getByRole('button', { name: 'Open Spring API Talent profile' }).count(), 0);
+    const unblockedResponse = await fetch(api + '/blocks/' + talent, {
+      method: 'DELETE', headers: { Authorization: 'Bearer ' + token(client) },
+    });
+    assert.equal(unblockedResponse.status, 200);
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByRole('button', { name: 'Draft brief for Spring API Talent' }).waitFor();
+    console.log('PASS: integrated Phase 4 block/unblock excludes and restores Phase 5 shortlist through real browser + Spring + PostgreSQL.');
+    console.log('PASS: real browser + Spring + PostgreSQL campaign parse, confirmed constraints, declared-date shortlist, editable brief and factual comparison.');
     await go(a, '/search', 'Search talent');
     await a.getByRole('button', { name: 'Save Spring API Talent', exact: true }).click();
     await a.getByRole('button', { name: 'Unsave Spring API Talent', exact: true }).waitFor();
