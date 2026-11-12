@@ -15,6 +15,10 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class Phase5Service {
   private final ActorDatabase data;
+
+  @org.springframework.beans.factory.annotation.Autowired
+  private com.castly.engagement.Phase6Signals phase6;
+
   private final Phase5RateLimit rate;
   private final SuggestionProvider provider;
   private final BoundedProvider boundedProvider;
@@ -121,7 +125,18 @@ public class Phase5Service {
   public List<Map<String, Object>> search(UUID actor, Search filters) {
     enabled(advanced);
     rate.check(actor, "advanced_search", 60);
-    return data.as(actor, db -> candidates(db, filters, List.of(), 0, List.of()));
+    return data.as(
+        actor,
+        db -> {
+          var found = candidates(db, filters, List.of(), 0, List.of());
+          phase6.record(db, "search");
+          return found;
+        });
+  }
+
+  public boolean hasDigestMatch(UUID actor, Search filters) {
+    enabled(advanced);
+    return data.as(actor, db -> !candidates(db, filters, List.of(), 0, List.of()).isEmpty());
   }
 
   private List<Map<String, Object>> candidates(
@@ -146,7 +161,7 @@ public class Phase5Service {
         f.skills().isEmpty()
             ? ""
             : " and public.phase5_normalized_skills(t.skills) @>"
-                  + " string_to_array(lower(:skill_text),chr(31))";
+                + " string_to_array(lower(:skill_text),chr(31))";
     String sql =
         "with found as (select t.id,t.display_name,t.category_id,t.city,t.day_rate,"
             + " t.skills,t.available,t.created_at,p.region,:ranking_budget as ranking_budget,"
@@ -289,6 +304,13 @@ public class Phase5Service {
                         ? campaign.maxBudget()
                         : 0,
                     campaign.deliverables()));
+    if (allowProvider)
+      data.as(
+          actor,
+          db -> {
+            phase6.record(db, "search");
+            return null;
+          });
     var ranked = new ArrayList<Map<String, Object>>();
     for (var row : source) {
       if ("unavailable".equals(row.get("availability_status"))) continue;

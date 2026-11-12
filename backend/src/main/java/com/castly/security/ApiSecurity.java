@@ -31,7 +31,10 @@ public class ApiSecurity {
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             a ->
-                a.requestMatchers("/actuator/health")
+                a.requestMatchers(
+                        "/api/v1/engagement/unsubscribe/*", "/api/v1/engagement/webhooks/email")
+                    .permitAll()
+                    .requestMatchers("/actuator/health")
                     .permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/talents/me")
                     .authenticated()

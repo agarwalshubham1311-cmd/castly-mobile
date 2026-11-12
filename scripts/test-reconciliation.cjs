@@ -111,6 +111,7 @@ for (const withOldRpcs of [false, true]) {
   file(db, 'tests/phase4.sql');
   file(db, 'tests/phase5.sql');
   file(db, 'tests/phase5-trust-integration.sql');
+  file(db, 'tests/phase6.sql');
   console.log(`PASS ${db}: inventory, refusal gates, preparation preserving legacy M1, API/RLS/Storage actors, cutover, data and ledger preservation`);
 }
 console.log(`PASS reconciliation scenarios: ${assertions} SQL assertions/catalog gates on disposable PostgreSQL; no hosted database contacted.`);

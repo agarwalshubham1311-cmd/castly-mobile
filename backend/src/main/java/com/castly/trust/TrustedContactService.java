@@ -72,6 +72,34 @@ public class TrustedContactService {
     }
   }
 
+  public Optional<String> verifiedEmail(String token, UUID actor) {
+    if (key.isBlank()) return Optional.empty();
+    try {
+      var response =
+          http.send(
+              HttpRequest.newBuilder(URI.create(issuer + "/user"))
+                  .timeout(Duration.ofSeconds(5))
+                  .header("apikey", key)
+                  .header("Authorization", "Bearer " + token)
+                  .GET()
+                  .build(),
+              HttpResponse.BodyHandlers.ofInputStream());
+      try (var input = response.body()) {
+        byte[] bytes = input.readNBytes(65537);
+        if (response.statusCode() != 200 || bytes.length > 65536) return Optional.empty();
+        var user = json.readTree(bytes);
+        String address = user.path("email").asText("");
+        if (actor.toString().equals(user.path("id").asText())
+            && confirmed(user, "email_confirmed_at")
+            && address.length() <= 254
+            && address.matches("[^\\s<>]+@[^\\s<>]+\\.[^\\s<>]+")) return Optional.of(address);
+      }
+    } catch (Exception e) {
+      if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+    }
+    return Optional.empty();
+  }
+
   static boolean confirmed(JsonNode user, String field) {
     try {
       return user.path(field).isTextual()

@@ -23,6 +23,11 @@ import org.springframework.test.web.servlet.*;
       "castly.jwt.audience=authenticated",
       "castly.jwt.mode=jwks",
       "castly.notifications.enabled=true",
+      "castly.phase6.push-enabled=true",
+      "castly.phase6.email-enabled=true",
+      "castly.phase6.engagement-enabled=true",
+      "castly.phase6.analytics-enabled=true",
+      "castly.phase6.analytics-key=fixture-phase6-analytics-key-at-least-32-characters",
       "castly.phase5.advanced-search-enabled=true",
       "castly.phase5.ai-recommendations-enabled=true",
       "castly.phase5.smart-matching-enabled=true",
@@ -68,6 +73,13 @@ class BusinessApiTest {
   @Autowired com.castly.subscription.PromotionService promotionService;
   @Autowired com.castly.subscription.SubscriptionService membershipService;
   @Autowired com.castly.subscription.SubscriptionRateLimiter subscriptionLimiter;
+
+  @org.springframework.test.context.bean.override.mockito.MockitoBean
+  com.castly.engagement.VerifiedEmailGateway phase6Email;
+
+  @Autowired com.castly.engagement.Phase6Settings phase6Flags;
+  @Autowired com.castly.engagement.EngagementService engagement;
+  @Autowired com.castly.discovery.Phase5Service phase5;
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper json;
   @Autowired ActorDatabase data;
@@ -3420,6 +3432,749 @@ class BusinessApiTest {
               + talent
               + "'");
       org.mockito.Mockito.reset(suggestionProvider);
+    }
+  }
+
+  private String p6Prefs(boolean consent) {
+    return "{\"timezone\":\"UTC\",\"quiet_start\":0,\"quiet_end\":0,\"push_bookings\":"
+        + consent
+        + ",\"push_messages\":"
+        + consent
+        + ",\"email_transactional\":"
+        + consent
+        + ",\"email_optional\":"
+        + consent
+        + ",\"reminders\":"
+        + consent
+        + ",\"saved_alerts\":"
+        + consent
+        + ",\"reengagement\":"
+        + consent
+        + ",\"analytics\":"
+        + consent
+        + "}";
+  }
+
+  private void p6Opt(String actor) throws Exception {
+    call("PUT", "/api/v1/engagement/preferences", actor, p6Prefs(true)).andExpect(status().isOk());
+  }
+
+  private void p6Device(String actor) throws Exception {
+    call(
+            "POST",
+            "/api/v1/engagement/devices",
+            actor,
+            "{\"device_key\":\""
+                + actor
+                + "\",\"token\":\"ExpoPushToken[fixture_"
+                + actor.replace("-", "")
+                + "]\",\"platform\":\"android\"}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.token").doesNotExist());
+  }
+
+  private void p6Email(String actor) throws Exception {
+    org.mockito.Mockito.when(
+            phase6Email.verified(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(UUID.fromString(actor))))
+        .thenReturn(Optional.of("verified-" + actor + "@fixture.invalid"));
+    call("POST", "/api/v1/engagement/email/verify", actor, "{}").andExpect(status().isOk());
+  }
+
+  private long p6Count(String actor, String table, String condition) {
+    return data.as(
+        UUID.fromString(actor),
+        db ->
+            db.sql("select count(*) from " + table + " where " + condition)
+                .query(Long.class)
+                .single());
+  }
+
+  private void p6Clear(String... actors) {
+    for (String actor : actors) engagement.delete(UUID.fromString(actor));
+    org.mockito.Mockito.reset(phase6Email);
+  }
+
+  private com.castly.engagement.EngagementWorker p6Worker(
+      com.castly.engagement.DeliveryProvider provider) throws Exception {
+    return p6Worker(provider, false);
+  }
+
+  private com.castly.engagement.EngagementWorker p6Worker(
+      com.castly.engagement.DeliveryProvider provider, boolean scheduling) throws Exception {
+    ownerFixture("alter role castly_engagement_worker login password 'local-worker-fixture-only'");
+    var pool = new com.zaxxer.hikari.HikariDataSource();
+    pool.setJdbcUrl("jdbc:postgresql://127.0.0.1:55432/castly_spring_test");
+    pool.setUsername("castly_engagement_worker");
+    pool.setPassword("local-worker-fixture-only");
+    pool.setMaximumPoolSize(2);
+    var f = new com.castly.engagement.Phase6Settings();
+    f.worker = true;
+    f.engagement = scheduling;
+    f.webhookSecret =
+        "whsec_"
+            + Base64.getEncoder()
+                .encodeToString(
+                    "fixture-email-webhook-secret-32-characters"
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    f.push = true;
+    f.email = true;
+    f.analytics = true;
+    f.pushProvider = "expo";
+    f.emailProvider = "resend";
+    f.analyticsKey = phase6Flags.analyticsKey;
+    f.unsubscribeKey = "fixture-unsubscribe-key-at-least-32-characters";
+    f.appOrigin = "https://app.fixture.invalid";
+    f.apiOrigin = "https://api.fixture.invalid";
+    return new com.castly.engagement.EngagementWorker(pool, data, phase5, f, provider, json);
+  }
+
+  private static class P6Provider implements com.castly.engagement.DeliveryProvider {
+    final java.util.List<Envelope> envelopes = new java.util.concurrent.CopyOnWriteArrayList<>();
+    final java.util.concurrent.atomic.AtomicInteger sends =
+        new java.util.concurrent.atomic.AtomicInteger();
+    volatile Status next = Status.ACCEPTED, receiptState = Status.DELIVERED;
+
+    public Result send(Envelope e) {
+      sends.incrementAndGet();
+      envelopes.add(e);
+      assertFalse(e.link().contains("requirements"));
+      return new Result(next, "receipt-" + e.id());
+    }
+
+    public Result receipt(String id) {
+      return Result.of(receiptState);
+    }
+  }
+
+  @Test
+  void phase6PreferencesValidationDeviceOwnershipRotationAndPrivacy() throws Exception {
+    p6Opt(CLIENT);
+    try {
+      call(
+              "PUT",
+              "/api/v1/engagement/preferences",
+              CLIENT,
+              p6Prefs(true).replace("UTC", "not/a/timezone"))
+          .andExpect(status().isBadRequest());
+      call("GET", "/api/v1/engagement/preferences", null, null)
+          .andExpect(status().isUnauthorized());
+      p6Device(CLIENT);
+      p6Device(CLIENT);
+      assertEquals(1, p6Count(CLIENT, "public.push_devices", "true"));
+      assertEquals(0, p6Count(OUTSIDER, "public.push_devices", "true"));
+      call("DELETE", "/api/v1/engagement/devices/" + CLIENT, OUTSIDER, null)
+          .andExpect(status().isOk());
+      assertEquals(1, p6Count(CLIENT, "public.push_devices", "true"));
+      call(
+              "POST",
+              "/api/v1/engagement/devices",
+              OUTSIDER,
+              "{\"device_key\":\""
+                  + OUTSIDER
+                  + "\",\"token\":\"ExpoPushToken[fixture_"
+                  + CLIENT.replace("-", "")
+                  + "]\",\"platform\":\"ios\"}")
+          .andExpect(status().isConflict());
+      ownerFixture(
+          "update public.push_devices set expires_at=now()-interval '1 second' where user_id='"
+              + CLIENT
+              + "'");
+      call(
+              "POST",
+              "/api/v1/engagement/devices",
+              OUTSIDER,
+              "{\"device_key\":\""
+                  + OUTSIDER
+                  + "\",\"token\":\"ExpoPushToken[fixture_"
+                  + CLIENT.replace("-", "")
+                  + "]\",\"platform\":\"ios\"}")
+          .andExpect(status().isOk());
+      assertEquals(0, p6Count(CLIENT, "public.push_devices", "true"));
+      call("GET", "/api/v1/engagement/export", CLIENT, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.devices[0].token").doesNotExist());
+      call("POST", "/api/v1/engagement/email/verify", CLIENT, "{}")
+          .andExpect(status().isConflict());
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () ->
+              data.as(
+                  UUID.fromString(CLIENT),
+                  db ->
+                      db.sql(
+                              "insert into engagement_private.contacts(user_id,email,verified_at)"
+                                  + " values(private.request_user_id(),'forged@fixture.invalid',now())")
+                          .update()));
+    } finally {
+      p6Clear(CLIENT, OUTSIDER);
+    }
+  }
+
+  @Test
+  void phase6BookingOutboxIsAtomicDedupedAndRecipientOnly() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    p6Opt(CLIENT);
+    p6Device(CLIENT);
+    p6Email(CLIENT);
+    try {
+      assertThrows(
+          RuntimeException.class,
+          () ->
+              data.as(
+                  UUID.fromString(talent),
+                  db -> {
+                    db.sql("update public.bookings set status='accepted' where id=:b")
+                        .param("b", UUID.fromString(booking))
+                        .update();
+                    throw new RuntimeException("fixture rollback");
+                  }));
+      assertEquals(0, p6Count(CLIENT, "engagement_private.outbox", "booking_id='" + booking + "'"));
+      call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+          .andExpect(status().isOk());
+      call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+          .andExpect(status().isOk());
+      assertEquals(2, p6Count(CLIENT, "engagement_private.outbox", "booking_id='" + booking + "'"));
+      assertEquals(
+          0, p6Count(OUTSIDER, "engagement_private.outbox", "booking_id='" + booking + "'"));
+      String id =
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql(
+                          "select id::text from engagement_private.outbox where booking_id=:b limit"
+                              + " 1")
+                      .param("b", UUID.fromString(booking))
+                      .query(String.class)
+                      .single());
+      call("POST", "/api/v1/engagement/open/" + id, OUTSIDER, "{}")
+          .andExpect(status().isNotFound());
+      call("POST", "/api/v1/engagement/open/" + id, CLIENT, "{}")
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.route").value("/booking-detail/" + booking));
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () ->
+              data.as(
+                  UUID.fromString(CLIENT),
+                  db ->
+                      db.sql(
+                              "insert into"
+                                  + " engagement_private.outbox(recipient_id,event_key,kind,channel)"
+                                  + " values(private.request_user_id(),'forged','account_activity','email')")
+                          .update()));
+    } finally {
+      p6Clear(CLIENT);
+    }
+  }
+
+  @Test
+  void phase6WorkerRetryReceiptAndInvalidTokenCleanup() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    p6Opt(CLIENT);
+    p6Device(CLIENT);
+    call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+        .andExpect(status().isOk());
+    var provider = new P6Provider();
+    provider.next = com.castly.engagement.DeliveryProvider.Status.RETRY;
+    var now = java.time.Instant.now();
+    try (var worker = p6Worker(provider)) {
+      worker.tick(now);
+      assertEquals(1, provider.sends.get());
+      assertEquals(
+          1, p6Count(CLIENT, "engagement_private.outbox", "state='queued' and attempts=1"));
+      worker.tick(now.plusSeconds(1));
+      assertEquals(1, provider.sends.get());
+      provider.next = com.castly.engagement.DeliveryProvider.Status.ACCEPTED;
+      worker.tick(now.plusSeconds(61));
+      assertEquals(2, provider.sends.get());
+      assertEquals(1, p6Count(CLIENT, "engagement_private.outbox", "state='ticket'"));
+      worker.tick(now.plusSeconds(122));
+      assertEquals(2, provider.sends.get());
+      assertEquals(1, p6Count(CLIENT, "engagement_private.outbox", "state='delivered'"));
+      ownerFixture(
+          "update engagement_private.outbox set state='queued',next_at=now() where booking_id='"
+              + booking
+              + "'");
+      provider.next = com.castly.engagement.DeliveryProvider.Status.INVALID;
+      worker.tick(java.time.Instant.now());
+      assertEquals(1, p6Count(CLIENT, "public.push_devices", "not active"));
+      assertEquals(1, p6Count(CLIENT, "engagement_private.outbox", "state='dead'"));
+    } finally {
+      p6Clear(CLIENT);
+    }
+  }
+
+  @Test
+  void phase6ConcurrentWorkersAndAmbiguousDispatchNeverBlindlyResend() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    p6Opt(CLIENT);
+    p6Device(CLIENT);
+    call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+        .andExpect(status().isOk());
+    var provider = new P6Provider();
+    provider.next = com.castly.engagement.DeliveryProvider.Status.UNCERTAIN;
+    try (var first = p6Worker(provider);
+        var second = p6Worker(provider);
+        var pool = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+      var now = java.time.Instant.now();
+      var a = pool.submit(() -> first.tick(now));
+      var b = pool.submit(() -> second.tick(now));
+      a.get(5, java.util.concurrent.TimeUnit.SECONDS);
+      b.get(5, java.util.concurrent.TimeUnit.SECONDS);
+      assertEquals(1, provider.sends.get());
+      first.tick(now.plusSeconds(3600));
+      assertEquals(1, provider.sends.get());
+      assertEquals(1, p6Count(CLIENT, "engagement_private.outbox", "state='uncertain'"));
+    } finally {
+      p6Clear(CLIENT);
+    }
+  }
+
+  @Test
+  void phase6ConsentWithdrawalAndBlockingSuppressQueuedSends() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    p6Opt(CLIENT);
+    p6Device(CLIENT);
+    call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+        .andExpect(status().isOk());
+    var provider = new P6Provider();
+    try (var worker = p6Worker(provider)) {
+      call("PUT", "/api/v1/blocks/" + talent, CLIENT, null).andExpect(status().isOk());
+      worker.tick(java.time.Instant.now());
+      assertEquals(0, provider.sends.get());
+      assertEquals(1, p6Count(CLIENT, "engagement_private.outbox", "state='suppressed'"));
+      call("DELETE", "/api/v1/blocks/" + talent, CLIENT, null).andExpect(status().isOk());
+      ownerFixture(
+          "update engagement_private.outbox set state='queued',next_at=now() where booking_id='"
+              + booking
+              + "'");
+      call("PUT", "/api/v1/engagement/preferences", CLIENT, p6Prefs(false))
+          .andExpect(status().isOk());
+      worker.tick(java.time.Instant.now());
+      assertEquals(0, provider.sends.get());
+    } finally {
+      ownerFixture(
+          "delete from public.user_blocks where blocker_id='"
+              + CLIENT
+              + "' and blocked_id='"
+              + talent
+              + "'");
+      p6Clear(CLIENT);
+    }
+  }
+
+  @Test
+  void phase6SavedSearchOwnershipOptOutAndAnalyticsAggregation() throws Exception {
+    p6Opt(CLIENT);
+    try {
+      String body =
+          "{\"label\":\"Public actor"
+              + " search\",\"filters\":{\"category\":\"actors\",\"city\":\"Pune\",\"skills\":[\"acting\"],\"include_unknown\":true},\"alerts\":true}";
+      String id =
+          object(
+                  call("POST", "/api/v1/engagement/saved-searches", CLIENT, body)
+                      .andExpect(status().isOk()))
+              .get("id")
+              .toString();
+      call("GET", "/api/v1/engagement/saved-searches", OUTSIDER, null)
+          .andExpect(jsonPath("$.length()").value(0));
+      call("PUT", "/api/v1/engagement/saved-searches/" + id, OUTSIDER, body)
+          .andExpect(status().isNotFound());
+      call("DELETE", "/api/v1/engagement/saved-searches/" + id, OUTSIDER, null)
+          .andExpect(status().isOk());
+      assertEquals(1, p6Count(CLIENT, "public.saved_searches", "true"));
+      call("GET", "/api/v1/talents", CLIENT, null).andExpect(status().isOk());
+      call("GET", "/api/v1/talents", CLIENT, null).andExpect(status().isOk());
+      assertEquals(1, p6Count(CLIENT, "engagement_private.events", "event='search'"));
+      call("GET", "/api/v1/engagement/admin/analytics", CLIENT, null)
+          .andExpect(status().isForbidden());
+      ownerFixture(
+          "insert into engagement_private.analytics_admins(user_id) values('"
+              + CLIENT
+              + "');insert into engagement_private.events(subject_key,day,event) select"
+              + " lpad(g::text,64,'a'),current_date,'activation' from generate_series(1,6) g");
+      String report =
+          call("GET", "/api/v1/engagement/admin/analytics", CLIENT, null)
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.minimum_cell").value(5))
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      assertFalse(report.contains("subject_key"));
+      assertFalse(report.contains(CLIENT));
+      call("PUT", "/api/v1/engagement/preferences", CLIENT, p6Prefs(false))
+          .andExpect(status().isOk());
+      assertEquals(
+          0,
+          data.as(
+                  UUID.fromString(CLIENT),
+                  db ->
+                      db.sql("select count(*) from engagement_private.events where subject_key=:s")
+                          .param("s", phase6Flags.subject(UUID.fromString(CLIENT)))
+                          .query(Long.class)
+                          .single())
+              .longValue());
+      call("DELETE", "/api/v1/engagement/data", CLIENT, null).andExpect(status().isOk());
+      assertEquals(0, p6Count(CLIENT, "public.saved_searches", "true"));
+    } finally {
+      ownerFixture(
+          "delete from engagement_private.analytics_admins where user_id='"
+              + CLIENT
+              + "';delete from engagement_private.events where event='activation'");
+      p6Clear(CLIENT);
+    }
+  }
+
+  private String p6Signature(String body, String id, java.time.Instant now) throws Exception {
+    var mac = javax.crypto.Mac.getInstance("HmacSHA256");
+    mac.init(
+        new javax.crypto.spec.SecretKeySpec(
+            "fixture-email-webhook-secret-32-characters"
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8),
+            "HmacSHA256"));
+    return "v1,"
+        + Base64.getEncoder()
+            .encodeToString(
+                mac.doFinal(
+                    (id + "." + now.getEpochSecond() + "." + body)
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+  }
+
+  @Test
+  void phase6VerifiedEmailWebhookIdempotencySuppressionAndOptionalUnsubscribe() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    p6Opt(CLIENT);
+    p6Email(CLIENT);
+    call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+        .andExpect(status().isOk());
+    var provider = new P6Provider();
+    try (var worker = p6Worker(provider)) {
+      var now = java.time.Instant.now();
+      worker.tick(now);
+      assertEquals(1, provider.sends.get());
+      String id =
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql("select id::text from engagement_private.outbox where booking_id=:b")
+                      .param("b", UUID.fromString(booking))
+                      .query(String.class)
+                      .single());
+      assertEquals(1, p6Count(CLIENT, "engagement_private.outbox", "state='ticket'"));
+      String body = "{\"type\":\"email.delivered\",\"data\":{\"email_id\":\"receipt-" + id + "\"}}";
+      assertFalse(
+          worker.webhook(
+              "evt_fixture",
+              "" + now.getEpochSecond(),
+              "bad",
+              body.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+              now));
+      String signature = p6Signature(body, "evt_fixture", now);
+      for (int n = 0; n < 2; n++)
+        assertTrue(
+            worker.webhook(
+                "evt_fixture",
+                "" + now.getEpochSecond(),
+                signature,
+                body.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                now));
+      assertEquals(1, p6Count(CLIENT, "engagement_private.outbox", "state='delivered'"));
+      String reminderBooking =
+          object(
+                  call(
+                          "POST",
+                          "/api/v1/bookings",
+                          CLIENT,
+                          "{\"talent_id\":\""
+                              + talent
+                              + "\",\"project_type\":\"Reminder"
+                              + " fixture\",\"location\":\"Pune\",\"requirements\":\"Private"
+                              + " reminder fixture requirements\",\"proposed_date\":\""
+                              + java.time.LocalDate.now().plusDays(1)
+                              + "\",\"indicative_budget\":1000}")
+                      .andExpect(status().isCreated()))
+              .get("id")
+              .toString();
+      try (var scheduler = p6Worker(provider, true)) {
+        scheduler.schedule(now);
+      }
+      String optional =
+          data.as(
+              UUID.fromString(CLIENT),
+              db ->
+                  db.sql(
+                          "select id::text from engagement_private.outbox where booking_id=:b and"
+                              + " kind='booking_reminder' limit 1")
+                      .param("b", UUID.fromString(reminderBooking))
+                      .query(String.class)
+                      .single());
+      var tokens =
+          new com.castly.engagement.UnsubscribeTokens(
+              "fixture-unsubscribe-key-at-least-32-characters");
+      worker.unsubscribe(tokens.issue(UUID.fromString(optional), now) + "invalid", now);
+      call("GET", "/api/v1/engagement/preferences", CLIENT, null)
+          .andExpect(jsonPath("$.email_optional").value(true));
+      worker.unsubscribe(tokens.issue(UUID.fromString(optional), now), now);
+      call("GET", "/api/v1/engagement/preferences", CLIENT, null)
+          .andExpect(jsonPath("$.email_optional").value(false))
+          .andExpect(jsonPath("$.email_transactional").value(true));
+      call("POST", "/api/v1/engagement/open/" + optional, CLIENT, "{}").andExpect(status().isOk());
+      assertEquals(0, p6Count(CLIENT, "engagement_private.events", "event='notification_opened'"));
+      String bounce = body.replace("email.delivered", "email.bounced");
+      assertTrue(
+          worker.webhook(
+              "evt_bounce",
+              "" + now.getEpochSecond(),
+              p6Signature(bounce, "evt_bounce", now),
+              bounce.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+              now));
+      ownerFixture(
+          "update engagement_private.outbox set state='queued',next_at=now() where id='"
+              + id
+              + "'");
+      worker.tick(java.time.Instant.now());
+      assertEquals(1, provider.sends.get());
+    } finally {
+      ownerFixture(
+          "delete from engagement_private.suppressions where"
+              + " email_hash=encode(sha256(convert_to('verified-"
+              + CLIENT
+              + "@fixture.invalid','UTF8')),'hex')");
+      p6Clear(CLIENT);
+    }
+  }
+
+  @Test
+  void phase6SchedulerDeduplicatesDigestsAndRechecksBlockVisibility() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    p6Opt(CLIENT);
+    p6Device(CLIENT);
+    call(
+            "PUT",
+            "/api/v1/engagement/preferences",
+            CLIENT,
+            p6Prefs(true).replace("\"reminders\":true", "\"reminders\":false"))
+        .andExpect(status().isOk());
+    call(
+            "PUT",
+            "/api/v1/discovery/me/preferences",
+            talent,
+            "{\"region\":\"PhaseSixRegion\",\"share_region\":true}")
+        .andExpect(status().isOk());
+    String body =
+        "{\"label\":\"Consented region"
+            + " only\",\"filters\":{\"category\":\"actors\",\"region\":\"PhaseSixRegion\",\"skills\":[],\"include_unknown\":true},\"alerts\":true}";
+    String search =
+        object(
+                call("POST", "/api/v1/engagement/saved-searches", CLIENT, body)
+                    .andExpect(status().isOk()))
+            .get("id")
+            .toString();
+    var provider = new P6Provider();
+    try (var worker = p6Worker(provider, true)) {
+      var now = java.time.Instant.now();
+      worker.schedule(now);
+      worker.schedule(now);
+      assertEquals(1, p6Count(CLIENT, "engagement_private.outbox", "search_id='" + search + "'"));
+      call("PUT", "/api/v1/blocks/" + talent, CLIENT, null).andExpect(status().isOk());
+      worker.tick(java.time.Instant.now());
+      assertTrue(provider.envelopes.stream().noneMatch(e -> e.kind().equals("saved_digest")));
+      assertEquals(
+          1,
+          p6Count(
+              CLIENT,
+              "engagement_private.outbox",
+              "search_id='" + search + "' and state='suppressed'"));
+      call("DELETE", "/api/v1/engagement/saved-searches/" + search, CLIENT, null)
+          .andExpect(status().isOk());
+      assertEquals(0, p6Count(CLIENT, "engagement_private.outbox", "search_id='" + search + "'"));
+    } finally {
+      ownerFixture(
+          "delete from public.user_blocks where blocker_id='"
+              + CLIENT
+              + "' and blocked_id='"
+              + talent
+              + "'");
+      p6Clear(CLIENT);
+    }
+  }
+
+  @Test
+  void phase6DeviceCapAllowsRotationAndRejectsAdditionalDevices() throws Exception {
+    String actor = "00000000-0000-0000-0000-000000000099";
+    p6Opt(actor);
+    UUID first = UUID.randomUUID();
+    try {
+      for (int n = 0; n < 10; n++)
+        call(
+                "POST",
+                "/api/v1/engagement/devices",
+                actor,
+                "{\"device_key\":\""
+                    + (n == 0 ? first : UUID.randomUUID())
+                    + "\",\"token\":\"ExpoPushToken[cap_fixture_token_"
+                    + n
+                    + "]\",\"platform\":\"ios\"}")
+            .andExpect(status().isOk());
+      call(
+              "POST",
+              "/api/v1/engagement/devices",
+              actor,
+              "{\"device_key\":\""
+                  + first
+                  + "\",\"token\":\"ExpoPushToken[cap_fixture_rotated_token]\",\"platform\":\"ios\"}")
+          .andExpect(status().isOk());
+      call(
+              "POST",
+              "/api/v1/engagement/devices",
+              actor,
+              "{\"device_key\":\""
+                  + UUID.randomUUID()
+                  + "\",\"token\":\"ExpoPushToken[cap_fixture_extra_token]\",\"platform\":\"ios\"}")
+          .andExpect(status().isConflict());
+      assertEquals(10, p6Count(actor, "public.push_devices", "true"));
+    } finally {
+      p6Clear(actor);
+    }
+  }
+
+  @Test
+  void phase6QuietHoursDeferAndTenthRejectedAttemptDeadLetters() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    p6Opt(CLIENT);
+    p6Device(CLIENT);
+    call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+        .andExpect(status().isOk());
+    int hour = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC).getHour();
+    String quiet =
+        p6Prefs(true)
+            .replace("\"quiet_start\":0", "\"quiet_start\":" + hour)
+            .replace("\"quiet_end\":0", "\"quiet_end\":" + ((hour + 1) % 24));
+    call("PUT", "/api/v1/engagement/preferences", CLIENT, quiet).andExpect(status().isOk());
+    var provider = new P6Provider();
+    try (var worker = p6Worker(provider)) {
+      worker.tick(java.time.Instant.now());
+      assertEquals(0, provider.sends.get());
+      assertEquals(
+          1,
+          p6Count(
+              CLIENT,
+              "engagement_private.outbox",
+              "booking_id='" + booking + "' and state='queued' and error_code='quiet_hours'"));
+      call("PUT", "/api/v1/engagement/preferences", CLIENT, p6Prefs(true))
+          .andExpect(status().isOk());
+      ownerFixture(
+          "update engagement_private.outbox set attempts=9,next_at=now() where booking_id='"
+              + booking
+              + "'");
+      provider.next = com.castly.engagement.DeliveryProvider.Status.RETRY;
+      worker.tick(java.time.Instant.now());
+      assertEquals(
+          1,
+          p6Count(
+              CLIENT,
+              "engagement_private.outbox",
+              "booking_id='" + booking + "' and state='dead' and attempts=10"));
+    } finally {
+      p6Clear(CLIENT);
+    }
+  }
+
+  @Test
+  void phase6OptionalFrequencyCapIsThreeJobsPerLocalDay() throws Exception {
+    String booking = newBooking();
+    p6Opt(CLIENT);
+    p6Device(CLIENT);
+    ownerFixture(
+        "update public.bookings set proposed_date=current_date+1 where id='"
+            + booking
+            + "';insert into"
+            + " engagement_private.outbox(recipient_id,event_key,kind,channel,device_id,booking_id)"
+            + " select '"
+            + CLIENT
+            + "','cap-fixture:'||g,'booking_reminder','push',d.id,'"
+            + booking
+            + "' from public.push_devices d cross join generate_series(1,10) g where d.user_id='"
+            + CLIENT
+            + "'");
+    var provider = new P6Provider();
+    try (var worker = p6Worker(provider, true)) {
+      worker.tick(java.time.Instant.now());
+      assertEquals(3, provider.sends.get());
+      assertTrue(p6Count(CLIENT, "engagement_private.outbox", "error_code='frequency_cap'") > 0);
+      // Yesterday's deferred jobs count against TODAY's actual dispatch cap.
+      ownerFixture(
+          "update engagement_private.outbox set created_at=now()-interval '1 day' where"
+              + " recipient_id='"
+              + CLIENT
+              + "' and kind='booking_reminder'");
+      worker.tick(java.time.Instant.now().plusSeconds(60));
+      assertEquals(3, provider.sends.get());
+    } finally {
+      p6Clear(CLIENT);
+    }
+  }
+
+  @Test
+  void phase6DispatchSerializesWithBlockAcknowledgement() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    p6Opt(CLIENT);
+    p6Device(CLIENT);
+    call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+        .andExpect(status().isOk());
+    var entered = new java.util.concurrent.CountDownLatch(1);
+    var release = new java.util.concurrent.CountDownLatch(1);
+    var started = new java.util.concurrent.CountDownLatch(1);
+    var provider =
+        new P6Provider() {
+          public Result send(Envelope e) {
+            entered.countDown();
+            try {
+              if (!release.await(3, java.util.concurrent.TimeUnit.SECONDS))
+                throw new AssertionError("Dispatch not released");
+            } catch (InterruptedException x) {
+              throw new RuntimeException(x);
+            }
+            return super.send(e);
+          }
+        };
+    try (var worker = p6Worker(provider);
+        var pool = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+      var now = java.time.Instant.now();
+      var send = pool.submit(() -> worker.tick(now));
+      assertTrue(entered.await(3, java.util.concurrent.TimeUnit.SECONDS));
+      var block =
+          pool.submit(
+              () -> {
+                started.countDown();
+                return call("PUT", "/api/v1/blocks/" + talent, CLIENT, null);
+              });
+      assertTrue(started.await(2, java.util.concurrent.TimeUnit.SECONDS));
+      assertThrows(
+          java.util.concurrent.TimeoutException.class,
+          () -> block.get(100, java.util.concurrent.TimeUnit.MILLISECONDS));
+      release.countDown();
+      send.get(5, java.util.concurrent.TimeUnit.SECONDS);
+      block.get(5, java.util.concurrent.TimeUnit.SECONDS).andExpect(status().isOk());
+      worker.tick(now.plusSeconds(61));
+      assertEquals(1, provider.sends.get());
+      assertEquals(
+          1,
+          p6Count(
+              CLIENT,
+              "engagement_private.outbox",
+              "booking_id='" + booking + "' and state='suppressed'"));
+    } finally {
+      release.countDown();
+      ownerFixture(
+          "delete from public.user_blocks where blocker_id='"
+              + CLIENT
+              + "' and blocked_id='"
+              + talent
+              + "'");
+      p6Clear(CLIENT);
     }
   }
 }
