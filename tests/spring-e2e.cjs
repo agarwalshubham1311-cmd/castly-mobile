@@ -128,6 +128,7 @@ async function until(url) {
           CASTLY_SUBSCRIPTIONS_ENABLED: 'true',
           CASTLY_GOOGLE_PLAY_ENABLED: 'false',
           CASTLY_DISPUTES_ENABLED: 'true',
+          CASTLY_SAFETY_REPORTING_ENABLED: 'true',
           CASTLY_ADVANCED_SEARCH_ENABLED: 'true',
           CASTLY_AI_RECOMMENDATIONS_ENABLED: 'true',
           CASTLY_SMART_MATCHING_ENABLED: 'true',
@@ -246,6 +247,20 @@ async function until(url) {
     await a.getByRole('checkbox', { name: 'Compare Spring API Talent' }).click();
     await a.getByRole('button', { name: 'Compare selected creators' }).click();
     await a.getByText(/Spring API Talent: actors, Mumbai, INR .*\/day indicative/).first().waitFor();
+    const blockedResponse = await fetch(api + '/blocks/' + talent, {
+      method: 'PUT', headers: { Authorization: 'Bearer ' + token(client) },
+    });
+    assert.equal(blockedResponse.status, 200);
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByText('No matches. Edit a filter or allow clearly labeled unknown availability.', { exact: true }).waitFor();
+    assert.equal(await a.getByRole('button', { name: 'Open Spring API Talent profile' }).count(), 0);
+    const unblockedResponse = await fetch(api + '/blocks/' + talent, {
+      method: 'DELETE', headers: { Authorization: 'Bearer ' + token(client) },
+    });
+    assert.equal(unblockedResponse.status, 200);
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByRole('button', { name: 'Draft brief for Spring API Talent' }).waitFor();
+    console.log('PASS: integrated Phase 4 block/unblock excludes and restores Phase 5 shortlist through real browser + Spring + PostgreSQL.');
     console.log('PASS: real browser + Spring + PostgreSQL campaign parse, confirmed constraints, declared-date shortlist, editable brief and factual comparison.');
     await go(a, '/search', 'Search talent');
     await a.getByRole('button', { name: 'Save Spring API Talent', exact: true }).click();
