@@ -82,6 +82,7 @@ export default function LiveNotifications() {
   return (
     <Screen title="Notifications">
       <Label>{live.status}</Label>
+      <EngagementEntry />
       <PrimaryButton
         title="Refresh notifications"
         secondary
@@ -164,4 +165,10 @@ export default function LiveNotifications() {
       </Label>
     </Screen>
   );
+}
+
+function EngagementEntry() {
+  const [enabled,setEnabled]=useState(false);
+  useEffect(()=>{let active=true;void services?.engagement.configuration().then((c)=>{if(active)setEnabled(c.push||c.email||c.engagement||c.analytics);}).catch(()=>{});return()=>{active=false;};},[]);
+  return enabled?<PrimaryButton secondary title="Notification & engagement preferences" onPress={()=>router.push('/engagement')}/>:null;
 }

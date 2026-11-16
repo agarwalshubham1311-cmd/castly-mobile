@@ -1,0 +1,13 @@
+Closes #13.
+
+Phase 6 adds consented push/email delivery, saved searches and engagement scheduling, and privacy-minimized analytics on milestone5 `1b37a65bc1bbcb1898ec816c81dc8a1da94af9df`. Existing in-app notifications remain the business-event source. A guarded transactional outbox deduplicates per recipient/event/channel/device; a separate restricted worker handles receipts, bounded rejection retries, quarantine/dead-letter, invalid tokens, current consent/block checks, quiet hours and caps. Expo/Resend adapters default disabled, and no provider was activated.
+
+The Lavender Pearl mobile integration adds preferences, owned saved-search replay/alerts, export/delete, native permission/token lifecycle and opaque notification links resolved only after authentication/recipient authorization. Analytics uses consented server-derived daily deduped pseudonyms, admin-only small-cell-suppressed aggregates and documented weekly cohorts/retention. Registration, analytics, callbacks and privacy deletion are fenced with consistent consent locks. No direct mobile business writes, SECURITY DEFINER, auth-schema grants, service-role or BYPASSRLS shortcuts were introduced.
+
+All five backend rollout/worker flags and the native push build flag default OFF; provider selectors are disabled. Existing trust, discovery, subscription/checkout and in-app notification flags are unchanged. No hosted SQL, deployments, EAS/Play operations, real notifications or paid activation occurred.
+
+Validation: Java 21 clean verify passes 160 tests on each fresh/reconciled schema path; TypeScript/lint, 76 Node tests, 17 components, all SQL/RLS suites and 392 reconciliation assertions pass. Web/Android/iOS bundles export; real Spring/browser Phase 6 + inherited flows, mobile HTTP fixture, mock browser/portraits/UI/30 decoded screenshots/accessibility pass. Provider HTTP/worker tests are isolated local sandbox fixtures, not live delivery/native-device evidence.
+
+Forward migration: `20261112120000_phase6_engagement.sql`, SHA-256 `e96f83ea35c12200a194c384feebf2e550762b64078a3f3b7bd2d7875d74595a`, after reviewed installed Phase 5 dependencies. Do not replay historical migrations or run unrestricted db push. Actual hosted catalog equivalence, native device tests, mailbox enrollment/retention policy, sender DNS/provider credentials and worker provisioning remain owner approval gates. Roll back sending by disabling outbound/worker flags, retaining control callbacks, privacy management and approved retention maintenance; do not blindly resend uncertain jobs.
+
+Review `docs/phase6/implementation-plan.md`, `api-event-contract.md`, `migration-review.md`, `test-report.md` and `release-checklist.md`. Draft only; do not merge or deploy without owner approval.

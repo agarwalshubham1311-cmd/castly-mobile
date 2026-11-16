@@ -24,6 +24,24 @@ spring:
       fail-on-unknown-properties: true
       accept-float-as-int: false
 castly:
+  phase6:
+    push-enabled: ${CASTLY_PUSH_ENABLED:false}
+    email-enabled: ${CASTLY_EMAIL_ENABLED:false}
+    engagement-enabled: ${CASTLY_ENGAGEMENT_ENABLED:false}
+    analytics-enabled: ${CASTLY_ANALYTICS_ENABLED:false}
+    worker-enabled: ${CASTLY_PHASE6_WORKER_ENABLED:false}
+    push-provider: ${CASTLY_PHASE6_PUSH_PROVIDER:disabled}
+    email-provider: ${CASTLY_PHASE6_EMAIL_PROVIDER:disabled}
+    analytics-key: ${CASTLY_PHASE6_ANALYTICS_KEY:}
+    unsubscribe-key: ${CASTLY_PHASE6_UNSUBSCRIBE_KEY:}
+    email-key: ${CASTLY_PHASE6_EMAIL_KEY:}
+    webhook-secret: ${CASTLY_PHASE6_WEBHOOK_SECRET:}
+    email-from: ${CASTLY_PHASE6_EMAIL_FROM:}
+    app-origin: ${CASTLY_PHASE6_APP_ORIGIN:}
+    api-origin: ${CASTLY_PHASE6_API_ORIGIN:}
+    worker-url: ${CASTLY_PHASE6_WORKER_JDBC_URL:}
+    worker-user: ${CASTLY_PHASE6_WORKER_DB_USER:}
+    worker-password: ${CASTLY_PHASE6_WORKER_DB_PASSWORD:}
   trust:
     verification-enabled: ${CASTLY_VERIFICATION_ENABLED:false}
     disputes-enabled: ${CASTLY_DISPUTES_ENABLED:false}

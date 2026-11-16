@@ -133,6 +133,11 @@ async function until(url) {
           CASTLY_AI_RECOMMENDATIONS_ENABLED: 'true',
           CASTLY_SMART_MATCHING_ENABLED: 'true',
           CASTLY_AI_ASSISTANCE_ENABLED: 'true',
+          CASTLY_PUSH_ENABLED: 'true',
+          CASTLY_EMAIL_ENABLED: 'true',
+          CASTLY_ENGAGEMENT_ENABLED: 'true',
+          CASTLY_ANALYTICS_ENABLED: 'true',
+          CASTLY_PHASE6_ANALYTICS_KEY: 'fixture-phase6-browser-key-at-least-32-characters',
           CORS_ALLOWED_ORIGINS: new URL(process.env.TEST_URL).origin,
           PORT: '8080',
         },
@@ -229,6 +234,28 @@ async function until(url) {
       true,
       'Private API 401 must refresh the same Auth user and restore the account',
     );
+    await go(a, '/engagement', 'Notifications & engagement');
+    await a.getByRole('switch', { name: 'Booking push notifications' }).waitFor();
+    await a.getByRole('switch', { name: 'Privacy-minimized product analytics' }).click();
+    await a.getByRole('switch', { name: 'Saved search alerts', exact: true }).click();
+    await a.getByRole('button', { name: 'Save notification preferences' }).click();
+    await a.getByText('Preferences saved. Channel and provider rollout settings still apply.', { exact: true }).waitFor();
+    await a.getByText('External delivery providers are disabled. No push or email will be sent.', { exact: true }).waitFor();
+    await a.getByRole('textbox', { name: 'Saved search name', exact: true }).fill('Mumbai actor shortlist');
+    await a.getByRole('textbox', { name: 'Creator category', exact: true }).fill('actors');
+    await a.getByRole('textbox', { name: 'City', exact: true }).fill('Mumbai');
+    await a.getByRole('switch', { name: 'Alerts for this saved search', exact: true }).click();
+    await a.getByRole('button', { name: 'Save search', exact: true }).click();
+    await a.getByRole('button', { name: 'Pause alerts for Mumbai actor shortlist', exact: true }).waitFor();
+    await a.getByRole('button', { name: 'Run saved search Mumbai actor shortlist', exact: true }).click();
+    await a.getByRole('button', { name: 'View matching profile Spring API Talent', exact: true }).waitFor();
+    await a.getByRole('button', { name: 'Pause alerts for Mumbai actor shortlist', exact: true }).click();
+    await a.getByRole('button', { name: 'Enable alerts for Mumbai actor shortlist', exact: true }).waitFor();
+    await a.getByRole('button', { name: 'Export my engagement data', exact: true }).click();
+    await a.getByRole('textbox', { name: 'Engagement data export or authorized aggregates', exact: true }).waitFor();
+    assert.match(await a.getByRole('textbox', { name: 'Engagement data export or authorized aggregates', exact: true }).inputValue(), /Mumbai actor shortlist/);
+    await responsiveCapture(a, 'engagement-preferences');
+    console.log('PASS: Phase 6 consent/preferences, saved-search replay and alert pause, owner export and disabled-provider disclosure through real browser + Spring + PostgreSQL; no sends.');
     await go(a, '/discovery', 'Campaign discovery');
     await a.getByRole('textbox', { name: 'Campaign description' })
       .fill(`Actors with video for a reel in Mumbai under INR 20000 on ${phase5Day}`);
@@ -293,6 +320,22 @@ async function until(url) {
       path: path.join(folder, 'accepted-booking-390x844.png'),
       animations: 'disabled',
     });
+    const deliveryId = crypto.randomUUID();
+    const seedDelivery = spawnSync('docker', ['exec', '-i', 'castly-spring-test-db', 'psql', '-U', 'postgres', '-d', 'castly_spring_test', '-v', 'ON_ERROR_STOP=1'], {
+      input: `insert into engagement_private.outbox(id,recipient_id,event_key,kind,channel,booking_id) values('${deliveryId}','${client}','email-link-fixture','booking_accepted','email','${bookingId}');`, encoding: 'utf8',
+    });
+    assert.equal(seedDelivery.status, 0, seedDelivery.stderr);
+    const guestContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const guest = await guestContext.newPage();
+    guest.on('pageerror', (e) => errors.push(e.message));
+    await go(guest, '/engagement/open/' + deliveryId, 'Welcome back');
+    await guest.getByRole('textbox', { name: 'Email', exact: true }).fill('client@example.test');
+    await guest.getByLabel('Password', { exact: true }).fill('local-test-password');
+    await guest.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await guest.getByRole('button', { name: 'Open conversation', exact: true }).waitFor();
+    assert.equal(new URL(guest.url()).pathname, '/booking-detail/' + bookingId);
+    await guestContext.close();
+    console.log('PASS: Phase 6 opaque email link survives guest login and authorizes the recipient before booking navigation.');
     await go(a, '/notifications', 'Notifications');
     await a.getByText('Booking accepted', { exact: true }).waitFor();
     await a.getByRole('button', { name: 'View booking', exact: true }).click();

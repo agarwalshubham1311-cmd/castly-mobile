@@ -1,3 +1,4 @@
+import { createEngagementServices } from '../engagement/api.ts';
 import { createTrustServices } from '../trust/api.ts';
 import type { CampaignConstraints, DiscoveryCandidate, DiscoveryConfiguration, Shortlist } from '../discovery/types';
 import type { BillingConfiguration, BillingResult } from '../subscriptions/billing';
@@ -160,6 +161,7 @@ export type BookingRequest = {
 export function createApiServices(request: ReturnType<typeof createApiTransport>) {
   return {
     trust: createTrustServices(request),
+    engagement: createEngagementServices(request),
     discovery: {
       configuration: () => request<DiscoveryConfiguration>('discovery/configuration'),
       forget: (actor: string) => request<void>('discovery/me/ai-cache', 'DELETE', undefined, { expectedSubject: actor }),
