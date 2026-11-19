@@ -1,0 +1,35 @@
+{
+  "scope": "Executed reconciled Java suite; no production or provider tests",
+  "totals": {
+    "BRANCH": {
+      "type": "BRANCH",
+      "missed": "185",
+      "covered": "502"
+    },
+    "LINE": {
+      "type": "LINE",
+      "missed": "150",
+      "covered": "1606"
+    }
+  },
+  "packages": {
+    "com/castly/admin": {
+      "BRANCH": {
+        "type": "BRANCH",
+        "missed": "18",
+        "covered": "86"
+      },
+      "LINE": {
+        "type": "LINE",
+        "missed": "25",
+        "covered": "302"
+      }
+    }
+  },
+  "tests": {
+    "tests": 129,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

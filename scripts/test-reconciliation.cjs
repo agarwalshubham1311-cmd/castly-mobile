@@ -97,6 +97,10 @@ for (const withOldRpcs of [false, true]) {
     raise notice 'PASS cutover preserves intervening request timestamp';
     end$$;`);
   file(db, 'tests/reconciliation-behavior.sql');
+  // M7.1 forward migration rehearsal over both reconciled legacy variants (not hosted equivalence).
+  for (const migration of fs.readdirSync(path.resolve(__dirname,'../supabase/migrations')).sort().filter(name=>name.startsWith('20261107')||name.startsWith('20261109')||name.startsWith('20261119')))
+    file(db,'migrations/'+migration);
+  file(db,'tests/admin-rbac.sql');
   // The ledger has not been repaired or populated with fictitious repository history.
   if (sql(db, 'select version from supabase_migrations.schema_migrations;').includes('20261022000100'))
     throw new Error('Historical migration ledger was altered');

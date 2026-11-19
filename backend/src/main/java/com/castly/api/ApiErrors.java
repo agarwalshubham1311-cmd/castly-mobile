@@ -24,6 +24,7 @@ public class ApiErrors {
     HandlerMethodValidationException.class,
     HttpMessageNotReadableException.class,
     MethodArgumentTypeMismatchException.class,
+    org.springframework.web.bind.MissingRequestHeaderException.class,
     IllegalArgumentException.class
   })
   ProblemDetail invalid(Exception e) {

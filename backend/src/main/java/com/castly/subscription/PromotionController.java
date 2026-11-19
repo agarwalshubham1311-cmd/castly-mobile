@@ -2,6 +2,7 @@ package com.castly.subscription;
 
 import static com.castly.api.MarketplaceController.actor;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.util.*;
@@ -17,9 +18,11 @@ public class PromotionController {
   public record Review(@NotBlank @Size(min = 3, max = 1000) String reason) {}
 
   private final PromotionService service;
+  private final com.castly.admin.AdminService admin;
 
-  public PromotionController(PromotionService service) {
+  public PromotionController(PromotionService service, com.castly.admin.AdminService admin) {
     this.service = service;
+    this.admin = admin;
   }
 
   @PostMapping("/subscriptions/promotions/claims")
@@ -37,19 +40,50 @@ public class PromotionController {
   public List<Map<String, Object>> queue(
       @AuthenticationPrincipal Jwt jwt,
       @RequestParam(defaultValue = "25") @Min(1) @Max(100) int limit,
-      @RequestParam(defaultValue = "0") @Min(0) @Max(10000) int offset) {
-    return service.queue(actor(jwt), limit, offset);
+      @RequestParam(defaultValue = "0") @Min(0) @Max(10000) int offset,
+      @RequestHeader(value = "X-Castly-Admin-Session", required = false) UUID session,
+      HttpServletRequest request) {
+    return admin.delegated(
+        jwt,
+        session,
+        request,
+        "subscriptions.read",
+        "Review legacy creator claims",
+        false,
+        () -> service.queue(actor(jwt), limit, offset));
   }
 
   @PostMapping("/admin/subscriptions/promotions/{id}/approve")
   public Map<String, Object> approve(
-      @AuthenticationPrincipal Jwt jwt, @PathVariable UUID id, @Valid @RequestBody Review body) {
-    return service.review(actor(jwt), id, true, body.reason());
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable UUID id,
+      @Valid @RequestBody Review body,
+      @RequestHeader(value = "X-Castly-Admin-Session", required = false) UUID session,
+      HttpServletRequest request) {
+    return admin.delegated(
+        jwt,
+        session,
+        request,
+        "admins.manage",
+        body.reason(),
+        true,
+        () -> service.review(actor(jwt), id, true, body.reason()));
   }
 
   @PostMapping("/admin/subscriptions/promotions/{id}/reject")
   public Map<String, Object> reject(
-      @AuthenticationPrincipal Jwt jwt, @PathVariable UUID id, @Valid @RequestBody Review body) {
-    return service.review(actor(jwt), id, false, body.reason());
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable UUID id,
+      @Valid @RequestBody Review body,
+      @RequestHeader(value = "X-Castly-Admin-Session", required = false) UUID session,
+      HttpServletRequest request) {
+    return admin.delegated(
+        jwt,
+        session,
+        request,
+        "admins.manage",
+        body.reason(),
+        true,
+        () -> service.review(actor(jwt), id, false, body.reason()));
   }
 }

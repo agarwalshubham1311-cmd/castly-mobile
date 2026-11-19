@@ -24,6 +24,9 @@ spring:
       fail-on-unknown-properties: true
       accept-float-as-int: false
 castly:
+  admin:
+    enabled: ${CASTLY_ADMIN_ENABLED:false}
+    audit-key: ${CASTLY_ADMIN_AUDIT_KEY:}
   google:
     enabled: ${CASTLY_GOOGLE_PLAY_ENABLED:false}
     checkout-enabled: ${CASTLY_GOOGLE_PLAY_CHECKOUT_ENABLED:false}

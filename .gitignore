@@ -57,3 +57,10 @@ backend/.env.*
 
 # Also ignore a worktree-local dependency symlink.
 node_modules
+
+# Independent Next admin build/cache/coverage
+admin-dashboard/.next/
+admin-dashboard/coverage/
+admin-dashboard/playwright-report/
+admin-dashboard/test-results/
+admin-dashboard/next-env.d.ts

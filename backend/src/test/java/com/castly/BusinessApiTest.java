@@ -32,6 +32,8 @@ import org.springframework.test.web.servlet.*;
       "castly.cors-origins=http://localhost:8081"
     })
 @AutoConfigureMockMvc
+@org.springframework.test.annotation.DirtiesContext(
+    classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class BusinessApiTest {
   @org.springframework.test.context.DynamicPropertySource
   static void prepare(org.springframework.test.context.DynamicPropertyRegistry registry) {

@@ -1,0 +1,44 @@
+[
+  {
+    "file": "artifacts/phase7/administrators-1440.png",
+    "format": "PNG",
+    "width": 1440,
+    "height": 1688,
+    "fixture": "synthetic local accounts, no hosted data"
+  },
+  {
+    "file": "artifacts/phase7/audit-1440.png",
+    "format": "PNG",
+    "width": 1440,
+    "height": 1963,
+    "fixture": "synthetic local accounts, no hosted data"
+  },
+  {
+    "file": "artifacts/phase7/overview-1440.png",
+    "format": "PNG",
+    "width": 1440,
+    "height": 946,
+    "fixture": "synthetic local accounts, no hosted data"
+  },
+  {
+    "file": "artifacts/phase7/overview-360.png",
+    "format": "PNG",
+    "width": 360,
+    "height": 1406,
+    "fixture": "synthetic local accounts, no hosted data"
+  },
+  {
+    "file": "artifacts/phase7/overview-390.png",
+    "format": "PNG",
+    "width": 390,
+    "height": 1382,
+    "fixture": "synthetic local accounts, no hosted data"
+  },
+  {
+    "file": "artifacts/phase7/overview-430.png",
+    "format": "PNG",
+    "width": 430,
+    "height": 1341,
+    "fixture": "synthetic local accounts, no hosted data"
+  }
+]

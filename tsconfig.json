@@ -7,5 +7,9 @@
       "react",
       "node"
     ]
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "admin-dashboard"
+  ]
 }

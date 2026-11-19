@@ -1,0 +1,98 @@
+name: Admin M7.1 quality gate
+on:
+  pull_request:
+    paths: ['admin-dashboard/**', 'backend/**', 'supabase/**', 'scripts/**', '.github/workflows/admin-quality.yml']
+  push:
+    branches: ['feat/phase7-admin-phase8-readiness']
+permissions:
+  contents: read
+concurrency:
+  group: admin-quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        schema: [repository, reconciliation]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - run: mvn -B clean verify
+        working-directory: backend
+        env:
+          CASTLY_TEST_SCHEMA_PATH: ${{ matrix.schema }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-${{ matrix.schema }}-test-coverage
+          path: |
+            backend/target/surefire-reports/
+            backend/target/site/jacoco/
+          retention-days: 14
+  admin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: admin-dashboard/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - run: npm ci
+        working-directory: admin-dashboard
+      - run: npm run typecheck && npm run lint && npm run format && npm run test:coverage && npm run build
+        working-directory: admin-dashboard
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+      - run: npx playwright install --with-deps chromium
+        working-directory: admin-dashboard
+      - run: mvn -B -DskipTests package
+        working-directory: backend
+      - run: npm run test:integration
+        working-directory: admin-dashboard
+      - run: npm audit --json > dependency-audit.json
+        working-directory: admin-dashboard
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: admin-browser-and-security
+          path: |
+            admin-dashboard/playwright-report/
+            admin-dashboard/dependency-audit.json
+            artifacts/phase7/
+          retention-days: 14
+  mobile-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck && npm run lint && npm test && npm run test:components
+  sql-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node backend/scripts/prepare-test-db.cjs
+      - run: node scripts/test-sql.cjs
+        env:
+          CASTLY_TEST_DB_CONTAINER: castly-spring-test-db
+      - run: node scripts/test-reconciliation.cjs
