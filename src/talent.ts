@@ -8,6 +8,12 @@ export const categories = [
 ] as const;
 export type Category = (typeof categories)[number];
 export type Talent = {
+  verifiedCreator?: boolean;
+  trustIndicators?: {
+    completedBookings: number;
+    reviewCount: number;
+    averageRating: number | null;
+  };
   id: string;
   name: string;
   category: Category;

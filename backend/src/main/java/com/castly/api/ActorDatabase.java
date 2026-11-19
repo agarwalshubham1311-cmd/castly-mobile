@@ -14,6 +14,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Component
 public class ActorDatabase implements InitializingBean {
   private final JdbcClient db;
+  private com.castly.engagement.Phase6Settings phase6 = new com.castly.engagement.Phase6Settings();
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public void phase6(com.castly.engagement.Phase6Settings settings) {
+    phase6 = settings;
+  }
+
   private final TransactionTemplate transactions;
 
   public ActorDatabase(DataSource source, PlatformTransactionManager manager) {
@@ -37,6 +44,16 @@ public class ActorDatabase implements InitializingBean {
                   "claims",
                   actor == null ? "{}" : "{\"sub\":\"" + actor + "\",\"role\":\"authenticated\"}")
               .param("role", actor == null ? "anon" : "authenticated")
+              .query()
+              .singleRow();
+          db.sql(
+                  "select"
+                      + " set_config('castly.phase6.push',:push,true),set_config('castly.phase6.email',:email,true),set_config('castly.phase6.engagement',:engagement,true),set_config('castly.phase6.analytics',:analytics,true),set_config('castly.phase6.subject',:subject,true)")
+              .param("push", Boolean.toString(phase6.push))
+              .param("email", Boolean.toString(phase6.email))
+              .param("engagement", Boolean.toString(phase6.engagement))
+              .param("analytics", Boolean.toString(phase6.analytics))
+              .param("subject", phase6.subject(actor))
               .query()
               .singleRow();
           return operation.apply(db);

@@ -27,12 +27,23 @@ public class ApiSecurity {
         new com.castly.admin.AdminBoundaryFilter(admin),
         org.springframework.security.oauth2.server.resource.web.authentication
             .BearerTokenAuthenticationFilter.class);
+    http.addFilterAfter(
+        new com.castly.engagement.EngagementBodyLimit(),
+        org.springframework.security.oauth2.server.resource.web.authentication
+            .BearerTokenAuthenticationFilter.class);
+    http.addFilterAfter(
+        new com.castly.trust.EvidenceUploadLimitFilter(),
+        org.springframework.security.oauth2.server.resource.web.authentication
+            .BearerTokenAuthenticationFilter.class);
     return http.csrf(csrf -> csrf.disable())
         .cors(cors -> {})
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             a ->
-                a.requestMatchers("/actuator/health")
+                a.requestMatchers(
+                        "/api/v1/engagement/unsubscribe/*", "/api/v1/engagement/webhooks/email")
+                    .permitAll()
+                    .requestMatchers("/actuator/health")
                     .permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/talents/me")
                     .authenticated()

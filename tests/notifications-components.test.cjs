@@ -39,7 +39,7 @@ Module._load = function (name, parent, main) {
     return { useLiveRefresh: () => ({ revision, status: 'Connected' }) };
   if (name === '../backend')
     return {
-      services: {
+      services: { engagement: { configuration: async () => ({push:false,email:false,engagement:false,analytics:false}) },
         notifications: {
           list: async (before) => {
           if (unavailable) throw new Error('Offline fixture');

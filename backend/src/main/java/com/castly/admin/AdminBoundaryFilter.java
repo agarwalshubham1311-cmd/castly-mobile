@@ -18,7 +18,19 @@ public class AdminBoundaryFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
-    if (!request.getRequestURI().startsWith("/api/v1/admin")) {
+    String path = request.getServletPath();
+    if (path == null || path.isEmpty()) path = request.getRequestURI();
+    final String resource = path;
+    boolean legacy =
+        resource.equals("/api/v1/engagement/admin/analytics")
+            || java.util.List.of(
+                    "subscriptions", "verification", "moderation", "disputes", "trust", "reviews")
+                .stream()
+                .anyMatch(
+                    group ->
+                        resource.equals("/api/v1/admin/" + group)
+                            || resource.startsWith("/api/v1/admin/" + group + "/"));
+    if (!resource.startsWith("/api/v1/admin") && !legacy) {
       chain.doFilter(request, response);
       return;
     }
@@ -27,7 +39,7 @@ public class AdminBoundaryFilter extends OncePerRequestFilter {
     request.setAttribute("castly.admin.request", id);
     response.setHeader("X-Request-ID", id.toString());
     // Legacy review retains its original controller/limits and adds an opt-in delegated MFA gate.
-    if (request.getRequestURI().startsWith("/api/v1/admin/subscriptions/")) {
+    if (legacy && !settings.enabled()) {
       chain.doFilter(request, response);
       return;
     }

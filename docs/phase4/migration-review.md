@@ -1,0 +1,20 @@
+# Phase 4 migration review
+
+These are forward-only local artifacts, in exact application order. SHA-256 values are for the committed SQL bytes. No hosted migration was run. The six files depend on the stable merged Phase 3 schema and must be reviewed against an actual owner-supplied hosted inventory before any application.
+
+| Order | File | SHA-256 |
+| --- | --- | --- |
+| 1 | `20261110090000_trust_verification.sql` | `a822994dd407de624be1862aa9453293e581b23645a0a102e924aa8f51627286` |
+| 2 | `20261110100000_booking_reviews.sql` | `726bb662bbc2a5d190dd45c4f2f0dc8877c6e49e8d7b30e6d81aba6f04aefb75` |
+| 3 | `20261110110000_reporting_blocking.sql` | `32aee773515e2991397e9845ef4e2373160b56e33278f1dd034bb845213ae6d2` |
+| 4 | `20261110115000_completed_booking_attestations.sql` | `791ee2ae0cd21efe157a192f7dccc0391f72651f904b17be09c9b7a575afe003` |
+| 5 | `20261110120000_trust_signals.sql` | `492d06249d8984a1745c0121763b174ab0c80005d7924828bbaad11fe8e10403` |
+| 6 | `20261110130000_disputes_private_evidence.sql` | `ba5262678cfe1ad14500ef69db64d8cc0084599dcad16251f7170f652669b3a3` |
+
+The migrations add verification/revision/audit tables, completion attestations, reviews, reports, blocks, moderation actions/appeals, trust counters/snapshots and disputes/evidence. A private Storage bucket is created by migration 6 but no image privacy policy is approved or upload enabled. Transactional DDL takes locks; schedule based on an actual table-size and dependency inventory. Existing business tables and pending notification SQL must not be replayed. Do not use blanket `supabase db push` on a reconciled project.
+
+Before approval, a database owner should review and run `hosted-preflight.sql` with a read-only catalog connection, then compare its output with the stable reviewed inventory: `select version from supabase_migrations.schema_migrations order by version`, inspect `pg_class`/`pg_namespace` for every new object name, `pg_constraint`, `pg_trigger`, `pg_policies`, `information_schema.role_table_grants`, `information_schema.column_privileges`, and `pg_proc`/`pg_language` for the affected booking, message, portfolio, subscription, `private`, `trust_private`, `storage` and `auth` objects. Capture the exact definitions and source hashes of modified guards and compare them with the stable baseline; reject unexpected source or ACL differences for separate review. Confirm `castly_api` is non-owner and has neither BYPASSRLS nor inherited privileged roles. Confirm current booking statuses and existing subscription projections, the Storage bucket name is unused, all six versions are absent, and the owner has an isolated restore rehearsal and backup. Do not infer hosted equivalence from local reconciliation fixtures.
+
+Apply only these reviewed files in order through the established owner migration workflow and record the exact versions/hashes. With flags still false, restart the API to refresh schema readiness; verify discovery, booking, messages, history, cancellation and subscriptions first. Check new tables have RLS, public/anon/authenticated write grants are absent, `castly_api` column grants match review, reviewer scopes and evidence policy rows are empty, and no `SECURITY DEFINER` or service-role bypass appeared. Run negative cross-user and Storage JWT tests on an isolated copy before enabling a feature. Observe lock duration, API errors, moderation queue latency, trust-refresh backlog and retention-deletion failures. Roll back behavior by disabling individual flags; retain schema/audit data and investigate failures. Do not drop tables or rewind migration ledger as a live rollback.
+
+The local fresh-schema test follows repository history and includes inherited notification SQL solely inside disposable fixtures. The local reconciliation path approximates previously described hosted differences; it cannot certify the live database. Actual hosted inventory was unavailable in this run, so hosted SQL application remains blocked pending owner review and explicit approval.

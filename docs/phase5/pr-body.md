@@ -1,0 +1,5 @@
+Phase 5 adds opt-in broad-region and creator-declared date search, deterministic explainable campaign matching and recommendations, and editable brief/profile/comparison assistance. A client can describe a campaign, confirm parsed constraints, see a relevant shortlist with truthful unknowns, and edit a brief without triggering a booking or message. Four independent rollout flags default false; no external AI provider is configured or called.
+
+The standalone forward migration adds RLS-scoped discovery preferences, availability days, accepted-booking conflict maintenance and actor rate counters. It does not depend on unapproved Phase 4 objects. Review the hosted Phase 3 ledger/source inventory before any owner-approved migration; this PR does not deploy or enable features.
+
+Validation: fresh and reconciliation-shaped Java clean verify (118 tests each), npm typecheck/lint, 71 Node tests, 10 component tests, disposable PostgreSQL SQL/RLS and 286 reconciliation assertions, dedicated web export and Spring browser flow. See `docs/phase5/test-report.md` for exact limits and evidence.

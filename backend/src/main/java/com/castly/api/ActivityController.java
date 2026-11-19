@@ -17,14 +17,23 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1")
 public class ActivityController {
   private final ActorDatabase data;
+  private final com.castly.trust.SafetyService safety;
+  private final String conversationSql;
   private final NotificationService notifications;
   private final BookingUpdateDiagnostics bookingDiagnostics;
 
   public ActivityController(
       ActorDatabase data,
+      com.castly.trust.SafetyService safety,
+      com.castly.trust.TrustSchema trustSchema,
       NotificationService notifications,
       BookingUpdateDiagnostics bookingDiagnostics) {
     this.data = data;
+    this.safety = safety;
+    this.conversationSql =
+        trustSchema.blockingReady()
+            ? CONVERSATIONS
+            : CONVERSATIONS.replace("trust_private.blocked(c.client_id,c.talent_id)", "false");
     this.notifications = notifications;
     this.bookingDiagnostics = bookingDiagnostics;
   }
@@ -208,7 +217,10 @@ public class ActivityController {
           + " public.bookings b where b.client_id=c.client_id and b.talent_id=c.talent_id order by"
           + " b.created_at desc,b.id desc limit 1),'Talent') as talent_name,exists(select 1 from"
           + " public.bookings b where b.client_id=c.client_id and b.talent_id=c.talent_id and"
-          + " b.status='accepted') as can_send from public.conversations c";
+          + " b.status in ('accepted','completed')) and not"
+          + " trust_private.blocked(c.client_id,c.talent_id) as"
+          + " can_send,trust_private.blocked(c.client_id,c.talent_id) as contact_blocked from"
+          + " public.conversations c";
 
   @GetMapping("/conversations")
   public List<Map<String, Object>> conversations(
@@ -222,7 +234,7 @@ public class ActivityController {
                 db,
                 rows(
                     db.sql(
-                            CONVERSATIONS
+                            conversationSql
                                 + " order by c.created_at desc,c.id desc limit :limit offset"
                                 + " :offset")
                         .param("limit", limit)
@@ -235,7 +247,7 @@ public class ActivityController {
         actor(jwt),
         db ->
             notifications.decorate(
-                db, one(db.sql(CONVERSATIONS + " where c.id=:id").param("id", id))));
+                db, one(db.sql(conversationSql + " where c.id=:id").param("id", id))));
   }
 
   @PostMapping("/conversations")
@@ -246,7 +258,7 @@ public class ActivityController {
         db -> {
           var row = booking(db, request.bookingId(), true);
           requireParticipant(actor(jwt), row);
-          if (!"accepted".equals(row.get("status")))
+          if (!Set.of("accepted", "completed").contains(row.get("status")))
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT, "An accepted booking is required");
           return ensureConversation(db, row);
@@ -299,13 +311,18 @@ public class ActivityController {
           var conversation =
               one(db.sql("select * from public.conversations where id=:id").param("id", id));
           requireParticipant(actor(jwt), conversation);
+          safety.contact(
+              db,
+              participantId(conversation, "client_id"),
+              participantId(conversation, "talent_id"));
           // Lock an accepted booking so send versus cancellation has a deterministic transaction
           // order.
           var accepted =
               rows(
                   db.sql(
                           "select id from public.bookings where client_id=:client and"
-                              + " talent_id=:talent and status='accepted' order by id for update")
+                              + " talent_id=:talent and status in ('accepted','completed') order by"
+                              + " id for update")
                       .param("client", UUID.fromString(conversation.get("client_id").toString()))
                       .param("talent", UUID.fromString(conversation.get("talent_id").toString())));
           if (accepted.isEmpty())

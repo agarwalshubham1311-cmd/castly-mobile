@@ -1,0 +1,71 @@
+begin;
+create table public.user_blocks(blocker_id uuid not null references public.users(id),blocked_id uuid not null references public.users(id),created_at timestamptz not null default now(),primary key(blocker_id,blocked_id),check(blocker_id<>blocked_id));
+create index blocks_reverse on public.user_blocks(blocked_id,blocker_id);
+alter table public.user_blocks enable row level security;
+revoke all on public.user_blocks from public,anon,authenticated;
+grant select,insert(blocker_id,blocked_id),delete on public.user_blocks to castly_api;
+create policy blocks_read on public.user_blocks for select to castly_api using(private.request_user_id() in(blocker_id,blocked_id));
+create policy blocks_insert on public.user_blocks for insert to castly_api with check(blocker_id=private.request_user_id());
+create policy blocks_delete on public.user_blocks for delete to castly_api using(blocker_id=private.request_user_id());
+create function trust_private.lock_pair(a uuid,b uuid) returns void language sql volatile security invoker set search_path='' as $$select pg_advisory_xact_lock(hashtextextended(least(a,b)::text||':'||greatest(a,b)::text,71))$$;
+create function trust_private.blocked(a uuid,b uuid) returns boolean language sql stable security invoker set search_path='' as $$select exists(select 1 from public.user_blocks where (blocker_id=a and blocked_id=b) or(blocker_id=b and blocked_id=a))$$;
+revoke all on function trust_private.lock_pair(uuid,uuid),trust_private.blocked(uuid,uuid) from public,anon,authenticated;
+grant execute on function trust_private.lock_pair(uuid,uuid),trust_private.blocked(uuid,uuid) to castly_api;
+create function trust_private.block_pair_guard() returns trigger language plpgsql security invoker set search_path='' as $$begin
+ if TG_OP='DELETE' then perform trust_private.lock_pair(old.blocker_id,old.blocked_id);return old;end if;
+ perform trust_private.lock_pair(new.blocker_id,new.blocked_id);return new;end$$;
+revoke all on function trust_private.block_pair_guard() from public,anon,authenticated,castly_api;
+create trigger block_pair_guard before insert or delete on public.user_blocks for each row execute function trust_private.block_pair_guard();
+create function trust_private.booking_block_guard() returns trigger language plpgsql security invoker set search_path='' as $$begin
+ if current_user<>'castly_api' then return new;end if;
+ perform trust_private.lock_pair(new.client_id,new.talent_id);
+ if trust_private.blocked(new.client_id,new.talent_id) then raise exception 'New contact is unavailable between these accounts' using errcode='42501';end if;return new;end$$;
+revoke all on function trust_private.booking_block_guard() from public,anon,authenticated,castly_api;
+create trigger booking_block_guard before insert on public.bookings for each row execute function trust_private.booking_block_guard();
+create or replace function public.api_message_send_guard() returns trigger language plpgsql security invoker set search_path='' as $$
+declare c public.conversations; booking_id uuid; allowed boolean:=false;me uuid:=private.request_user_id();begin
+ if current_user<>'castly_api' then return new;end if;
+ select * into c from public.conversations where id=new.conversation_id;
+ if not found or me is null or new.sender_id is distinct from me or me not in(c.client_id,c.talent_id) then raise exception 'Conversation participant required' using errcode='42501';end if;
+ perform trust_private.lock_pair(c.client_id,c.talent_id);
+ if trust_private.blocked(c.client_id,c.talent_id) then raise exception 'New contact is unavailable between these accounts' using errcode='42501';end if;
+ for booking_id in select id from public.bookings where client_id=c.client_id and talent_id=c.talent_id and status in('accepted','completed') order by id for update loop allowed:=true;end loop;
+ if not allowed then raise exception 'An accepted booking is required' using errcode='42501';end if;return new;end$$;
+revoke all on function public.api_message_send_guard() from public,anon,authenticated,castly_api;
+create table public.safety_reports(id uuid primary key default gen_random_uuid(),reporter_id uuid not null references public.users(id),subject_id uuid not null references public.users(id),target_kind text not null check(target_kind in('user','portfolio','message','review')),target_id uuid not null,category text not null check(category in('harassment','spam','impersonation','fraud','inappropriate_content','other')),target_snapshot jsonb not null default '{}',description text not null check(length(trim(description)) between 10 and 2000),status text not null default 'OPEN' check(status in('OPEN','RESOLVED')),created_at timestamptz not null default now(),incident_hash bytea not null,unique(reporter_id,target_kind,target_id,incident_hash),check(reporter_id<>subject_id));
+create index reports_queue on public.safety_reports(status,created_at,id);
+create index reports_owner on public.safety_reports(reporter_id,created_at desc,id);
+alter table public.safety_reports enable row level security;
+revoke all on public.safety_reports from public,anon,authenticated;
+grant select,insert(reporter_id,subject_id,target_kind,target_id,category,description),update(status) on public.safety_reports to castly_api;
+create policy reports_read on public.safety_reports for select to castly_api using(reporter_id=private.request_user_id() or trust_private.is_reviewer('moderation'));
+create policy reports_insert on public.safety_reports for insert to castly_api with check(reporter_id=private.request_user_id());
+create policy reports_update on public.safety_reports for update to castly_api using(trust_private.is_reviewer('moderation') and private.request_user_id() not in(reporter_id,subject_id)) with check(trust_private.is_reviewer('moderation') and private.request_user_id() not in(reporter_id,subject_id));
+create function trust_private.report_target_guard() returns trigger language plpgsql security invoker set search_path='' as $$declare actual uuid;begin new.incident_hash:=sha256(convert_to(new.category||':'||new.description,'UTF8'));
+ if new.target_kind='user' then
+  if exists(select 1 from public.talent_profiles where id=new.target_id and published) or exists(select 1 from public.bookings where private.request_user_id() in(client_id,talent_id) and new.target_id in(client_id,talent_id)) then actual:=new.target_id;end if;
+ elsif new.target_kind='portfolio' then select talent_id into actual from public.portfolio_assets where id=new.target_id;
+ elsif new.target_kind='message' then select sender_id into actual from public.messages where id=new.target_id;
+ elsif new.target_kind='review' then select reviewer_id into actual from public.user_reviews where id=new.target_id;end if;
+ if new.target_kind='message' then select jsonb_build_object('body',body,'created_at',created_at) into new.target_snapshot from public.messages where id=new.target_id;elsif new.target_kind='review' then select jsonb_build_object('body',body,'rating',rating) into new.target_snapshot from public.user_reviews where id=new.target_id;elsif new.target_kind='portfolio' then select jsonb_build_object('label',label,'path',path) into new.target_snapshot from public.portfolio_assets where id=new.target_id;end if;
+ if actual is null or actual<>new.subject_id then raise exception 'Report target not accessible' using errcode='42501';end if;return new;end$$;
+revoke all on function trust_private.report_target_guard() from public,anon,authenticated,castly_api;
+create trigger report_target_guard before insert on public.safety_reports for each row execute function trust_private.report_target_guard();
+create table public.moderation_actions(id uuid primary key default gen_random_uuid(),report_id uuid unique references public.safety_reports(id),review_id uuid references public.user_reviews(id),subject_id uuid not null references public.users(id),reviewer_id uuid not null references public.users(id),decision text not null check(decision in('dismissed','warning','review_hidden','review_restored')),reason text not null check(length(trim(reason)) between 3 and 1000),policy_version text not null default 'trust-policy-v1',created_at timestamptz not null default now());
+alter table public.moderation_actions enable row level security;
+revoke all on public.moderation_actions from public,anon,authenticated;
+grant select,insert(report_id,review_id,subject_id,reviewer_id,decision,reason) on public.moderation_actions to castly_api;
+create policy actions_read on public.moderation_actions for select to castly_api using(subject_id=private.request_user_id() or trust_private.is_reviewer('moderation') or exists(select 1 from public.safety_reports r where r.id=report_id and r.reporter_id=private.request_user_id()));
+create policy actions_insert on public.moderation_actions for insert to castly_api with check(reviewer_id=private.request_user_id() and trust_private.is_reviewer('moderation') and ((report_id is not null and exists(select 1 from public.safety_reports r where r.id=report_id and r.subject_id=moderation_actions.subject_id and private.request_user_id() not in(r.reporter_id,r.subject_id))) or (report_id is null and decision in('review_hidden','review_restored') and exists(select 1 from public.user_reviews r where r.id=review_id and r.reviewer_id=subject_id and private.request_user_id() not in(r.reviewer_id,r.target_id)))));
+create table public.moderation_appeals(id uuid primary key default gen_random_uuid(),action_id uuid not null references public.moderation_actions(id),appellant_id uuid not null references public.users(id),statement text not null check(length(trim(statement)) between 10 and 2000),status text not null default 'PENDING' check(status in('PENDING','UPHELD','OVERTURNED','ESCALATED')),resolution text check(length(resolution) between 3 and 1000),reviewer_id uuid references public.users(id),created_at timestamptz not null default now(),unique(action_id,appellant_id));
+alter table public.moderation_appeals enable row level security;
+revoke all on public.moderation_appeals from public,anon,authenticated;
+grant select,insert(action_id,appellant_id,statement),update(status,resolution,reviewer_id) on public.moderation_appeals to castly_api;
+create policy appeal_read on public.moderation_appeals for select to castly_api using(appellant_id=private.request_user_id() or trust_private.is_reviewer('moderation'));
+create policy appeal_insert on public.moderation_appeals for insert to castly_api with check(appellant_id=private.request_user_id() and exists(select 1 from public.moderation_actions a where a.id=action_id and (a.subject_id=appellant_id or exists(select 1 from public.safety_reports r where r.id=a.report_id and r.reporter_id=appellant_id))));
+create policy appeal_update on public.moderation_appeals for update to castly_api using(trust_private.is_reviewer('moderation') and appellant_id<>private.request_user_id() and exists(select 1 from public.moderation_actions a where a.id=action_id and a.reviewer_id<>private.request_user_id() and a.subject_id<>private.request_user_id() and not exists(select 1 from public.safety_reports r where r.id=a.report_id and r.reporter_id=private.request_user_id()))) with check(reviewer_id=private.request_user_id() and trust_private.is_reviewer('moderation'));
+create function trust_private.appeal_transition() returns trigger language plpgsql security invoker set search_path='' as $$begin
+ if old.status not in('PENDING','ESCALATED') or new.status='PENDING' or new.resolution is null or(to_jsonb(new)-array['status','resolution','reviewer_id']) is distinct from(to_jsonb(old)-array['status','resolution','reviewer_id']) then raise exception 'Invalid appeal transition' using errcode='42501';end if;return new;end$$;
+revoke all on function trust_private.appeal_transition() from public,anon,authenticated,castly_api;
+create trigger appeal_transition before update on public.moderation_appeals for each row execute function trust_private.appeal_transition();
+commit;

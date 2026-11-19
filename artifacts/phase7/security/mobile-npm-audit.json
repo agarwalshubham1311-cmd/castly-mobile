@@ -120,7 +120,9 @@
         "@typescript-eslint/typescript-estree",
         "@typescript-eslint/utils"
       ],
-      "effects": [],
+      "effects": [
+        "@typescript-eslint/eslint-plugin"
+      ],
       "range": "6.16.0 - 8.72.2",
       "nodes": [
         "node_modules/@typescript-eslint/type-utils"
@@ -152,9 +154,7 @@
       "via": [
         "@typescript-eslint/typescript-estree"
       ],
-      "effects": [
-        "@typescript-eslint/eslint-plugin"
-      ],
+      "effects": [],
       "range": "6.16.0 - 8.72.2",
       "nodes": [
         "node_modules/@typescript-eslint/utils"
@@ -704,12 +704,12 @@
       "total": 17
     },
     "dependencies": {
-      "prod": 538,
+      "prod": 545,
       "dev": 266,
       "optional": 50,
       "peer": 13,
       "peerOptional": 0,
-      "total": 839
+      "total": 846
     }
   }
 }

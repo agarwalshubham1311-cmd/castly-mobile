@@ -1,17 +1,24 @@
 {
-  "cli": { "version": ">=16.0.0", "appVersionSource": "remote" },
+  "cli": {
+    "version": ">=16.0.0",
+    "appVersionSource": "remote"
+  },
   "build": {
     "preview": {
       "distribution": "internal",
       "environment": "preview",
       "node": "24.19.0",
       "autoIncrement": true,
-      "android": { "buildType": "apk" },
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "CASTLY_RELEASE_CHECK": "1",
         "EXPO_PUBLIC_BACKEND_MODE": "supabase",
         "EXPO_PUBLIC_BUSINESS_API_MODE": "spring",
-        "EXPO_PUBLIC_ISOLATED_SUPABASE_FALLBACK": "false"
+        "EXPO_PUBLIC_ISOLATED_SUPABASE_FALLBACK": "false",
+        "EXPO_EAS_PROJECT_ID": "45b573ec-4b24-400e-af1e-94766ed1eb36",
+        "CASTLY_ANDROID_PACKAGE": "com.castly.mobile"
       }
     },
     "production": {
@@ -19,7 +26,9 @@
       "environment": "production",
       "node": "24.19.0",
       "autoIncrement": true,
-      "android": { "buildType": "app-bundle" },
+      "android": {
+        "buildType": "app-bundle"
+      },
       "env": {
         "CASTLY_RELEASE_CHECK": "1",
         "EXPO_PUBLIC_BACKEND_MODE": "supabase",

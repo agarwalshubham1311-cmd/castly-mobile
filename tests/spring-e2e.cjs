@@ -127,6 +127,17 @@ async function until(url) {
           CASTLY_NOTIFICATIONS_ENABLED: 'true',
           CASTLY_SUBSCRIPTIONS_ENABLED: 'true',
           CASTLY_GOOGLE_PLAY_ENABLED: 'false',
+          CASTLY_DISPUTES_ENABLED: 'true',
+          CASTLY_SAFETY_REPORTING_ENABLED: 'true',
+          CASTLY_ADVANCED_SEARCH_ENABLED: 'true',
+          CASTLY_AI_RECOMMENDATIONS_ENABLED: 'true',
+          CASTLY_SMART_MATCHING_ENABLED: 'true',
+          CASTLY_AI_ASSISTANCE_ENABLED: 'true',
+          CASTLY_PUSH_ENABLED: 'true',
+          CASTLY_EMAIL_ENABLED: 'true',
+          CASTLY_ENGAGEMENT_ENABLED: 'true',
+          CASTLY_ANALYTICS_ENABLED: 'true',
+          CASTLY_PHASE6_ANALYTICS_KEY: 'fixture-phase6-browser-key-at-least-32-characters',
           CORS_ALLOWED_ORIGINS: new URL(process.env.TEST_URL).origin,
           PORT: '8080',
         },
@@ -189,6 +200,7 @@ async function until(url) {
     await b
       .getByRole('textbox', { name: 'Biography', exact: true })
       .fill('A profile created through the real Spring API.');
+    await b.getByRole('textbox', { name: 'Skills, separated by commas', exact: true }).fill('video');
     await b.getByRole('button', { name: 'Save talent profile', exact: true }).click();
     await b
       .getByText('Draft profile saved. It is not visible in discovery.', { exact: true })
@@ -196,6 +208,15 @@ async function until(url) {
     await b.getByRole('switch', { name: 'Published in discovery', exact: true }).click();
     await b.getByRole('button', { name: 'Save talent profile', exact: true }).click();
     await b.getByText('Talent profile published.', { exact: true }).waitFor();
+    const phase5Day = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+    await go(b, '/discovery/creator', 'Creator discovery controls');
+    await b.getByRole('textbox', { name: 'Broad region (no coordinates or address)' }).fill('Maharashtra');
+    await b.getByRole('checkbox', { name: 'Share this region in discovery' }).click();
+    await b.getByRole('button', { name: 'Save region choice' }).click();
+    await b.getByText('Region choice saved.', { exact: true }).waitFor();
+    await b.getByRole('textbox', { name: 'Availability day (YYYY-MM-DD)' }).fill(phase5Day);
+    await b.getByRole('button', { name: 'Save date declaration' }).click();
+    await b.getByText('Date declaration saved. Clients still need direct confirmation.', { exact: true }).waitFor();
     let expiredOnce = false;
     await a.route('**/api/v1/account', async (route) => {
       if (!expiredOnce && route.request().method() === 'GET') {
@@ -213,6 +234,61 @@ async function until(url) {
       true,
       'Private API 401 must refresh the same Auth user and restore the account',
     );
+    await go(a, '/engagement', 'Notifications & engagement');
+    await a.getByRole('switch', { name: 'Booking push notifications' }).waitFor();
+    await a.getByRole('switch', { name: 'Privacy-minimized product analytics' }).click();
+    await a.getByRole('switch', { name: 'Saved search alerts', exact: true }).click();
+    await a.getByRole('button', { name: 'Save notification preferences' }).click();
+    await a.getByText('Preferences saved. Channel and provider rollout settings still apply.', { exact: true }).waitFor();
+    await a.getByText('External delivery providers are disabled. No push or email will be sent.', { exact: true }).waitFor();
+    await a.getByRole('textbox', { name: 'Saved search name', exact: true }).fill('Mumbai actor shortlist');
+    await a.getByRole('textbox', { name: 'Creator category', exact: true }).fill('actors');
+    await a.getByRole('textbox', { name: 'City', exact: true }).fill('Mumbai');
+    await a.getByRole('switch', { name: 'Alerts for this saved search', exact: true }).click();
+    await a.getByRole('button', { name: 'Save search', exact: true }).click();
+    await a.getByRole('button', { name: 'Pause alerts for Mumbai actor shortlist', exact: true }).waitFor();
+    await a.getByRole('button', { name: 'Run saved search Mumbai actor shortlist', exact: true }).click();
+    await a.getByRole('button', { name: 'View matching profile Spring API Talent', exact: true }).waitFor();
+    await a.getByRole('button', { name: 'Pause alerts for Mumbai actor shortlist', exact: true }).click();
+    await a.getByRole('button', { name: 'Enable alerts for Mumbai actor shortlist', exact: true }).waitFor();
+    await a.getByRole('button', { name: 'Export my engagement data', exact: true }).click();
+    await a.getByRole('textbox', { name: 'Engagement data export or authorized aggregates', exact: true }).waitFor();
+    assert.match(await a.getByRole('textbox', { name: 'Engagement data export or authorized aggregates', exact: true }).inputValue(), /Mumbai actor shortlist/);
+    await responsiveCapture(a, 'engagement-preferences');
+    console.log('PASS: Phase 6 consent/preferences, saved-search replay and alert pause, owner export and disabled-provider disclosure through real browser + Spring + PostgreSQL; no sends.');
+    await go(a, '/discovery', 'Campaign discovery');
+    await a.getByRole('textbox', { name: 'Campaign description' })
+      .fill(`Actors with video for a reel in Mumbai under INR 20000 on ${phase5Day}`);
+    await a.getByRole('button', { name: 'Parse campaign locally' }).click();
+    await a.getByRole('textbox', { name: 'City (public profile label)' }).waitFor();
+    await a.getByRole('checkbox', { name: 'Budget is an indicative per-day rate ceiling' }).click();
+    await a.getByRole('checkbox', { name: 'I confirm these structured campaign fields' }).click();
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByRole('button', { name: 'Draft brief for Spring API Talent' }).waitFor();
+    await a.getByText('Date availability: confirmed', { exact: false }).waitFor();
+    await a.getByRole('button', { name: 'Draft brief for Spring API Talent' }).click();
+    const editableBrief = a.getByRole('textbox', { name: 'Editable booking brief suggestion (not sent)' });
+    await editableBrief.waitFor();
+    await editableBrief.fill('Edited by the client before any booking.');
+    assert.equal(await editableBrief.inputValue(), 'Edited by the client before any booking.');
+    await a.getByRole('checkbox', { name: 'Compare Spring API Talent' }).click();
+    await a.getByRole('button', { name: 'Compare selected creators' }).click();
+    await a.getByText(/Spring API Talent: actors, Mumbai, INR .*\/day indicative/).first().waitFor();
+    const blockedResponse = await fetch(api + '/blocks/' + talent, {
+      method: 'PUT', headers: { Authorization: 'Bearer ' + token(client) },
+    });
+    assert.equal(blockedResponse.status, 200);
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByText('No matches. Edit a filter or allow clearly labeled unknown availability.', { exact: true }).waitFor();
+    assert.equal(await a.getByRole('button', { name: 'Open Spring API Talent profile' }).count(), 0);
+    const unblockedResponse = await fetch(api + '/blocks/' + talent, {
+      method: 'DELETE', headers: { Authorization: 'Bearer ' + token(client) },
+    });
+    assert.equal(unblockedResponse.status, 200);
+    await a.getByRole('button', { name: 'Build confirmed shortlist' }).click();
+    await a.getByRole('button', { name: 'Draft brief for Spring API Talent' }).waitFor();
+    console.log('PASS: integrated Phase 4 block/unblock excludes and restores Phase 5 shortlist through real browser + Spring + PostgreSQL.');
+    console.log('PASS: real browser + Spring + PostgreSQL campaign parse, confirmed constraints, declared-date shortlist, editable brief and factual comparison.');
     await go(a, '/search', 'Search talent');
     await a.getByRole('button', { name: 'Save Spring API Talent', exact: true }).click();
     await a.getByRole('button', { name: 'Unsave Spring API Talent', exact: true }).waitFor();
@@ -244,6 +320,22 @@ async function until(url) {
       path: path.join(folder, 'accepted-booking-390x844.png'),
       animations: 'disabled',
     });
+    const deliveryId = crypto.randomUUID();
+    const seedDelivery = spawnSync('docker', ['exec', '-i', 'castly-spring-test-db', 'psql', '-U', 'postgres', '-d', 'castly_spring_test', '-v', 'ON_ERROR_STOP=1'], {
+      input: `insert into engagement_private.outbox(id,recipient_id,event_key,kind,channel,booking_id) values('${deliveryId}','${client}','email-link-fixture','booking_accepted','email','${bookingId}');`, encoding: 'utf8',
+    });
+    assert.equal(seedDelivery.status, 0, seedDelivery.stderr);
+    const guestContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const guest = await guestContext.newPage();
+    guest.on('pageerror', (e) => errors.push(e.message));
+    await go(guest, '/engagement/open/' + deliveryId, 'Welcome back');
+    await guest.getByRole('textbox', { name: 'Email', exact: true }).fill('client@example.test');
+    await guest.getByLabel('Password', { exact: true }).fill('local-test-password');
+    await guest.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await guest.getByRole('button', { name: 'Open conversation', exact: true }).waitFor();
+    assert.equal(new URL(guest.url()).pathname, '/booking-detail/' + bookingId);
+    await guestContext.close();
+    console.log('PASS: Phase 6 opaque email link survives guest login and authorizes the recipient before booking navigation.');
     await go(a, '/notifications', 'Notifications');
     await a.getByText('Booking accepted', { exact: true }).waitFor();
     await a.getByRole('button', { name: 'View booking', exact: true }).click();
@@ -291,6 +383,23 @@ async function until(url) {
     await a.getByRole('button', { name: 'Cancel booking', exact: true }).click();
     await a.getByRole('button', { name: 'Confirm cancel booking', exact: true }).click();
     await a.getByText('Cancelled', { exact: true }).waitFor();
+    await go(a, '/safety/disputes?booking=' + bookingId, 'Booking disputes');
+    await a.getByRole('textbox', { name: 'Describe the booking dispute', exact: true })
+      .fill('The cancellation affected our agreed creative project schedule.');
+    await a.getByRole('checkbox').click();
+    await a.getByRole('button', { name: 'Submit dispute', exact: true }).click();
+    await a.getByText('Status: OPEN', { exact: true }).waitFor();
+    const disputeId = new URL(a.url()).pathname.split('/').pop();
+    const outsiderDispute = await fetch(api + '/disputes/' + disputeId, {
+      headers: { Authorization: 'Bearer ' + token(outsider) },
+    });
+    assert.equal(outsiderDispute.status, 404);
+    await a.getByRole('textbox', { name: 'Additional note or appeal explanation', exact: true })
+      .fill('The call time and location had already been agreed in messages.');
+    await a.getByRole('button', { name: 'Add private note', exact: true }).click();
+    await a.getByText('The call time and location had already been agreed in messages.', { exact: true }).waitFor();
+    await noOverflow(a);
+    console.log('PASS: real browser + Spring + PostgreSQL dispute filing, private note and outsider denial.');
     await b.reload();
     await b
       .getByText('Messaging is paused because there is no active accepted booking.', {

@@ -29,6 +29,13 @@ import org.springframework.test.web.servlet.*;
       "castly.jwt.mode=jwks",
       "castly.admin.enabled=true",
       "castly.subscriptions.enabled=true",
+      "castly.trust.verification-enabled=true",
+      "castly.trust.reporting-enabled=true",
+      "castly.trust.disputes-enabled=true",
+      "castly.trust.reviews-enabled=true",
+      "castly.trust.signals-enabled=true",
+      "castly.phase6.analytics-enabled=true",
+      "castly.phase6.analytics-key=fixture-phase6-analytics-key-at-least-32-characters",
       "castly.admin.audit-key=local-only-audit-key-at-least-32-characters",
       "castly.cors-origins=http://localhost:8081"
     })
@@ -581,5 +588,84 @@ class AdminApiTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("approved"));
     owner("delete from private.subscription_admins where user_id='" + u(31) + "';");
+  }
+
+  @Test
+  void integratedLegacyAdminRoutesRequireBothMfaSessionAndExistingRoster() throws Exception {
+    String session = login(31);
+    var identity =
+        jwt()
+            .jwt(
+                j ->
+                    j.subject(u(31))
+                        .claim("aal", "aal2")
+                        .claim("session_id", AUTH_SESSION)
+                        .claim(
+                            "amr",
+                            List.of(
+                                Map.of(
+                                    "method",
+                                    "totp",
+                                    "timestamp",
+                                    Instant.now().getEpochSecond()))));
+    for (String route :
+        List.of(
+            "/admin/verification",
+            "/admin/moderation",
+            "/admin/disputes",
+            "/engagement/admin/analytics")) {
+      mvc.perform(
+              get("/api/v1" + route)
+                  .with(identity)
+                  .header("X-Castly-Admin-Session", UUID.randomUUID().toString()))
+          .andExpect(status().isForbidden());
+      mvc.perform(get("/api/v1" + route).with(identity).header("X-Castly-Admin-Session", session))
+          .andExpect(status().isForbidden());
+    }
+    owner(
+        "insert into trust_private.reviewers(user_id,scope) values('"
+            + u(31)
+            + "','verification'),('"
+            + u(31)
+            + "','moderation'),('"
+            + u(31)
+            + "','disputes') on conflict do nothing; insert into"
+            + " engagement_private.analytics_admins values('"
+            + u(31)
+            + "') on conflict do nothing;");
+    for (String route :
+        List.of(
+            "/admin/verification",
+            "/admin/moderation",
+            "/admin/disputes",
+            "/engagement/admin/analytics"))
+      mvc.perform(get("/api/v1" + route).with(identity).header("X-Castly-Admin-Session", session))
+          .andExpect(status().isOk());
+    String moderator = login(32);
+    mvc.perform(
+            get("/api/v1/admin/verification")
+                .with(
+                    jwt()
+                        .jwt(
+                            j ->
+                                j.subject(u(32))
+                                    .claim("aal", "aal2")
+                                    .claim("session_id", AUTH_SESSION)
+                                    .claim(
+                                        "amr",
+                                        List.of(
+                                            Map.of(
+                                                "method",
+                                                "totp",
+                                                "timestamp",
+                                                Instant.now().getEpochSecond())))))
+                .header("X-Castly-Admin-Session", moderator))
+        .andExpect(status().isForbidden());
+    owner(
+        "delete from trust_private.reviewers where user_id='"
+            + u(31)
+            + "'; delete from engagement_private.analytics_admins where user_id='"
+            + u(31)
+            + "';");
   }
 }

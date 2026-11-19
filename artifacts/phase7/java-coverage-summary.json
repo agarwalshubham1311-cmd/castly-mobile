@@ -3,31 +3,31 @@
   "totals": {
     "BRANCH": {
       "type": "BRANCH",
-      "missed": "185",
-      "covered": "502"
+      "missed": "734",
+      "covered": "1318"
     },
     "LINE": {
       "type": "LINE",
-      "missed": "150",
-      "covered": "1606"
+      "missed": "577",
+      "covered": "4141"
     }
   },
   "packages": {
     "com/castly/admin": {
       "BRANCH": {
         "type": "BRANCH",
-        "missed": "18",
-        "covered": "86"
+        "missed": "20",
+        "covered": "102"
       },
       "LINE": {
         "type": "LINE",
-        "missed": "25",
-        "covered": "302"
+        "missed": "30",
+        "covered": "316"
       }
     }
   },
   "tests": {
-    "tests": 129,
+    "tests": 179,
     "failures": 0,
     "errors": 0,
     "skipped": 0

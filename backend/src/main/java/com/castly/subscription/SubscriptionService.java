@@ -26,9 +26,10 @@ public class SubscriptionService {
   public String discoveryField() {
     return enabled
         ? "exists(select 1 from public.subscription_discovery_eligibility e where"
-            + " e.user_id=talent_profiles.id and e.eligible and (e.valid_until is null or"
-            + " e.valid_until>now()) and exists(select 1 from public.subscription_plans p where"
-            + " p.id='creator_pro' and p.premium_discovery)) as premium_discovery_eligible"
+              + " e.user_id=talent_profiles.id and e.eligible and (e.valid_until is null or"
+              + " e.valid_until>statement_timestamp()) and exists(select 1 from"
+              + " public.subscription_plans p where p.id='creator_pro' and p.premium_discovery)) as"
+              + " premium_discovery_eligible"
         : "false as premium_discovery_eligible";
   }
 
@@ -88,7 +89,7 @@ public class SubscriptionService {
                 : ActorDatabase.rows(
                     db.sql(
                             "select * from public.subscription_entitlements where user_id=:u and"
-                                + " (valid_until is null or valid_until>now())")
+                                + " (valid_until is null or valid_until>statement_timestamp())")
                         .param("u", user)));
   }
 

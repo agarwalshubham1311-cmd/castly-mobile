@@ -7,6 +7,11 @@ export type Account = {
   updated_at: string;
 };
 export type TalentProfile = {
+  verified_creator?: boolean;
+  trust_signals_enabled?: boolean;
+  completed_bookings?: number;
+  booking_review_count?: number;
+  booking_average_rating?: number | null;
   id: string;
   display_name: string;
   category_id: string;
@@ -63,6 +68,7 @@ export type ConversationRow = {
   client_name?: string;
   talent_name?: string;
   can_send?: boolean;
+  contact_blocked?: boolean;
   id: string;
   client_id: string;
   talent_id: string;
@@ -152,5 +158,4 @@ export type NotificationRow = {
   read_at: string | null;
 };
 export type NotificationStats =
-  | { enabled: false }
-  | { enabled: true; unread_count: number; message_unread_count: number };
+  { enabled: false } | { enabled: true; unread_count: number; message_unread_count: number };

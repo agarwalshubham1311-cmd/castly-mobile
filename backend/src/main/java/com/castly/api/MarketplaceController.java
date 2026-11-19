@@ -16,10 +16,21 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1")
 public class MarketplaceController {
   private final ActorDatabase data;
+
+  @org.springframework.beans.factory.annotation.Autowired
+  private com.castly.engagement.Phase6Signals phase6;
+
+  private final com.castly.trust.TrustSignals trust;
+  private final com.castly.trust.VerificationService verification;
   private final com.castly.subscription.SubscriptionService subscriptions;
 
   public MarketplaceController(
-      ActorDatabase data, com.castly.subscription.SubscriptionService subscriptions) {
+      ActorDatabase data,
+      com.castly.subscription.SubscriptionService subscriptions,
+      com.castly.trust.VerificationService verification,
+      com.castly.trust.TrustSignals trust) {
+    this.trust = trust;
+    this.verification = verification;
     this.subscriptions = subscriptions;
     this.data = data;
   }
@@ -51,6 +62,7 @@ public class MarketplaceController {
               && !row.get("primary_role").equals(body.selectedRole()))
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT, "Primary role cannot be changed");
+          phase6.record(db, "activation");
           return one(
               db.sql(
                       "update public.users set primary_role=cast(:role as"
@@ -98,25 +110,36 @@ public class MarketplaceController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid rate range");
     return data.as(
         actor(jwt),
-        db ->
-            rows(
-                db.sql(
-                        "select *,"
-                            + subscriptions.discoveryField()
-                            + " from public.talent_profiles where published and (:query='' or"
-                            + " position(lower(:query) in lower(display_name||' '||city||'"
-                            + " '||bio||' '||array_to_string(skills,' ')))>0) and (:category='' or"
-                            + " category_id=:category) and (:city='' or lower(city)=lower(:city))"
-                            + " and day_rate between :min and :max and (not :available or"
-                            + " available) order by created_at desc,id limit :limit offset :offset")
-                    .param("query", query.trim())
-                    .param("category", category)
-                    .param("city", city)
-                    .param("min", minRate)
-                    .param("max", maxRate)
-                    .param("available", available)
-                    .param("limit", limit)
-                    .param("offset", offset)));
+        db -> {
+          var result =
+              rows(
+                  db.sql(
+                          "select talent_profiles.*,"
+                              + subscriptions.discoveryField()
+                              + ","
+                              + verification.badgeField()
+                              + ","
+                              + trust.fields()
+                              + " from public.talent_profiles "
+                              + trust.join()
+                              + " where published and (:query='' or position(lower(:query) in"
+                              + " lower(display_name||' '||city||' '||bio||'"
+                              + " '||array_to_string(skills,' ')))>0) and (:category='' or"
+                              + " category_id=:category) and (:city='' or lower(city)=lower(:city))"
+                              + " and day_rate between :min and :max and (not :available or"
+                              + " available) order by created_at desc,id limit :limit offset"
+                              + " :offset")
+                      .param("query", query.trim())
+                      .param("category", category)
+                      .param("city", city)
+                      .param("min", minRate)
+                      .param("max", maxRate)
+                      .param("available", available)
+                      .param("limit", limit)
+                      .param("offset", offset));
+          phase6.record(db, "search");
+          return result;
+        });
   }
 
   @GetMapping("/talents/me")
@@ -139,13 +162,23 @@ public class MarketplaceController {
   public Map<String, Object> profile(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
     return data.as(
         actor(jwt),
-        db ->
-            one(
-                db.sql(
-                        "select *,"
-                            + subscriptions.discoveryField()
-                            + " from public.talent_profiles where id=:id and published")
-                    .param("id", id)));
+        db -> {
+          var result =
+              one(
+                  db.sql(
+                          "select talent_profiles.*,"
+                              + subscriptions.discoveryField()
+                              + ","
+                              + verification.badgeField()
+                              + ","
+                              + trust.fields()
+                              + " from public.talent_profiles "
+                              + trust.join()
+                              + " where id=:id and published")
+                      .param("id", id));
+          phase6.record(db, "profile");
+          return result;
+        });
   }
 
   @PostMapping("/talents/me")

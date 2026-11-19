@@ -54,8 +54,14 @@ backend/src/main/java/com/castly/admin/AdminSchema.java
 backend/src/main/java/com/castly/admin/AdminService.java
 backend/src/main/java/com/castly/admin/AdminSettings.java
 backend/src/main/java/com/castly/api/ApiErrors.java
+backend/src/main/java/com/castly/engagement/EngagementController.java
 backend/src/main/java/com/castly/security/ApiSecurity.java
 backend/src/main/java/com/castly/subscription/PromotionController.java
+backend/src/main/java/com/castly/trust/DisputeController.java
+backend/src/main/java/com/castly/trust/ReviewController.java
+backend/src/main/java/com/castly/trust/SafetyController.java
+backend/src/main/java/com/castly/trust/TrustController.java
+backend/src/main/java/com/castly/trust/VerificationController.java
 backend/src/main/resources/application.yml
 backend/src/test/java/com/castly/AdminApiTest.java
 backend/src/test/java/com/castly/BusinessApiTest.java

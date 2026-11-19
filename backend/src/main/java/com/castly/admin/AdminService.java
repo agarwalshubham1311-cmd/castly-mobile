@@ -430,6 +430,26 @@ public class AdminService {
    */
   public <T> T delegated(
       org.springframework.security.oauth2.jwt.Jwt jwt,
+      jakarta.servlet.http.HttpServletRequest request,
+      String permission,
+      String reason,
+      boolean sensitive,
+      java.util.function.Supplier<T> operation) {
+    if (!settings.enabled()) return operation.get();
+    UUID session;
+    try {
+      session = UUID.fromString(request.getHeader("X-Castly-Admin-Session"));
+    } catch (Exception e) {
+      AdminRequest metadata = AdminRequest.from(request, settings);
+      AdminIdentity identity = authenticate(jwt, metadata);
+      auditDenied(identity, metadata, "session.denied");
+      throw denied();
+    }
+    return delegated(jwt, session, request, permission, reason, sensitive, operation);
+  }
+
+  public <T> T delegated(
+      org.springframework.security.oauth2.jwt.Jwt jwt,
       UUID session,
       jakarta.servlet.http.HttpServletRequest request,
       String permission,
