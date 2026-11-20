@@ -39,9 +39,14 @@ public class EngagementWorker implements AutoCloseable {
     this.flags = flags;
     this.provider = provider;
     this.json = json;
+    // Role switching can change current_user and even session_user for a superuser session.
+    // Check the backend-authenticated login too; pooler compatibility must fail closed.
     boolean safe =
         db.sql(
-                "select current_user='castly_engagement_worker' and not rolsuper and not"
+                "select current_user='castly_engagement_worker' and"
+                    + " session_user='castly_engagement_worker' and (select usename from"
+                    + " pg_stat_activity where pid=pg_backend_pid())='castly_engagement_worker'"
+                    + " and not rolsuper and not"
                     + " rolbypassrls and not rolcreatedb and not rolcreaterole and not"
                     + " rolreplication and not exists(select 1 from pg_auth_members where"
                     + " member=pg_roles.oid) and not exists(select 1 from pg_class where"
@@ -465,7 +470,7 @@ public class EngagementWorker implements AutoCloseable {
   }
 
   public void schedule(Instant now) {
-    if (!flags.engagement) return;
+    if (!flags.worker || !flags.engagement) return;
     var users =
         rows(
             db.sql(

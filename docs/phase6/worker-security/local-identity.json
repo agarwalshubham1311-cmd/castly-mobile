@@ -1,0 +1,15 @@
+{
+  "effective": "castly_engagement_worker",
+  "login": "castly_engagement_worker",
+  "authenticated": "castly_engagement_worker",
+  "rolsuper": false,
+  "rolbypassrls": false,
+  "rolcreatedb": false,
+  "rolcreaterole": false,
+  "rolreplication": false,
+  "rolinherit": false,
+  "memberships": false,
+  "owns_tables": false,
+  "scope": "disposable local PostgreSQL only; no hosted validation",
+  "server_version_num": "170011"
+}
