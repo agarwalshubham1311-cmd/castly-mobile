@@ -44,8 +44,37 @@ import org.springframework.test.web.servlet.*;
 @org.springframework.test.annotation.DirtiesContext(
     classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class AdminApiTest {
+  static com.sun.net.httpserver.HttpServer storageFixture;
+  static final java.util.concurrent.atomic.AtomicReference<
+          java.util.function.Function<com.sun.net.httpserver.HttpExchange, String>>
+      storageReply = new java.util.concurrent.atomic.AtomicReference<>();
+
+  @AfterAll
+  static void stopStorageFixture() {
+    if (storageFixture != null) storageFixture.stop(0);
+  }
+
   @DynamicPropertySource
   static void prepare(DynamicPropertyRegistry registry) throws Exception {
+    storageFixture =
+        com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+    storageFixture.createContext(
+        "/storage/v1/object/sign/portfolio/",
+        exchange -> {
+          try {
+            String reply = storageReply.get() == null ? "{}" : storageReply.get().apply(exchange);
+            byte[] bytes = reply.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, bytes.length);
+            exchange.getResponseBody().write(bytes);
+          } finally {
+            exchange.close();
+          }
+        });
+    storageFixture.start();
+    registry.add(
+        "castly.jwt.issuer",
+        () -> "http://127.0.0.1:" + storageFixture.getAddress().getPort() + "/auth/v1");
+    registry.add("castly.jwt.public-key", () -> "sb_publishable_local_fixture");
     if (new ProcessBuilder("node", "scripts/prepare-test-db.cjs").inheritIO().start().waitFor()
         != 0) throw new IllegalStateException("Disposable DB preparation failed");
   }
@@ -187,6 +216,14 @@ class AdminApiTest {
   @Test
   void m72ReadModelsCannotExposeOrForgePrivateSourceData() throws Exception {
     String support = login(33), moderator = login(32);
+    call("GET", "/users", 1, support, null).andExpect(status().isForbidden());
+    var supportDetail =
+        object(call("GET", "/users/" + u(1), 33, support, null).andExpect(status().isOk()));
+    assertNull(supportDetail.get("security_activity"));
+    var superDetail =
+        object(call("GET", "/users/" + u(1), 31, login(31), null).andExpect(status().isOk()));
+    assertFalse(
+        ((List<?>) ((Map<?, ?>) superDetail.get("security_activity")).get("events")).isEmpty());
     String text =
         call("GET", "/users/" + u(1), 33, support, null)
             .andExpect(status().isOk())
@@ -371,6 +408,84 @@ class AdminApiTest {
               + "','"
               + u(33)
               + "') and scope='verification'");
+    }
+  }
+
+  @Test
+  void m72PreviewRechecksRosterAfterStorageWait() throws Exception {
+    String application = verificationFixture(84), session = login(31);
+    owner(
+        "insert into trust_private.reviewers(user_id,scope) values('"
+            + u(31)
+            + "','verification') on conflict do nothing");
+    var detail = verification.adminDetail(UUID.fromString(u(31)), UUID.fromString(application));
+    String evidence =
+        ((Map<?, ?>) ((List<?>) detail.get("evidence")).getFirst()).get("id").toString();
+    String endpoint = "/users/verifications/" + application + "/evidence/" + evidence + "/preview";
+    call("POST", endpoint, 33, login(33), "{}").andExpect(status().isForbidden());
+    call("POST", endpoint, 31, session, "{}", "aal2", 600).andExpect(status().isForbidden());
+    var entered = new CountDownLatch(1);
+    var release = new CountDownLatch(1);
+    storageReply.set(
+        exchange -> {
+          entered.countDown();
+          try {
+            if (!release.await(4, TimeUnit.SECONDS))
+              throw new IllegalStateException("fixture release timeout");
+          } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(ex);
+          }
+          String encodeHeader =
+              Base64.getUrlEncoder()
+                  .withoutPadding()
+                  .encodeToString(
+                      "{\"alg\":\"HS256\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+          String encodeClaims =
+              Base64.getUrlEncoder()
+                  .withoutPadding()
+                  .encodeToString(
+                      ("{\"exp\":" + Instant.now().plusSeconds(30).getEpochSecond() + "}")
+                          .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+          return "{\"signedURL\":\""
+              + exchange.getRequestURI().getRawPath().substring("/storage/v1".length())
+              + "?token="
+              + encodeHeader
+              + "."
+              + encodeClaims
+              + ".c2lnbmF0dXJl\"}";
+        });
+    try (var workers = Executors.newSingleThreadExecutor()) {
+      var result = workers.submit(() -> call("POST", endpoint, 31, session, "{}").andReturn());
+      try {
+        assertTrue(
+            entered.await(10, TimeUnit.SECONDS),
+            "Authorized request must reach local storage fixture");
+        // Only this disposable test connection is owner-authenticated, never the application.
+        try (var connection =
+                java.sql.DriverManager.getConnection(
+                    "jdbc:postgresql://127.0.0.1:55432/castly_spring_test",
+                    "postgres",
+                    "local-test-only");
+            var statement = connection.createStatement()) {
+          statement.executeUpdate(
+              "delete from trust_private.reviewers where user_id='"
+                  + u(31)
+                  + "' and scope='verification'");
+        }
+      } finally {
+        release.countDown();
+      }
+      var response = result.get(10, TimeUnit.SECONDS).getResponse();
+      assertEquals(403, response.getStatus());
+      assertFalse(response.getContentAsString().contains("token="));
+    } finally {
+      release.countDown();
+      storageReply.set(null);
+      owner(
+          "delete from trust_private.reviewers where user_id='"
+              + u(31)
+              + "' and scope='verification'");
     }
   }
 

@@ -24,13 +24,16 @@ backend/src/main/java/com/castly/admin/AdminService.java
 backend/src/main/java/com/castly/admin/AdminUserVerificationController.java
 backend/src/main/java/com/castly/admin/AdminUsersController.java
 backend/src/main/java/com/castly/admin/AdminUsersService.java
+backend/src/main/java/com/castly/admin/PortfolioPreviewGateway.java
 backend/src/main/java/com/castly/trust/VerificationService.java
 backend/src/main/resources/application.yml
 backend/src/test/java/com/castly/AdminApiTest.java
+backend/src/test/java/com/castly/admin/PortfolioPreviewGatewayTest.java
 docs/phase7/m72-file-inventory.txt
 docs/phase7/m72-progress.md
 scripts/test-reconciliation.cjs
 scripts/test-sql.cjs
 supabase/migrations/20261125100000_admin_user_read_models.sql
+supabase/migrations/20261125110000_admin_account_security_index.sql
 supabase/tests/admin-rbac.sql
 supabase/tests/admin-users.sql

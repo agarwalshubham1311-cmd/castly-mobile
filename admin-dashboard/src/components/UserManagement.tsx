@@ -347,9 +347,18 @@ export function UserDetails({ id }: { id: string }) {
       </section>
       <section className="card">
         <h2>Security activity</h2>
+        {d.security_activity?.events.map((e, i) => (
+          <p key={i}>
+            {e.action} · {e.outcome} · {new Date(e.occurred_at).toLocaleString()}
+          </p>
+        ))}
+        {d.security_activity && !d.security_activity.events.length && (
+          <p>No recorded privileged-access denials.</p>
+        )}
         <p>
-          Identity-provider sign-in history and fraud signals are not available in this summary. No
-          risk assessment is inferred.
+          {d.security_activity
+            ? d.security_activity.note
+            : 'Audit permission is required to inspect privileged-access denials. No fraud assessment or complete identity-provider history is inferred.'}
         </p>
       </section>
     </>

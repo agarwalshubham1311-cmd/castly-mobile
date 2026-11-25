@@ -96,8 +96,59 @@ const fixture = http.createServer(async (req, res) => {
       JSON.stringify({ access_token: token(id), refresh_token: 'local-' + id, expires_in: 3600 }),
     );
   }
+  if (req.method === 'GET' && url.pathname.startsWith('/storage/v1/object/sign/portfolio/')) {
+    try {
+      const raw = url.searchParams.get('token') ?? '',
+        parts = raw.split('.');
+      if (
+        !crypto.verify(
+          'sha256',
+          Buffer.from(parts[0] + '.' + parts[1]),
+          { key: publicKey, dsaEncoding: 'ieee-p1363' },
+          Buffer.from(parts[2], 'base64url'),
+        )
+      )
+        throw new Error();
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+      if (
+        payload.exp <= Date.now() / 1000 ||
+        payload.url !== url.pathname.slice('/storage/v1/object/sign/'.length)
+      )
+        throw new Error();
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'no-store');
+      return res.end(
+        Buffer.from(
+          'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAADklEQVR4XmMQMgljgAMABxoAncbTxfwAAAAASUVORK5CYII=',
+          'base64',
+        ),
+      );
+    } catch {
+      return res.writeHead(403).end('{}');
+    }
+  }
   const jwt = claims(req);
   if (!jwt) return res.writeHead(401).end('{}');
+  if (url.pathname.startsWith('/storage/v1/object/sign/portfolio/')) {
+    if (jwt.sub !== uid(31) || body.expiresIn > 60 || body.expiresIn < 1)
+      return res.writeHead(403).end('{}');
+    const enc = (v) => Buffer.from(JSON.stringify(v)).toString('base64url');
+    const raw =
+      enc({ alg: 'ES256' }) +
+      '.' +
+      enc({
+        exp: Math.floor(Date.now() / 1000) + body.expiresIn,
+        url: url.pathname.slice('/storage/v1/object/sign/'.length),
+      });
+    const signature = crypto
+      .sign('sha256', Buffer.from(raw), { key: privateKey, dsaEncoding: 'ieee-p1363' })
+      .toString('base64url');
+    return res.end(
+      JSON.stringify({
+        signedURL: url.pathname.slice('/storage/v1'.length) + '?token=' + raw + '.' + signature,
+      }),
+    );
+  }
   if (url.pathname.endsWith('/user'))
     return res.end(
       JSON.stringify({
@@ -185,6 +236,7 @@ try {
         CASTLY_ADMIN_ENABLED: 'true',
         CASTLY_ADMIN_USERS_ENABLED: 'true',
         CASTLY_VERIFICATION_ENABLED: 'true',
+        SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_local_fixture',
         CASTLY_ADMIN_AUDIT_KEY: 'local-fixture-audit-key-32-characters-long',
         CASTLY_SUBSCRIPTIONS_ENABLED: 'false',
         CASTLY_GOOGLE_PLAY_ENABLED: 'false',
@@ -228,6 +280,23 @@ try {
     { cwd: admin, env: { ...process.env, CASTLY_ADMIN_TEST_URL: origin }, stdio: 'inherit' },
   );
   process.exitCode = await new Promise((r) => test.on('exit', r));
+  if (process.exitCode === 0) {
+    const audit = run('docker', [
+      'exec',
+      'castly-spring-test-db',
+      'psql',
+      '-X',
+      '-At',
+      '-U',
+      'postgres',
+      '-d',
+      'castly_spring_test',
+      '-c',
+      "select count(*) from public.trust_audit_logs where action='portfolio.preview_issued' and resource_id='72800000-0000-0000-0000-000000000002'",
+    ]);
+    if (audit.trim() !== '1')
+      throw new Error('Successful portfolio preview must have exactly one committed source audit');
+  }
 } finally {
   for (const child of [next, java])
     if (child) {

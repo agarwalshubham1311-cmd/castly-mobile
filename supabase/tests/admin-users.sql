@@ -8,6 +8,7 @@ grant execute on all functions in schema m72_test to castly_api,castly_engagemen
 select m72_test.ok((select count(*)=7 and bool_and(relrowsecurity) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='admin_private' and c.relname in('user_directory','talent_summaries','verification_summaries','badge_summaries','booking_summaries','grant_summaries','user_history')),'all seven user read models/history use RLS');
 select m72_test.ok(not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private' and p.proname like 'admin_project_%' and p.prosecdef),'projection maintenance is SECURITY INVOKER');
 select m72_test.ok((select count(*)=8 from pg_indexes where schemaname='admin_private' and indexname in('admin_directory_role_created','admin_directory_created','admin_directory_prefix','admin_verification_state','admin_bookings_client','admin_bookings_talent','admin_grants_user','admin_history_user')),'operational lookups have purpose indexes');
+select m72_test.ok(exists(select 1 from pg_indexes where schemaname='admin_private' and indexname='admin_account_denials'),'account security review has an actor-scoped denial index');
 insert into auth.users(id) values('72000000-0000-0000-0000-000000000001'),('72000000-0000-0000-0000-000000000002'),('72000000-0000-0000-0000-000000000003');
 set local castly.admin_bootstrap_reviewed='M7.1-owner-approved';
 insert into admin_private.principals(user_id,roles,state) values('72000000-0000-0000-0000-000000000001',array['SUPER_ADMIN'],'active');

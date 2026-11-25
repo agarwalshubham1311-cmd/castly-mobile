@@ -39,6 +39,10 @@ export interface UserDetail {
   }[];
   history: { id: number; action: string; occurred_at: string }[];
   history_note: string;
+  security_activity: {
+    events: { action: string; outcome: string; occurred_at: string }[];
+    note: string;
+  } | null;
 }
 export interface Verification {
   id: string;

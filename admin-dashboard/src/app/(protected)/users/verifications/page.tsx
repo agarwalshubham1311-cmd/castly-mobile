@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAdmin } from '@/components/AdminShell';
 import { useResource } from '@/components/UserManagement';
@@ -148,9 +148,12 @@ export default function Verifications() {
                 <p>Consent: {detail.data.request.consent_version}</p>
                 <h3>Portfolio evidence references</h3>
                 {detail.data.evidence.map((e) => (
-                  <p className="break-all" key={e.id}>
-                    {e.portfolio_path} · revision {e.revision}
-                  </p>
+                  <div key={`${me.user_id}/${me.version}/${selected}/${e.id}/${e.revision}`}>
+                    <p className="break-all">
+                      {e.portfolio_path} · revision {e.revision}
+                    </p>
+                    <PortfolioPreview request={selected} evidence={e.id} />
+                  </div>
                 ))}
                 {!detail.data.evidence.length && (
                   <p>No evidence is available under the current privacy and review rules.</p>
@@ -219,5 +222,47 @@ export default function Verifications() {
         </ConfirmDialog>
       )}
     </>
+  );
+}
+
+function PortfolioPreview({ request, evidence }: { request: string; evidence: string }) {
+  const [link, setLink] = useState<{ url: string; expires_in: number } | null>(null),
+    [error, setError] = useState(''),
+    [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!link) return;
+    const timer = setTimeout(() => setLink(null), link.expires_in * 1000);
+    return () => clearTimeout(timer);
+  }, [link]);
+  async function prepare() {
+    setBusy(true);
+    setError('');
+    try {
+      setLink(
+        await api(
+          'users/verifications/' + request + '/evidence/' + evidence + '/preview',
+          'POST',
+          {},
+        ),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Image preview unavailable');
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="mb-4">
+      {error && <p role="alert">{error}</p>}
+      {link ? (
+        <a href={link.url} target="_blank" rel="noopener noreferrer">
+          Open portfolio image in new tab · expires within one minute
+        </a>
+      ) : (
+        <button onClick={prepare} disabled={busy}>
+          {busy ? 'Preparing preview…' : 'Prepare image preview'}
+        </button>
+      )}
+    </div>
   );
 }

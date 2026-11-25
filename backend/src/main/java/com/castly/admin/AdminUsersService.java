@@ -131,6 +131,22 @@ public class AdminUsersService {
                     "select id,action,occurred_at from admin_private.user_history where user_id=:u"
                         + " order by id desc limit 50")
                 .param("u", user)));
+    boolean auditAllowed =
+        db.sql("select private.admin_permission('audit.read')").query(Boolean.class).single();
+    result.put(
+        "security_activity",
+        auditAllowed
+            ? Map.of(
+                "events",
+                rows(
+                    db.sql(
+                            "select action,outcome,occurred_at from admin_private.audit where"
+                                + " actor_id=:u and outcome='denied' order by id desc limit 50")
+                        .param("u", user)),
+                "note",
+                "Recorded privileged-access denials, not a complete identity-provider sign-in"
+                    + " history or fraud assessment.")
+            : null);
     result.put(
         "history_note",
         "Recorded since installation of the reviewed M7.2 migration; no earlier events are"

@@ -5,7 +5,7 @@ export function allowedBackend(method: string, path: string) {
       `^(me|principals|sessions|audit|users|users/${uuid}|users/${uuid}/bookings|users/verifications|users/verifications/${uuid})$`,
     ),
     POST: new RegExp(
-      `^(sessions|invitations|invitations/activate|users/verifications/${uuid}/decision)$`,
+      `^(sessions|invitations|invitations/activate|users/verifications/${uuid}/decision|users/verifications/${uuid}/evidence/${uuid}/preview)$`,
     ),
     PATCH: new RegExp(`^principals/${uuid}$`),
     DELETE: new RegExp(`^sessions/${uuid}$`),

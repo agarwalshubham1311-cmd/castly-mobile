@@ -204,6 +204,28 @@ test('M7.2 reviewer decisions retain evidence privacy, reasons and stale-version
     page.getByText('00000000-0000-0000-0000-000000000088/review.jpg', { exact: false }),
   ).toBeVisible();
   const dir = path.resolve(process.env.CASTLY_ADMIN_SCREENSHOT_DIR ?? '../artifacts/phase7');
+  const applicationUrl = '/api/backend/users/verifications/72800000-0000-0000-0000-000000000002';
+  const initialEvidence = (await (await page.request.get(applicationUrl)).json()).evidence[0]
+    .id as string;
+  await page.getByRole('button', { name: 'Prepare image preview' }).click();
+  const preview = page.getByRole('link', { name: /Open portfolio image in new tab/ });
+  await expect(preview).toBeVisible();
+  expect(await preview.getAttribute('href')).toMatch(
+    /^http:\/\/127\.0\.0\.1:19198\/storage\/v1\/object\/sign\/portfolio\//,
+  );
+  const popupPromise = page.waitForEvent('popup');
+  await preview.click();
+  const imagePage = await popupPromise;
+  await expect(imagePage.locator('img')).toBeVisible();
+  expect(
+    await imagePage
+      .locator('img')
+      .evaluate(
+        (img: HTMLImageElement) =>
+          img.complete && img.naturalWidth === 2 && img.naturalHeight === 2,
+      ),
+  ).toBeTruthy();
+  await imagePage.close();
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.screenshot({ path: path.join(dir, 'm72-verifications-1440.png'), fullPage: true });
   expect(
@@ -233,4 +255,13 @@ test('M7.2 reviewer decisions retain evidence privacy, reasons and stale-version
     },
   );
   expect(stale.status()).toBe(409);
+  const finalDetail = await page.request.get(
+    '/api/backend/users/verifications/72800000-0000-0000-0000-000000000002',
+  );
+  expect((await finalDetail.json()).evidence).toEqual([]);
+  const finalizedPreview = await page.request.post(
+    applicationUrl + '/evidence/' + initialEvidence + '/preview',
+    { headers: { Origin: 'http://127.0.0.1:3017' }, data: {} },
+  );
+  expect(finalizedPreview.status()).toBe(404);
 });
