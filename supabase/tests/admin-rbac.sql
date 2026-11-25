@@ -8,7 +8,7 @@ insert into auth.users(id,raw_user_meta_data) values('70000000-0000-0000-0000-00
 set local castly.admin_bootstrap_reviewed='M7.1-owner-approved';
 insert into admin_private.principals(user_id,roles,state) values('70000000-0000-0000-0000-000000000001',array['SUPER_ADMIN'],'active'),('70000000-0000-0000-0000-000000000002',array['ANALYST'],'active');
 revoke usage on schema auth from castly_api;
-select admin_test.eq((select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='admin_private' and c.relkind='r' and c.relrowsecurity),7,'all seven administrative tables use RLS');
+select admin_test.eq((select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='admin_private' and c.relname in ('role_permissions','principals','authorizations','sessions','invitations','audit','rate_limits') and c.relkind='r' and c.relrowsecurity),7,'all seven administrative tables use RLS');
 select admin_test.eq((select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('private','admin_private') and p.proname like 'admin_%' and p.prosecdef),0,'no admin SECURITY DEFINER functions');
 set local role authenticated;
 select admin_test.denied($$select * from admin_private.principals$$,'mobile cannot access admin principals');

@@ -15,6 +15,9 @@ public class AdminService {
   private final ActorDatabase data;
   private final AdminSettings settings;
 
+  @org.springframework.beans.factory.annotation.Value("${castly.admin.users-enabled:false}")
+  private boolean usersEnabled;
+
   public AdminService(ActorDatabase data, AdminSettings settings) {
     this.data = data;
     this.settings = settings;
@@ -222,6 +225,7 @@ public class AdminService {
         false,
         db -> {
           var result = principal(db, id.user());
+          result.put("modules", Map.of("user_management", usersEnabled));
           result.put(
               "expires_at",
               db.sql("select expires_at::text from admin_private.sessions where id=:s")
@@ -466,6 +470,20 @@ public class AdminService {
         reason,
         sensitive,
         db -> operation.get());
+  }
+
+  /** New modules always use the M7.1 session/MFA/permission transaction; no legacy bypass. */
+  public <T> T authorized(
+      org.springframework.security.oauth2.jwt.Jwt jwt,
+      UUID session,
+      jakarta.servlet.http.HttpServletRequest request,
+      String permission,
+      String reason,
+      boolean sensitive,
+      Function<JdbcClient, T> operation) {
+    AdminRequest metadata = AdminRequest.from(request, settings);
+    return run(
+        authenticate(jwt, metadata), session, metadata, permission, reason, sensitive, operation);
   }
 
   public static String hash(String input) {

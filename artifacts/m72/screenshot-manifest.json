@@ -1,0 +1,41 @@
+{
+  "source": "Real local Chromium; synthetic accounts; full-page screenshots",
+  "images": [
+    {
+      "file": "m72-user-detail-1440.png",
+      "width": 1440,
+      "height": 1554,
+      "sha256": "6b789d1dd79dfcc23cbdc8067b25c40595cf7f66f24a72ac0d482deba6c0a322"
+    },
+    {
+      "file": "m72-users-1440.png",
+      "width": 1440,
+      "height": 2163,
+      "sha256": "d8ee97f5537ae3982c01c09b5b44f719d6519bcefd19589078118b972fd59be3"
+    },
+    {
+      "file": "m72-users-360.png",
+      "width": 360,
+      "height": 2457,
+      "sha256": "5bbbddbbc837932b0dcd12241a0a0f4e4f5f1de95b8e7526060bbf2a06f40e4d"
+    },
+    {
+      "file": "m72-users-390.png",
+      "width": 390,
+      "height": 2409,
+      "sha256": "4a23ab8b222a95670a139e41fee1651757d7fc90f837f450f848b6ac7833e8f8"
+    },
+    {
+      "file": "m72-users-430.png",
+      "width": 430,
+      "height": 2409,
+      "sha256": "e1e9c326f982f93c19917a174b535b8575a3a03307586d494a337a1b9ec3d45f"
+    },
+    {
+      "file": "m72-verifications-1440.png",
+      "width": 1440,
+      "height": 1017,
+      "sha256": "9ebe99b51d42b31da3aadb07c5d50b7f237c3afa4c9849c3a6ae25647c1e2eb8"
+    }
+  ]
+}

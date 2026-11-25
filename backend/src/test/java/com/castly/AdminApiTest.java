@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.*;
       "castly.jwt.issuer=http://127.0.0.1:59999/auth/v1",
       "castly.jwt.mode=jwks",
       "castly.admin.enabled=true",
+      "castly.admin.users-enabled=true",
       "castly.subscriptions.enabled=true",
       "castly.trust.verification-enabled=true",
       "castly.trust.reporting-enabled=true",
@@ -152,6 +153,225 @@ class AdminApiTest {
                 .andExpect(status().isOk()))
         .get("token")
         .toString();
+  }
+
+  @Test
+  void m72DirectoryIsBoundedEscapedAndPermissionScoped() throws Exception {
+    String support = login(33);
+    var first = object(call("GET", "/users?limit=7", 33, support, null).andExpect(status().isOk()));
+    assertEquals(7, ((List<?>) first.get("items")).size());
+    String after = first.get("next_after").toString();
+    var second =
+        object(
+            call("GET", "/users?limit=7&after=" + after, 33, support, null)
+                .andExpect(status().isOk()));
+    var ids = new HashSet<String>();
+    for (Object page : List.of(first, second))
+      for (Object row : (List<?>) ((Map<?, ?>) page).get("items"))
+        assertTrue(ids.add(((Map<?, ?>) row).get("user_id").toString()));
+    call("GET", "/users?limit=51", 33, support, null).andExpect(status().isBadRequest());
+    call("GET", "/users?q=x", 33, support, null).andExpect(status().isBadRequest());
+    call("GET", "/users?role=superadmin", 33, support, null).andExpect(status().isBadRequest());
+    call("GET", "/users?from=2030-01-01&until=2020-01-01", 33, support, null)
+        .andExpect(status().isBadRequest());
+    assertEquals(
+        List.of(),
+        object(call("GET", "/users?q=zz%25_", 33, support, null).andExpect(status().isOk()))
+            .get("items"));
+    call("GET", "/users", 1, support, null).andExpect(status().isForbidden());
+    call("GET", "/users", 34, login(34), null).andExpect(status().isForbidden());
+    call("GET", "/users", 35, login(35), null).andExpect(status().isForbidden());
+    call("GET", "/users", 33, support, null, "aal1", 0).andExpect(status().isForbidden());
+  }
+
+  @Test
+  void m72ReadModelsCannotExposeOrForgePrivateSourceData() throws Exception {
+    String support = login(33), moderator = login(32);
+    String text =
+        call("GET", "/users/" + u(1), 33, support, null)
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    for (String field : List.of("email", "token_hash", "requirements", "image_base64", "statement"))
+      assertFalse(text.contains("\"" + field + "\""));
+    call("GET", "/users/" + u(1) + "/bookings", 32, moderator, null)
+        .andExpect(status().isForbidden());
+    call("GET", "/users/" + u(1) + "/bookings", 33, support, null).andExpect(status().isOk());
+    call("GET", "/users/ffffffff-ffff-ffff-ffff-ffffffffffff", 33, support, null)
+        .andExpect(status().isNotFound());
+    assertEquals(
+        Integer.valueOf(0),
+        data.<Integer>as(
+            UUID.fromString(u(1)),
+            db ->
+                db.sql("select count(*) from admin_private.user_directory")
+                    .query(Integer.class)
+                    .single()));
+    var denied =
+        assertThrows(
+            org.springframework.dao.DataAccessException.class,
+            () ->
+                data.as(
+                    UUID.fromString(u(1)),
+                    db ->
+                        db.sql(
+                                "insert into"
+                                    + " admin_private.user_directory(user_id,display_name,created_at,updated_at)"
+                                    + " values(:u,'forged',now(),now())")
+                            .param("u", UUID.fromString(u(1)))
+                            .update()));
+    assertEquals("42501", com.castly.api.SqlFailureKind.sqlState(denied));
+    assertThrows(
+        org.springframework.dao.DataAccessException.class,
+        () ->
+            data.as(
+                UUID.fromString(u(1)),
+                db -> db.sql("delete from admin_private.user_history").update()));
+  }
+
+  @Test
+  void m72SourceProjectionAndHistoryRollbackAtomically() throws Exception {
+    UUID user = UUID.fromString(u(90));
+    String support = login(33);
+    data.as(
+        user,
+        db ->
+            db.sql("update public.users set display_name='Before rollback' where id=:u")
+                .param("u", user)
+                .update());
+    var before =
+        object(call("GET", "/users/" + user, 33, support, null).andExpect(status().isOk()));
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            data.as(
+                user,
+                db -> {
+                  db.sql("update public.users set display_name='Must rollback' where id=:u")
+                      .param("u", user)
+                      .update();
+                  throw new IllegalStateException("fixture rollback");
+                }));
+    var after = object(call("GET", "/users/" + user, 33, support, null).andExpect(status().isOk()));
+    assertEquals(before, after);
+    assertEquals(
+        1,
+        ((List<?>)
+                object(call("GET", "/users?q=Before", 33, support, null).andExpect(status().isOk()))
+                    .get("items"))
+            .size());
+  }
+
+  @Test
+  void m72ConcurrentSourceChangesKeepProjectionConsistent() throws Exception {
+    UUID user = UUID.fromString(u(89));
+    try (var workers = Executors.newFixedThreadPool(2)) {
+      var go = new CountDownLatch(1);
+      var jobs = new ArrayList<Future<?>>();
+      for (String name : List.of("Concurrent A", "Concurrent B"))
+        jobs.add(
+            workers.submit(
+                () -> {
+                  go.await();
+                  return data.as(
+                      user,
+                      db ->
+                          db.sql("update public.users set display_name=:n where id=:u")
+                              .param("n", name)
+                              .param("u", user)
+                              .update());
+                }));
+      go.countDown();
+      for (var job : jobs) job.get(10, TimeUnit.SECONDS);
+    }
+    String source =
+        data.as(
+            user,
+            db ->
+                db.sql("select display_name from public.users where id=:u")
+                    .param("u", user)
+                    .query(String.class)
+                    .single());
+    var detail =
+        object(call("GET", "/users/" + user, 33, login(33), null).andExpect(status().isOk()));
+    assertEquals(source, ((Map<?, ?>) detail.get("account")).get("display_name"));
+    assertTrue(((List<?>) detail.get("history")).size() >= 2);
+  }
+
+  @Autowired com.castly.trust.VerificationService verification;
+
+  String verificationFixture(int user) throws Exception {
+    UUID asset = UUID.randomUUID();
+    owner(
+        "insert into public.talent_profiles(id,display_name,category_id,city,day_rate) values('"
+            + u(user)
+            + "','Review fixture','actors','Pune',1000) on conflict do nothing;insert into"
+            + " public.portfolio_assets(id,talent_id,path,label) values('"
+            + asset
+            + "','"
+            + u(user)
+            + "','"
+            + u(user)
+            + "/review.jpg','Consented fixture');");
+    return verification
+        .submit(
+            UUID.fromString(u(user)),
+            "Consented portfolio review for a synthetic local account.",
+            List.of(asset),
+            "profile-review-v1")
+        .get("id")
+        .toString();
+  }
+
+  @Test
+  void m72VerificationRequiresRosterPermissionFreshMfaAndCurrentRevision() throws Exception {
+    String application = verificationFixture(88), superSession = login(31), support = login(33);
+    String path = "/users/verifications/" + application;
+    call("GET", path, 33, support, null).andExpect(status().isForbidden());
+    owner(
+        "delete from trust_private.reviewers where user_id='"
+            + u(31)
+            + "' and scope='verification'");
+    call("GET", path, 31, superSession, null).andExpect(status().isForbidden());
+    owner(
+        "insert into trust_private.reviewers(user_id,scope) values('"
+            + u(31)
+            + "','verification'),('"
+            + u(33)
+            + "','verification') on conflict do nothing");
+    try {
+      call("GET", path, 33, support, null).andExpect(status().isForbidden());
+      call("GET", path, 31, superSession, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.evidence[0].revision").value(1));
+      String body =
+          "{\"expected_revision\":1,\"expected_status\":\"PENDING\",\"decision\":\"REJECTED\",\"reason\":\"Portfolio"
+              + " review rejection fixture\"}";
+      call("POST", path + "/decision", 31, superSession, body, "aal2", 600)
+          .andExpect(status().isForbidden());
+      call("POST", path + "/decision", 31, superSession, body).andExpect(status().isOk());
+      call("POST", path + "/decision", 31, superSession, body).andExpect(status().isConflict());
+      call("GET", path, 31, superSession, null)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.history.length()").value(1))
+          .andExpect(jsonPath("$.evidence.length()").value(0));
+      String query = "/users?verification=REJECTED";
+      assertTrue(
+          call("GET", query, 33, support, null)
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString()
+              .contains(u(88)));
+    } finally {
+      owner(
+          "delete from trust_private.reviewers where user_id in('"
+              + u(31)
+              + "','"
+              + u(33)
+              + "') and scope='verification'");
+    }
   }
 
   @Test

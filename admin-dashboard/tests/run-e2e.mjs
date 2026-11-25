@@ -85,9 +85,13 @@ const fixture = http.createServer(async (req, res) => {
         ? uid(31)
         : body.email === 'moderator@example.test'
           ? uid(32)
-          : body.email === 'invitee@example.test'
-            ? uid(40)
-            : uid(1);
+          : body.email === 'support@example.test'
+            ? uid(33)
+            : body.email === 'analyst@example.test'
+              ? uid(34)
+              : body.email === 'invitee@example.test'
+                ? uid(40)
+                : uid(1);
     return res.end(
       JSON.stringify({ access_token: token(id), refresh_token: 'local-' + id, expires_in: 3600 }),
     );
@@ -146,6 +150,22 @@ try {
     ],
     { input: fs.readFileSync(path.join(root, 'backend/scripts/admin-test-fixtures.sql'), 'utf8') },
   );
+  run(
+    'docker',
+    [
+      'exec',
+      '-i',
+      'castly-spring-test-db',
+      'psql',
+      '-U',
+      'postgres',
+      '-d',
+      'castly_spring_test',
+      '-v',
+      'ON_ERROR_STOP=1',
+    ],
+    { input: fs.readFileSync(path.join(root, 'backend/scripts/m72-browser-fixtures.sql'), 'utf8') },
+  );
   await new Promise((r) => fixture.listen(19198, '127.0.0.1', r));
   const javaLog = fs.openSync(path.join(os.tmpdir(), 'castly-admin-e2e-java.log'), 'w');
   logs.push(javaLog);
@@ -163,6 +183,8 @@ try {
         SUPABASE_JWT_ISSUER: authOrigin + '/auth/v1',
         JWT_SIGNING_MODE: 'jwks',
         CASTLY_ADMIN_ENABLED: 'true',
+        CASTLY_ADMIN_USERS_ENABLED: 'true',
+        CASTLY_VERIFICATION_ENABLED: 'true',
         CASTLY_ADMIN_AUDIT_KEY: 'local-fixture-audit-key-32-characters-long',
         CASTLY_SUBSCRIPTIONS_ENABLED: 'false',
         CASTLY_GOOGLE_PLAY_ENABLED: 'false',

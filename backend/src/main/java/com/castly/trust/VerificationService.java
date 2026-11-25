@@ -172,6 +172,77 @@ public class VerificationService {
         });
   }
 
+  /** Admin UI adapter: same roster and privacy policies, bounded UUID keyset. */
+  public List<Map<String, Object>> adminQueue(UUID actor, UUID after, int limit) {
+    TrustAccess.enabled(enabled);
+    return data.as(
+        actor,
+        db -> {
+          TrustAccess.reviewer(db, "verification");
+          return rows(
+              db.sql(
+                      "select id,user_id,status,revision,submitted_at,expires_at from"
+                          + " public.verification_requests where id>:a and status in"
+                          + " ('PENDING','UNDER_REVIEW') order by id limit :n")
+                  .param("a", after)
+                  .param("n", limit));
+        });
+  }
+
+  public Map<String, Object> adminDetail(UUID actor, UUID request) {
+    TrustAccess.enabled(enabled);
+    return data.as(
+        actor,
+        db -> {
+          TrustAccess.reviewer(db, "verification");
+          var result = new LinkedHashMap<String, Object>();
+          result.put(
+              "request",
+              one(
+                  db.sql(
+                          "select"
+                              + " id,user_id,status,statement,revision,consent_version,submitted_at,expires_at"
+                              + " from public.verification_requests where id=:r")
+                      .param("r", request)));
+          result.put("evidence", evidence(actor, request));
+          result.put(
+              "history",
+              rows(
+                  db.sql(
+                          "select id,revision,decision,reason,created_at from"
+                              + " public.verification_decisions where request_id=:r order by"
+                              + " created_at desc,id limit 100")
+                      .param("r", request)));
+          return result;
+        });
+  }
+
+  public Map<String, Object> decideExpected(
+      UUID actor,
+      UUID request,
+      int revision,
+      String expectedStatus,
+      String decision,
+      String reason) {
+    TrustAccess.enabled(enabled);
+    return data.as(
+        actor,
+        db -> {
+          TrustAccess.reviewer(db, "verification");
+          var current =
+              one(
+                  db.sql(
+                          "select revision,status from public.verification_requests where id=:r for"
+                              + " update")
+                      .param("r", request));
+          if (((Number) current.get("revision")).intValue() != revision
+              || !expectedStatus.equals(current.get("status")))
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT, "Verification changed; reload before deciding");
+          return decide(actor, request, decision, reason);
+        });
+  }
+
   public List<Map<String, Object>> evidence(UUID actor, UUID request) {
     TrustAccess.enabled(enabled);
     return data.as(

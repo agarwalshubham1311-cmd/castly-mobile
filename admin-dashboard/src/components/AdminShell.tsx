@@ -83,7 +83,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <p className="eyebrow">Operations studio</p>
           <nav>
             {PERMISSION_NAV.filter(
-              (x) => !x.permission || user.permissions?.includes(x.permission),
+              (x) =>
+                (!x.permission || user.permissions?.includes(x.permission)) &&
+                (!x.module || user.modules?.user_management),
             ).map((x) => (
               <Link
                 key={x.href}
@@ -98,8 +100,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <hr />
           <p className="eyebrow">Pending milestones</p>
           {[
-            'Users',
-            'Verifications',
+            ...(user.modules?.user_management ? [] : ['Users', 'Verifications']),
             'Bookings',
             'Reports',
             'Moderation',
@@ -119,11 +120,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <div>
               <strong>
                 Operations /{' '}
-                {path.includes('admins')
-                  ? 'Administrators'
-                  : path.includes('audit')
-                    ? 'Audit logs'
-                    : 'Overview'}
+                {path.includes('/users')
+                  ? 'User management'
+                  : path.includes('admins')
+                    ? 'Administrators'
+                    : path.includes('audit')
+                      ? 'Audit logs'
+                      : 'Overview'}
               </strong>
               <div className="muted">Privileged access · MFA verified</div>
             </div>

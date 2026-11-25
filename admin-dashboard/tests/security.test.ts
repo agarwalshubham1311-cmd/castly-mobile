@@ -116,3 +116,32 @@ test('cookie exception requires opt-in and three exact loopback fixture origins'
   });
   assert.deepEqual(adminCookiePolicy({ NODE_ENV: 'development' }), { secure: false, prefix: '' });
 });
+
+test('user management proxy exposes only minimized fixed contracts', () => {
+  const id = '00000000-0000-0000-0000-000000000001';
+  for (const p of [
+    'users',
+    'users/' + id,
+    'users/' + id + '/bookings',
+    'users/verifications',
+    'users/verifications/' + id,
+  ])
+    assert.equal(allowedBackend('GET', p), true);
+  assert.equal(allowedBackend('POST', 'users/verifications/' + id + '/decision'), true);
+  for (const p of [
+    'users/' + id + '/documents',
+    'users/' + id + '/payments',
+    'users/../../account',
+    'users/verifications/' + id + '/storage',
+  ])
+    assert.equal(allowedBackend('GET', p), false);
+  assert.equal(allowedBackend('DELETE', 'users/' + id), false);
+  assert.equal(allowedBackend('PATCH', 'users/' + id), false);
+  assert.throws(() => cleanQuery(new URLSearchParams({ q: 'x'.repeat(81) })));
+  assert.equal(
+    new URLSearchParams(
+      cleanQuery(new URLSearchParams({ q: 'a%_ b', role: 'talent', from: '2026-01-01' })),
+    ).get('q'),
+    'a%_ b',
+  );
+});

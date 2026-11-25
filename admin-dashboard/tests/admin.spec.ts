@@ -143,3 +143,94 @@ test('guest and MFA-authenticated non-admin remain outside protected dashboard a
   await expect(page.getByRole('heading', { name: 'Restricted operations' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Administrator directory' })).toHaveCount(0);
 });
+
+test('M7.2 directory filters, support privacy, details, responsive pages and analyst denial', async ({
+  page,
+  browser,
+}) => {
+  await signin(page, 'support@example.test');
+  await expect(page.getByRole('heading', { name: 'Administrator overview' })).toBeVisible();
+  await page.route('**/api/backend/users?*', (route) => route.abort('failed'));
+  await page.getByRole('link', { name: 'Users', exact: true }).click();
+  await expect(page.getByRole('main').getByRole('alert')).toBeVisible();
+  await page.unroute('**/api/backend/users?*');
+  await page.getByRole('button', { name: 'Retry', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Test user 1', exact: true })).toBeVisible();
+  const dir = path.resolve(process.env.CASTLY_ADMIN_SCREENSHOT_DIR ?? '../artifacts/phase7');
+  fs.mkdirSync(dir, { recursive: true });
+  for (const width of [360, 390, 430, 1440]) {
+    await page.setViewportSize({ width, height: 932 });
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+    ).toBeTruthy();
+    await page.screenshot({ path: path.join(dir, `m72-users-${width}.png`), fullPage: true });
+  }
+  expect(
+    (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations,
+  ).toEqual([]);
+  await page.getByLabel('Name prefix').fill('Test user 8');
+  await page.getByLabel('Account type', { exact: true }).selectOption('talent');
+  await page.getByLabel('Verification state').selectOption('PENDING');
+  await page.getByRole('button', { name: 'Apply filters' }).click();
+  await page.getByRole('link', { name: 'Test user 88', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Talent profile', exact: true })).toBeVisible();
+  await expect(page.getByText('Lavender fixture talent', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Relevant bookings' })).toBeVisible();
+  const detail = await page.request.get('/api/backend/users/' + u(88));
+  const body = await detail.json();
+  expect(detail.status()).toBe(200);
+  expect(body.account.verification_status).toBe('PENDING');
+  expect(body).not.toHaveProperty('evidence');
+  expect((await page.request.get('/api/backend/users/verifications')).status()).toBe(403);
+  await page.screenshot({ path: path.join(dir, 'm72-user-detail-1440.png'), fullPage: true });
+  const other = await browser.newContext(),
+    analyst = await other.newPage();
+  await signin(analyst, 'analyst@example.test');
+  await expect(analyst.getByRole('heading', { name: 'Administrator overview' })).toBeVisible();
+  await expect(analyst.getByRole('link', { name: 'Users', exact: true })).toHaveCount(0);
+  expect((await analyst.request.get('/api/backend/users')).status()).toBe(403);
+  await other.close();
+});
+
+test('M7.2 reviewer decisions retain evidence privacy, reasons and stale-version protection', async ({
+  page,
+}) => {
+  await signin(page, 'super@example.test');
+  await expect(page.getByRole('heading', { name: 'Administrator overview' })).toBeVisible();
+  await page.getByRole('link', { name: 'Verifications', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Verification review' })).toBeVisible();
+  await page.getByRole('button', { name: 'Review evidence' }).click();
+  await expect(
+    page.getByText('00000000-0000-0000-0000-000000000088/review.jpg', { exact: false }),
+  ).toBeVisible();
+  const dir = path.resolve(process.env.CASTLY_ADMIN_SCREENSHOT_DIR ?? '../artifacts/phase7');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.screenshot({ path: path.join(dir, 'm72-verifications-1440.png'), fullPage: true });
+  expect(
+    (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations,
+  ).toEqual([]);
+  await page.getByRole('button', { name: 'Reject verification', exact: true }).click();
+  await page.getByLabel('Decision reason').fill('Local synthetic portfolio review rejection');
+  await page.getByRole('button', { name: 'Confirm decision', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByText('No pending applications.')).toBeVisible();
+  await expect(
+    page.getByText('Local synthetic portfolio review rejection', { exact: false }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('No evidence is available under the current privacy and review rules.'),
+  ).toBeVisible();
+  const stale = await page.request.post(
+    '/api/backend/users/verifications/72800000-0000-0000-0000-000000000002/decision',
+    {
+      headers: { Origin: 'http://127.0.0.1:3017' },
+      data: {
+        expected_revision: 1,
+        expected_status: 'PENDING',
+        decision: 'VERIFIED',
+        reason: 'Stale browser decision must fail',
+      },
+    },
+  );
+  expect(stale.status()).toBe(409);
+});

@@ -115,6 +115,8 @@ for (const withOldRpcs of [false, true]) {
   file(db, 'tests/phase6-worker-security.sql');
   file(db, 'migrations/20261119120000_admin_rbac_audit.sql');
   file(db, 'tests/admin-rbac.sql');
+  file(db, 'migrations/20261125100000_admin_user_read_models.sql');
+  file(db, 'tests/admin-users.sql');
   console.log(`PASS ${db}: inventory, refusal gates, preparation preserving legacy M1, API/RLS/Storage actors, cutover, data and ledger preservation`);
 }
 console.log(`PASS reconciliation scenarios: ${assertions} SQL assertions/catalog gates on disposable PostgreSQL; no hosted database contacted.`);

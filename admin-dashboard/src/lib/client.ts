@@ -36,6 +36,7 @@ export interface Principal {
   version: number;
   permissions?: string[];
   expires_at?: string;
+  modules?: { user_management: boolean };
 }
 export interface AdminSession {
   expired: boolean;

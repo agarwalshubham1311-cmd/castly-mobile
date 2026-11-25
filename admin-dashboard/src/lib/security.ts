@@ -1,8 +1,12 @@
 const uuid = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
 export function allowedBackend(method: string, path: string) {
   const routes: Record<string, RegExp> = {
-    GET: /^(me|principals|sessions|audit)$/,
-    POST: /^(sessions|invitations|invitations\/activate)$/,
+    GET: new RegExp(
+      `^(me|principals|sessions|audit|users|users/${uuid}|users/${uuid}/bookings|users/verifications|users/verifications/${uuid})$`,
+    ),
+    POST: new RegExp(
+      `^(sessions|invitations|invitations/activate|users/verifications/${uuid}/decision)$`,
+    ),
     PATCH: new RegExp(`^principals/${uuid}$`),
     DELETE: new RegExp(`^sessions/${uuid}$`),
   };
@@ -32,7 +36,10 @@ export function sameOrigin(origin: string | null, expected: string) {
 export function cleanQuery(query: URLSearchParams) {
   const result = new URLSearchParams();
   for (const [key, value] of query) {
-    if (!['after', 'before', 'limit'].includes(key) || value.length > 50)
+    if (
+      !['after', 'before', 'limit', 'q', 'role', 'verification', 'from', 'until'].includes(key) ||
+      value.length > (key === 'q' ? 80 : 50)
+    )
       throw new Error('Invalid query');
     result.append(key, value);
   }
@@ -54,10 +61,22 @@ export const ROLES = [
   'FINANCE_ADMIN',
   'ANALYST',
 ] as const;
-export const PERMISSION_NAV = [
+export const PERMISSION_NAV: readonly {
+  href: string;
+  label: string;
+  permission: string | null;
+  module?: string;
+}[] = [
   { href: '/dashboard', label: 'Overview', permission: null },
   { href: '/settings/admins', label: 'Administrators', permission: 'admins.manage' },
   { href: '/audit', label: 'Audit logs', permission: 'audit.read' },
+  { href: '/users', label: 'Users', permission: 'users.read', module: 'user_management' },
+  {
+    href: '/users/verifications',
+    label: 'Verifications',
+    permission: 'users.verify',
+    module: 'user_management',
+  },
 ];
 
 // Keep cookie naming and transport validation on the same local-fixture decision.
