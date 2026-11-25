@@ -68,6 +68,9 @@ class BusinessApiTest {
   @org.springframework.test.context.bean.override.mockito.MockitoBean
   com.castly.discovery.SuggestionProvider suggestionProvider;
 
+  @org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+  com.castly.discovery.BoundedProvider boundedProvider;
+
   @org.springframework.test.context.bean.override.mockito.MockitoBean
   com.castly.trust.EvidenceGateway evidenceGateway;
 
@@ -1744,22 +1747,30 @@ class BusinessApiTest {
   }
 
   private void ownerFixture(String sql) throws Exception {
+    // Send SQL as UTF-8 stdin: no Windows command-line quoting or unread output pipe.
     var process =
         new ProcessBuilder(
                 "docker",
                 "exec",
+                "-i",
                 "castly-spring-test-db",
                 "psql",
+                "-X",
                 "-U",
                 "postgres",
                 "-d",
                 "castly_spring_test",
                 "-v",
-                "ON_ERROR_STOP=1",
-                "-c",
-                sql)
+                "ON_ERROR_STOP=1")
+            .redirectErrorStream(true)
             .start();
-    assertEquals(0, process.waitFor(), new String(process.getErrorStream().readAllBytes()));
+    try (var input = process.getOutputStream()) {
+      input.write(sql.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+    String output =
+        new String(
+            process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+    assertEquals(0, process.waitFor(), output);
   }
 
   @Test
@@ -2830,28 +2841,50 @@ class BusinessApiTest {
             + "','disputes'),('"
             + operator
             + "','retention')");
-    var started = new java.util.concurrent.CountDownLatch(1);
-    var finish = new java.util.concurrent.CountDownLatch(1);
+    // Approval, matching consent and configured private storage are independent requirements.
+    call(
+            "POST",
+            "/api/v1/disputes/" + id + "/images",
+            CLIENT,
+            json.writeValueAsString(
+                Map.of(
+                    "image_base64",
+                    fixturePng(0x123456),
+                    "consent_version",
+                    "unapproved-image-v2")))
+        .andExpect(status().isServiceUnavailable());
+    org.mockito.Mockito.when(evidenceGateway.configured()).thenReturn(false);
+    call("POST", "/api/v1/disputes/" + id + "/images", CLIENT, upload)
+        .andExpect(status().isServiceUnavailable());
+    org.mockito.Mockito.verify(evidenceGateway, org.mockito.Mockito.never())
+        .upload(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.any());
+    org.mockito.Mockito.when(evidenceGateway.configured()).thenReturn(true);
+    var uploadBoundary = new ConcurrentBoundary("private image upload");
     var path = new java.util.concurrent.atomic.AtomicReference<String>();
     org.mockito.Mockito.doAnswer(
             invocation -> {
               String objectPath = invocation.getArgument(1);
               path.set(objectPath);
               byte[] sanitized = invocation.getArgument(2);
-              assertNotNull(
-                  javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(sanitized)));
-              ownerFixture(
-                  storageActor(
-                      CLIENT,
-                      "insert into storage.objects(bucket_id,name) values('trust-evidence','"
-                          + objectPath
-                          + "');do $$begin delete from storage.objects where"
-                          + " bucket_id='trust-evidence' and name='"
-                          + objectPath
-                          + "';if found then raise exception 'Reserved image was deletable';end"
-                          + " if;end$$"));
-              started.countDown();
-              assertTrue(finish.await(10, java.util.concurrent.TimeUnit.SECONDS));
+              // Match production's memory-only decode; avoid ImageIO's OS temp-file cache.
+              try (var input =
+                  new javax.imageio.stream.MemoryCacheImageInputStream(
+                      new java.io.ByteArrayInputStream(sanitized))) {
+                var readers = javax.imageio.ImageIO.getImageReaders(input);
+                assertTrue(readers.hasNext(), "Sanitized evidence must decode as an image");
+                var reader = readers.next();
+                try {
+                  reader.setInput(input);
+                  assertEquals("png", reader.getFormatName().toLowerCase(java.util.Locale.ROOT));
+                  assertNotNull(reader.read(0));
+                } finally {
+                  reader.dispose();
+                }
+              }
+              uploadBoundary.hold();
               return null;
             })
         .when(evidenceGateway)
@@ -2859,12 +2892,27 @@ class BusinessApiTest {
             org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.any());
-    try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+    try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor();
+        uploadBoundary) {
       call("POST", "/api/v1/disputes/" + id + "/images", talent, upload)
           .andExpect(status().isNotFound());
       var pending =
-          executor.submit(() -> call("POST", "/api/v1/disputes/" + id + "/images", CLIENT, upload));
-      assertTrue(started.await(10, java.util.concurrent.TimeUnit.SECONDS));
+          executor.submit(
+              () ->
+                  call("POST", "/api/v1/disputes/" + id + "/images", CLIENT, upload)
+                      .andExpect(status().isOk()));
+      uploadBoundary.awaitReached(pending);
+      // Simulate Storage under the real authenticated role in the driver thread, so SQL/RLS
+      // failures surface directly instead of disappearing behind an unsignalled latch.
+      ownerFixture(
+          storageActor(
+              CLIENT,
+              "insert into storage.objects(bucket_id,name) values('trust-evidence','"
+                  + path.get()
+                  + "');do $$begin delete from storage.objects where bucket_id='trust-evidence' and"
+                  + " name='"
+                  + path.get()
+                  + "';if found then raise exception 'Reserved image was deletable';end if;end$$"));
       String evidence =
           data.as(
               UUID.fromString(CLIENT),
@@ -2886,9 +2934,9 @@ class BusinessApiTest {
                                   + " id=:id")
                           .param("id", UUID.fromString(evidence))
                           .update()));
-      finish.countDown();
+      uploadBoundary.release();
       pending
-          .get(10, java.util.concurrent.TimeUnit.SECONDS)
+          .get(30, java.util.concurrent.TimeUnit.SECONDS)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.state").value("READY"));
       call("POST", "/api/v1/disputes/" + id + "/images", CLIENT, upload)
@@ -2976,7 +3024,7 @@ class BusinessApiTest {
       call("GET", "/api/v1/disputes/" + id, CLIENT, null)
           .andExpect(jsonPath("$.evidence[0].state").value("DELETED"));
     } finally {
-      finish.countDown();
+      uploadBoundary.release();
       ownerFixture(
           "delete from trust_private.reviewers where user_id in('"
               + OUTSIDER
@@ -3217,58 +3265,10 @@ class BusinessApiTest {
     }
   }
 
-  @Test
-  void phase5RechecksPublicFactsAfterProviderWait() throws Exception {
-    String talent = "00000000-0000-0000-0000-000000000250";
-    ownerFixture(
-        "insert into auth.users(id,email) values('"
-            + talent
-            + "','phase5-provider@fixture.invalid') on conflict(id) do nothing");
-    ownerFixture(
-        "insert into"
-            + " public.talent_profiles(id,display_name,category_id,city,day_rate,bio,skills,available,published)"
-            + " values('"
-            + talent
-            + "','Provider fixture','actors','Pune',1000,'Fixture',array['acting'],true,true)");
-    var entered = new java.util.concurrent.CountDownLatch(1);
-    var release = new java.util.concurrent.CountDownLatch(1);
-    call("DELETE", "/api/v1/discovery/me/ai-cache", CLIENT, null).andExpect(status().isOk());
-    org.mockito.Mockito.when(suggestionProvider.available()).thenReturn(true);
-    org.mockito.Mockito.when(suggestionProvider.reorder(org.mockito.ArgumentMatchers.any()))
-        .thenAnswer(
-            invocation -> {
-              entered.countDown();
-              release.await(1, java.util.concurrent.TimeUnit.SECONDS);
-              return java.util.Optional.of(List.of(0));
-            });
-    try (var tasks = java.util.concurrent.Executors.newSingleThreadExecutor()) {
-      var pending =
-          tasks.submit(
-              () ->
-                  call(
-                      "POST",
-                      "/api/v1/matching/shortlist",
-                      CLIENT,
-                      phase5Campaign(
-                              java.time.LocalDate.now().plusDays(6), 2000, "per_day", true, false)
-                          .replace("\"allow_external_ai\":false", "\"allow_external_ai\":true")));
-      assertTrue(entered.await(2, java.util.concurrent.TimeUnit.SECONDS));
-      ownerFixture("update public.talent_profiles set published=false where id='" + talent + "'");
-      release.countDown();
-      String response =
-          pending
-              .get(2, java.util.concurrent.TimeUnit.SECONDS)
-              .andExpect(status().isOk())
-              .andReturn()
-              .getResponse()
-              .getContentAsString();
-      assertFalse(
-          response.contains(talent), "Unpublished talent must be removed after provider wait");
-    } finally {
-      release.countDown();
-      ownerFixture("delete from auth.users where id='" + talent + "'");
-      org.mockito.Mockito.reset(suggestionProvider);
-    }
+  @org.junit.jupiter.params.ParameterizedTest(name = "published facts, provider result={0}")
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {true, false})
+  void phase5RechecksPublicFactsAfterProviderWait(boolean providerResult) throws Exception {
+    assertPhase5RechecksAfterProviderWait(false, providerResult);
   }
 
   @Test
@@ -3374,59 +3374,89 @@ class BusinessApiTest {
     }
   }
 
-  @Test
-  void phase5RechecksBlockAfterProviderWait() throws Exception {
+  @org.junit.jupiter.params.ParameterizedTest(name = "block visibility, provider result={0}")
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {true, false})
+  void phase5RechecksBlockAfterProviderWait(boolean providerResult) throws Exception {
+    assertPhase5RechecksAfterProviderWait(true, providerResult);
+  }
+
+  private void assertPhase5RechecksAfterProviderWait(boolean block, boolean providerResult)
+      throws Exception {
     String talent = "00000000-0000-0000-0000-000000000250";
     ownerFixture(
         "insert into auth.users(id,email) values('"
             + talent
-            + "','phase5-provider@fixture.invalid') on conflict(id) do nothing");
+            + "','phase5-provider@fixture.invalid') on conflict(id) do nothing;");
     ownerFixture(
         "insert into"
             + " public.talent_profiles(id,display_name,category_id,city,day_rate,bio,skills,available,published)"
             + " values('"
             + talent
             + "','Provider fixture','actors','Pune',1000,'Fixture',array['acting'],true,true)");
-    var entered = new java.util.concurrent.CountDownLatch(1);
-    var release = new java.util.concurrent.CountDownLatch(1);
     call("DELETE", "/api/v1/discovery/me/ai-cache", CLIENT, null).andExpect(status().isOk());
     org.mockito.Mockito.when(suggestionProvider.available()).thenReturn(true);
-    org.mockito.Mockito.when(suggestionProvider.reorder(org.mockito.ArgumentMatchers.any()))
-        .thenAnswer(
+    var providerBoundary = new ConcurrentBoundary("discovery provider response");
+    // Hold the validated provider boundary rather than racing the production transport's 250 ms
+    // deadline against docker/psql startup. BoundedProviderTest retains real timeout coverage.
+    org.mockito.Mockito.doAnswer(
             invocation -> {
-              entered.countDown();
-              release.await(1, java.util.concurrent.TimeUnit.SECONDS);
-              return java.util.Optional.of(List.of(0));
-            });
-    try (var tasks = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+              List<String> ids = invocation.getArgument(1);
+              assertTrue(
+                  ids.contains(talent), "The initial public snapshot must contain the fixture");
+              providerBoundary.hold();
+              return providerResult
+                  ? Optional.of(java.util.stream.IntStream.range(0, ids.size()).boxed().toList())
+                  : Optional.empty();
+            })
+        .when(boundedProvider)
+        .reorder(
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.anyList(),
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.anyString());
+    try (var tasks = java.util.concurrent.Executors.newSingleThreadExecutor();
+        providerBoundary) {
       var pending =
           tasks.submit(
               () ->
                   call(
-                      "POST",
-                      "/api/v1/matching/shortlist",
-                      CLIENT,
-                      phase5Campaign(
-                              java.time.LocalDate.now().plusDays(6), 2000, "per_day", true, false)
-                          .replace("\"allow_external_ai\":false", "\"allow_external_ai\":true")));
-      assertTrue(entered.await(2, java.util.concurrent.TimeUnit.SECONDS));
-      ownerFixture(
-          "insert into public.user_blocks(blocker_id,blocked_id) values('"
-              + talent
-              + "','"
-              + CLIENT
-              + "')");
-      release.countDown();
+                          "POST",
+                          "/api/v1/matching/shortlist",
+                          CLIENT,
+                          phase5Campaign(
+                                  java.time.LocalDate.now().plusDays(6),
+                                  2000,
+                                  "per_day",
+                                  true,
+                                  false)
+                              .replace("\"allow_external_ai\":false", "\"allow_external_ai\":true"))
+                      .andExpect(status().isOk()));
+      providerBoundary.awaitReached(pending);
+      if (block)
+        ownerFixture(
+            "insert into public.user_blocks(blocker_id,blocked_id) values('"
+                + talent
+                + "','"
+                + CLIENT
+                + "')");
+      else
+        ownerFixture("update public.talent_profiles set published=false where id='" + talent + "'");
+      providerBoundary.release();
       String response =
           pending
-              .get(2, java.util.concurrent.TimeUnit.SECONDS)
+              .get(30, java.util.concurrent.TimeUnit.SECONDS)
               .andExpect(status().isOk())
               .andReturn()
               .getResponse()
               .getContentAsString();
-      assertFalse(response.contains(talent), "Blocked talent must be removed after provider wait");
+      assertFalse(
+          response.contains(talent),
+          block
+              ? "Blocked talent must be removed after provider wait"
+              : "Unpublished talent must be removed after provider wait");
     } finally {
-      release.countDown();
+      providerBoundary.release();
+      org.mockito.Mockito.reset(boundedProvider);
       ownerFixture(
           "delete from public.user_blocks where blocker_id='"
               + talent
