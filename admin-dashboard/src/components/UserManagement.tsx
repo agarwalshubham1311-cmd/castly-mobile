@@ -238,7 +238,7 @@ export function UserDetails({ id }: { id: string }) {
   return (
     <>
       <Link href="/users">Back to users</Link>
-      <h1 className="mt-4">{d.account.display_name || 'Unnamed account'}</h1>
+      <h1 className="mt-4 break-all">{d.account.display_name || 'Unnamed account'}</h1>
       <section className="card">
         <h2>Account summary</h2>
         <p className="break-all">Reference: {id}</p>
@@ -256,7 +256,7 @@ export function UserDetails({ id }: { id: string }) {
         {d.talent.length ? (
           d.talent.map((t) => (
             <div key={t.user_id}>
-              <h3>{t.display_name}</h3>
+              <h3 className="break-all">{t.display_name}</h3>
               <p>
                 {t.category_id} · {t.city}
               </p>

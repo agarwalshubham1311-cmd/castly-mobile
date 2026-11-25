@@ -144,7 +144,7 @@ export default function Verifications() {
                 <p>
                   State: {detail.data.request.status} · Revision {detail.data.request.revision}
                 </p>
-                <p>{detail.data.request.statement}</p>
+                <p className="break-all">{detail.data.request.statement}</p>
                 <p>Consent: {detail.data.request.consent_version}</p>
                 <h3>Portfolio evidence references</h3>
                 {detail.data.evidence.map((e) => (
@@ -160,7 +160,7 @@ export default function Verifications() {
                 )}
                 <h3>Review history</h3>
                 {detail.data.history.map((h) => (
-                  <p key={h.id}>
+                  <p className="break-all" key={h.id}>
                     {h.decision} · {h.reason} · {new Date(h.created_at).toLocaleString()}
                   </p>
                 ))}
