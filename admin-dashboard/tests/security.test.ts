@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  adminCookiePolicy,
   allowedBackend,
   safeOrigin,
   sameOrigin,
@@ -64,4 +65,54 @@ test('user agents reduce to bounded coarse families', () => {
   assert.equal(browserFamily('Mozilla Chrome/1'), 'chromium');
   assert.equal(browserFamily('private identifier Firefox/1'), 'firefox');
   assert.equal(browserFamily('random session secret'), 'other');
+});
+
+test('production local-test flag cannot downgrade cookies on remote or mixed origins', () => {
+  const env = {
+    NODE_ENV: 'production',
+    CASTLY_ADMIN_LOCAL_TEST: 'true',
+    ADMIN_ORIGIN: 'https://admin.fixture.invalid',
+    CASTLY_API_URL: 'https://api.fixture.invalid',
+    SUPABASE_URL: 'https://auth.fixture.invalid',
+  };
+  assert.deepEqual(adminCookiePolicy(env), { secure: true, prefix: '__Host-' });
+  for (const key of ['ADMIN_ORIGIN', 'CASTLY_API_URL', 'SUPABASE_URL']) {
+    const origins = {
+      ...env,
+      ADMIN_ORIGIN: 'http://localhost:3017',
+      CASTLY_API_URL: 'http://127.0.0.1:19180',
+      SUPABASE_URL: 'http://localhost:19198',
+    };
+    for (const invalid of [
+      'https://remote.fixture.invalid',
+      'http://localhost.evil.test:3017',
+      'http://u:p@localhost:3017',
+      'http://localhost:3017/path',
+      undefined,
+    ]) {
+      assert.deepEqual(adminCookiePolicy({ ...origins, [key]: invalid }), {
+        secure: true,
+        prefix: '__Host-',
+      });
+    }
+  }
+});
+test('cookie exception requires opt-in and three exact loopback fixture origins', () => {
+  const env = {
+    NODE_ENV: 'production',
+    CASTLY_ADMIN_LOCAL_TEST: 'true',
+    ADMIN_ORIGIN: 'http://localhost:3017',
+    CASTLY_API_URL: 'http://127.0.0.1:19180',
+    SUPABASE_URL: 'http://localhost:19198',
+  };
+  assert.deepEqual(adminCookiePolicy(env), { secure: false, prefix: '' });
+  assert.deepEqual(adminCookiePolicy({ ...env, CASTLY_ADMIN_LOCAL_TEST: 'false' }), {
+    secure: true,
+    prefix: '__Host-',
+  });
+  assert.deepEqual(adminCookiePolicy({ NODE_ENV: 'production' }), {
+    secure: true,
+    prefix: '__Host-',
+  });
+  assert.deepEqual(adminCookiePolicy({ NODE_ENV: 'development' }), { secure: false, prefix: '' });
 });

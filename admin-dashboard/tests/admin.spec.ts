@@ -64,7 +64,7 @@ test('real MFA/JWT/session, invitation activation, audited change and recipient 
   await expect(invitee.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   expect((await guest.cookies()).filter((c) => c.name.startsWith('castly_admin_'))).toHaveLength(0);
   await guest.close();
-  const dir = path.resolve('../artifacts/phase7');
+  const dir = path.resolve(process.env.CASTLY_ADMIN_SCREENSHOT_DIR ?? '../artifacts/phase7');
   fs.mkdirSync(dir, { recursive: true });
   await page.goto('/dashboard');
   await expect(page.getByRole('table').getByRole('row').nth(1)).toBeVisible();
@@ -99,4 +99,47 @@ test('real MFA/JWT/session, invitation activation, audited change and recipient 
   expect(bad.status()).toBe(404);
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+});
+
+test('guest and MFA-authenticated non-admin remain outside protected dashboard and APIs', async ({
+  page,
+}) => {
+  await page.goto('/dashboard');
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+  expect((await page.request.get('/api/backend/audit')).status()).toBe(401);
+  const noOrigin = await page.request.post('/api/auth/login', {
+    data: { email: 'regular@example.test', password: 'local-fixture-only' },
+  });
+  expect(noOrigin.status()).toBe(403);
+  await signin(page, 'regular@example.test');
+  await expect(
+    page.getByText(
+      'MFA verified. If invited, activate your invitation below; otherwise contact operations.',
+    ),
+  ).toBeVisible();
+  // Without a session cookie, Spring first rejects the missing required header.
+  expect((await page.request.get('/api/backend/me')).status()).toBe(400);
+  const sessionCookie = (await page.context().cookies()).find(
+    (c) => c.name === 'castly_admin_session',
+  );
+  expect(sessionCookie).toBeUndefined();
+  await page.goto('/settings/admins');
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+  // A syntactically valid forged cookie must reach and fail actual server authorization.
+  await page.context().addCookies([
+    {
+      name: 'castly_admin_session',
+      value: u(99),
+      url: 'http://127.0.0.1:3017',
+      httpOnly: true,
+      sameSite: 'Strict',
+    },
+  ]);
+  expect((await page.request.get('/api/backend/me')).status()).toBe(403);
+  expect((await page.request.get('/api/backend/principals')).status()).toBe(403);
+  expect((await page.request.get('/api/backend/audit')).status()).toBe(403);
+  expect((await page.request.get('/api/backend/account')).status()).toBe(404);
+  await page.goto('/settings/admins');
+  await expect(page.getByRole('heading', { name: 'Restricted operations' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Administrator directory' })).toHaveCount(0);
 });

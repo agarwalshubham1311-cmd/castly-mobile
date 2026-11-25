@@ -1,29 +1,20 @@
 import 'server-only';
 import { cookies, headers as requestHeaders } from 'next/headers';
-import { safeOrigin, browserFamily } from './security';
-const cookiePrefix =
-  process.env.NODE_ENV === 'production' && process.env.CASTLY_ADMIN_LOCAL_TEST !== 'true'
-    ? '__Host-'
-    : '';
+import { safeOrigin, browserFamily, adminCookiePolicy } from './security';
+const cookiePrefix = adminCookiePolicy(process.env).prefix;
 export const ACCESS = cookiePrefix + 'castly_admin_access',
   REFRESH = cookiePrefix + 'castly_admin_refresh',
   SESSION = cookiePrefix + 'castly_admin_session';
 export function configuration() {
   if (process.env.CASTLY_ADMIN_UI_ENABLED !== 'true')
     throw new Error('Administrator dashboard is disabled');
-  const production = process.env.NODE_ENV === 'production';
-  // Production requires HTTPS even for internal API origins. Local production-build tests opt into loopback explicitly.
-  const local =
-    process.env.CASTLY_ADMIN_LOCAL_TEST === 'true' &&
-    [process.env.ADMIN_ORIGIN, process.env.CASTLY_API_URL, process.env.SUPABASE_URL].every(
-      (v) => v && /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(v),
-    );
+  const { secure } = adminCookiePolicy(process.env);
   return {
-    origin: safeOrigin(process.env.ADMIN_ORIGIN ?? '', production && !local),
-    api: safeOrigin(process.env.CASTLY_API_URL ?? '', production && !local),
-    auth: safeOrigin(process.env.SUPABASE_URL ?? '', production && !local),
+    origin: safeOrigin(process.env.ADMIN_ORIGIN ?? '', secure),
+    api: safeOrigin(process.env.CASTLY_API_URL ?? '', secure),
+    auth: safeOrigin(process.env.SUPABASE_URL ?? '', secure),
     key: process.env.SUPABASE_PUBLISHABLE_KEY ?? '',
-    secure: production && !local,
+    secure,
   };
 }
 export async function authRequest(path: string, method: string, body?: unknown, access?: string) {

@@ -59,3 +59,17 @@ export const PERMISSION_NAV = [
   { href: '/settings/admins', label: 'Administrators', permission: 'admins.manage' },
   { href: '/audit', label: 'Audit logs', permission: 'audit.read' },
 ];
+
+// Keep cookie naming and transport validation on the same local-fixture decision.
+export function adminCookiePolicy(env: Readonly<Record<string, string | undefined>>) {
+  const production = env.NODE_ENV === 'production';
+  const local =
+    env.CASTLY_ADMIN_LOCAL_TEST === 'true' &&
+    [env.ADMIN_ORIGIN, env.CASTLY_API_URL, env.SUPABASE_URL].every(
+      (v) => v && /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(v),
+    );
+  return {
+    secure: production && !local,
+    prefix: production && !local ? '__Host-' : '',
+  };
+}

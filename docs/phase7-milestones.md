@@ -1,5 +1,7 @@
 # Milestone checkpoints
 
+Latest checkpoint (25 November 2026): [milestone synchronization, M7.1 cookie fix, gap matrix and validation](phase7/continuation-2026-11-25.md). The original Phase 7 branch is preserved; integration is isolated on `integration/phase7-milestone-sync`. M7.2 remains behind the existing M7.1 review checkpoint.
+
 M7.1: implemented and locally validated; pending owner review. See architecture/RBAC/contracts and final test report appended here. Scope is admin authentication, session/MFA/revocation, invitations/roles, audit, dashboard shell and tests. M7.2–M7.4 are blocked on owner review/approval of M7.1. No suspension/verification/booking-moderation writes or business analytics claims are introduced.
 
 Phase 8 preparation is documented now; its execution is deferred to the ordered milestones after Phase 7 approvals. No deployment, privileged bootstrap, provider activation or hosted migration is authorized.

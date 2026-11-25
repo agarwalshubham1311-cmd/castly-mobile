@@ -1,5 +1,7 @@
 # Phase 7 architecture assessment and decision record
 
+Latest checkpoint (25 November 2026): [milestone synchronization, M7.1 cookie fix, gap matrix and validation](phase7/continuation-2026-11-25.md). The original Phase 7 branch is preserved; integration is isolated on `integration/phase7-milestone-sync`. M7.2 remains behind the existing M7.1 review checkpoint.
+
 ## Baseline audit (2026-11-19)
 
 The authoritative fetched head of `feat/milestone5-booking-messaging-notifications` is **3c12b515f5ba2e6ef67d0089d0fd49ea6c99a175** (Phase6 merge). Initial inspection mistakenly used a stale remote-tracking ref `b86deb4`: this clone fetches only main by default. The error was corrected by inspecting FETCH_HEAD/ls-remote, merging the actual base into the isolated feature branch without changing other branches or rewriting history, preserving all existing Phase4–6 code, and rerunning integrated checks. Results below refer to the corrected tree, not the earlier Phase3-only subset.
