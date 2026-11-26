@@ -32,6 +32,9 @@ public class AdminUsersController {
       @RequestParam(defaultValue = "")
           @Pattern(regexp = "|NOT_SUBMITTED|PENDING|UNDER_REVIEW|VERIFIED|REJECTED|EXPIRED|REVOKED")
           String verification,
+      @RequestParam(defaultValue = "")
+          @Pattern(regexp = "|ACTIVE|RESTRICTED|TEMPORARILY_SUSPENDED|PERMANENTLY_SUSPENDED")
+          String state,
       @RequestParam(required = false) LocalDate from,
       @RequestParam(required = false) LocalDate until,
       HttpServletRequest request) {
@@ -43,7 +46,7 @@ public class AdminUsersController {
         "users.read",
         "Review user directory",
         false,
-        db -> users.directory(db, after, limit, q, role, verification, from, until));
+        db -> users.directory(db, after, limit, q, role, verification, state, from, until));
   }
 
   @GetMapping("/{id}")

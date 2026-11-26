@@ -265,3 +265,122 @@ test('M7.2 reviewer decisions retain evidence privacy, reasons and stale-version
   );
   expect(finalizedPreview.status()).toBe(404);
 });
+
+test('M7.2 restricted-role suspension and independent appeal preserve account privacy', async ({
+  page,
+  browser,
+}) => {
+  await signin(page, 'm72-moderator@example.test');
+  await expect(page.getByRole('heading', { name: 'Administrator overview' })).toBeVisible();
+  await page.goto('/users/' + u(87));
+  await expect(
+    page.getByRole('heading', { name: 'Account access · ACTIVE', exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole('combobox', { name: 'Enforcement state', exact: true })
+    .selectOption('TEMPORARILY_SUSPENDED');
+  await page.getByRole('combobox', { name: 'Duration', exact: true }).selectOption('24');
+  await page
+    .getByRole('textbox', { name: 'User-visible explanation', exact: true })
+    .fill('Protective account hold while account security is reviewed.');
+  await page
+    .getByRole('textbox', { name: 'Evidence reference', exact: true })
+    .fill('local:reviewed-support-case');
+  await page
+    .getByRole('textbox', { name: 'Confidential investigation notes', exact: true })
+    .fill('Confidential browser fixture notes: never disclose to the account.');
+  await page.getByRole('button', { name: 'Review enforcement decision', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Confirm reviewed action' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Account access · TEMPORARILY SUSPENDED', exact: true }),
+  ).toBeVisible();
+  const dir = path.resolve(process.env.CASTLY_ADMIN_SCREENSHOT_DIR ?? '../artifacts/phase7');
+  fs.mkdirSync(dir, { recursive: true });
+  for (const [width, height] of [
+    [1440, 1000],
+    [360, 800],
+    [390, 844],
+    [430, 932],
+  ]) {
+    await page.setViewportSize({ width, height });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({
+      path: path.join(dir, 'm72-restrictions-' + width + '.png'),
+      fullPage: true,
+    });
+  }
+  const login = await page.request.post('http://127.0.0.1:19198/auth/v1/token', {
+    data: { email: 'restricted@example.test', password: 'local-fixture-only' },
+  });
+  const token = (await login.json()).access_token,
+    headers = { Authorization: 'Bearer ' + token };
+  const access = await page.request.get('http://127.0.0.1:19180/api/v1/account/access', {
+    headers,
+  });
+  expect(access.status()).toBe(200);
+  const current = await access.json();
+  expect(current.state).toBe('TEMPORARILY_SUSPENDED');
+  expect(JSON.stringify(current)).not.toContain('Confidential browser fixture notes');
+  const appeal = await page.request.post('http://127.0.0.1:19180/api/v1/account/appeals', {
+    headers,
+    data: {
+      request_key: crypto.randomUUID(),
+      operation: 'APPEAL_SUBMIT',
+      payload: {
+        decision_id: current.decisions[0].id,
+        statement: 'Please independently review the account security evidence.',
+        evidence_ref: 'local:appeal-evidence',
+      },
+    },
+  });
+  expect(appeal.status()).toBe(200);
+  const appealId = (await appeal.json()).resource_id;
+  const ownReview = await page.request.post('/api/backend/users/' + u(87) + '/access', {
+    headers: { Origin: 'http://127.0.0.1:3017' },
+    data: {
+      request_key: crypto.randomUUID(),
+      operation: 'APPEAL_REVIEW',
+      payload: { appeal_id: appealId, appeal_version: 1 },
+    },
+  });
+  expect(ownReview.status()).toBe(403);
+  const context = await browser.newContext(),
+    ops = await context.newPage();
+  await ops.setViewportSize({ width: 1440, height: 1000 });
+  await signin(ops, 'operations@example.test');
+  await expect(ops.getByRole('heading', { name: 'Administrator overview' })).toBeVisible();
+  await ops.goto('/account-queues');
+  await expect(
+    ops.getByRole('link', { name: 'Review account ' + u(87), exact: true }),
+  ).toBeVisible();
+  await ops.screenshot({ path: path.join(dir, 'm72-appeal-queue-1440.png'), fullPage: true });
+  await ops.goto('/users/' + u(87));
+  await ops.getByRole('button', { name: 'Begin independent review' }).click();
+  await ops.getByRole('dialog').getByRole('button', { name: 'Confirm reviewed action' }).click();
+  await expect(ops.getByText('UNDER_REVIEW · Due', { exact: false })).toBeVisible();
+  await ops
+    .getByRole('combobox', { name: 'Enforcement state', exact: true })
+    .selectOption('ACTIVE');
+  await ops
+    .getByRole('textbox', { name: 'Evidence reference', exact: true })
+    .fill('local:independent-review');
+  await ops
+    .getByRole('textbox', { name: 'User-visible explanation', exact: true })
+    .fill('Independent review supports restoring account access.');
+  await ops
+    .getByRole('textbox', { name: 'Public appeal resolution', exact: true })
+    .fill('Independent review supports restoring account access.');
+  await ops.getByRole('button', { name: 'Review overturned', exact: true }).click();
+  await ops.getByRole('dialog').getByRole('button', { name: 'Confirm reviewed action' }).click();
+  await expect(
+    ops.getByRole('heading', { name: 'Account access · ACTIVE', exact: true }),
+  ).toBeVisible();
+  await expect(ops.getByText('OVERTURNED · Due', { exact: false })).toBeVisible();
+  await ops.screenshot({ path: path.join(dir, 'm72-appeal-overturned-1440.png'), fullPage: true });
+  expect(
+    (await new AxeBuilder({ page: ops }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations,
+  ).toEqual([]);
+  await context.close();
+});

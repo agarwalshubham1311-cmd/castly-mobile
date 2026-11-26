@@ -38,7 +38,10 @@ const { assert, launch } = require('./browser-utils.cjs');
     const results = [];
     for (const [name, width, height] of targets) {
       const relative = `${name}-${width}x${height}.png`;
-      const file = path.resolve(__dirname, '../artifacts/screenshots', relative);
+      const file = path.resolve(
+        process.env.CASTLY_SCREENSHOT_DIR || path.join(__dirname, '../artifacts/screenshots'),
+        relative,
+      );
       const bytes = fs.readFileSync(file);
       assert.equal(bytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
       const decoded = await page.evaluate(async (data) => {
@@ -70,7 +73,10 @@ const { assert, launch } = require('./browser-utils.cjs');
       });
     }
     fs.writeFileSync(
-      path.resolve(__dirname, '../artifacts/screenshots/manifest.json'),
+      path.resolve(
+        process.env.CASTLY_SCREENSHOT_DIR || path.join(__dirname, '../artifacts/screenshots'),
+        'manifest.json',
+      ),
       JSON.stringify(
         {
           verifiedAt: new Date().toISOString(),

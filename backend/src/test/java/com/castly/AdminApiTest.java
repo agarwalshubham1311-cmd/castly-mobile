@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.*;
       "castly.jwt.mode=jwks",
       "castly.admin.enabled=true",
       "castly.admin.users-enabled=true",
+      "castly.admin.enforcement-enabled=true",
       "castly.subscriptions.enabled=true",
       "castly.trust.verification-enabled=true",
       "castly.trust.reporting-enabled=true",
@@ -114,6 +115,10 @@ class AdminApiTest {
 
   @BeforeEach
   void fixture() throws Exception {
+    owner(
+        "truncate"
+            + " enforcement_private.accounts,enforcement_private.capabilities,enforcement_private.decisions,enforcement_private.notes,enforcement_private.proposals,enforcement_private.appeals,enforcement_private.commands,enforcement_private.events,enforcement_private.notices"
+            + " restart identity cascade;");
     owner(Files.readString(Path.of("scripts/admin-test-fixtures.sql")));
   }
 
@@ -1002,5 +1007,712 @@ class AdminApiTest {
             + "'; delete from engagement_private.analytics_admins where user_id='"
             + u(31)
             + "';");
+  }
+
+  Map<String, Object> enforcementPayload(long version, String state, int hours) {
+    return Map.of(
+        "version",
+        version,
+        "state",
+        state,
+        "duration_hours",
+        hours,
+        "reason_code",
+        "ACCOUNT_COMPROMISE",
+        "explanation",
+        "Protective account security hold.",
+        "evidence_ref",
+        "local:support-case",
+        "notes",
+        "Confidential local investigation only",
+        "denied",
+        List.of("discovery"));
+  }
+
+  ResultActions accountCommand(
+      int admin,
+      String session,
+      int target,
+      String operation,
+      Map<String, Object> payload,
+      String key)
+      throws Exception {
+    return call(
+        "POST",
+        "/users/" + u(target) + "/access",
+        admin,
+        session,
+        json.writeValueAsString(
+            Map.of("request_key", key, "operation", operation, "payload", payload)));
+  }
+
+  ResultActions accountCommand(
+      int admin, String session, int target, String operation, Map<String, Object> payload)
+      throws Exception {
+    return accountCommand(admin, session, target, operation, payload, UUID.randomUUID().toString());
+  }
+
+  String accountState(int admin, String session, int target) throws Exception {
+    return object(
+            call("GET", "/users/" + u(target) + "/access", admin, session, null)
+                .andExpect(status().isOk()))
+        .get("state")
+        .toString();
+  }
+
+  @Test
+  void accountAuthorityAndDurationAreEnforcedInTheDatabase() throws Exception {
+    String mod = login(32),
+        support = login(33),
+        ops = login(36),
+        finance = login(35),
+        analyst = login(34);
+    for (var caller :
+        List.of(Map.entry(33, support), Map.entry(35, finance), Map.entry(34, analyst)))
+      accountCommand(
+              caller.getKey(),
+              caller.getValue(),
+              80,
+              "ENFORCE",
+              enforcementPayload(0, "TEMPORARILY_SUSPENDED", 1))
+          .andExpect(status().isForbidden());
+    accountCommand(32, mod, 80, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 169))
+        .andExpect(status().isConflict());
+    accountCommand(32, mod, 80, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 24))
+        .andExpect(status().isOk());
+    assertEquals("TEMPORARILY_SUSPENDED", accountState(32, mod, 80));
+    accountCommand(32, mod, 80, "ENFORCE", enforcementPayload(1, "TEMPORARILY_SUSPENDED", 168))
+        .andExpect(status().isConflict());
+    accountCommand(36, ops, 81, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 721))
+        .andExpect(status().isConflict());
+    accountCommand(36, ops, 81, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 720))
+        .andExpect(status().isOk());
+    accountCommand(32, mod, 82, "PROPOSE", enforcementPayload(0, "PERMANENTLY_SUSPENDED", 0))
+        .andExpect(status().isForbidden());
+    accountCommand(
+            33,
+            support,
+            82,
+            "ESCALATE",
+            Map.of("notes", "Escalate reported behavior for independent review"))
+        .andExpect(status().isOk());
+    assertEquals("ACTIVE", accountState(33, support, 82));
+  }
+
+  @Test
+  void accountCommandsRequireRecentMfaAndCannotTargetAdministrators() throws Exception {
+    String session = login(31);
+    var body =
+        json.writeValueAsString(
+            Map.of(
+                "request_key",
+                UUID.randomUUID(),
+                "operation",
+                "ENFORCE",
+                "payload",
+                enforcementPayload(0, "TEMPORARILY_SUSPENDED", 1)));
+    call("POST", "/users/" + u(80) + "/access", 31, session, body, "aal2", 301)
+        .andExpect(status().isForbidden());
+    call("POST", "/users/" + u(80) + "/access", 31, session, body, "aal1", 0)
+        .andExpect(status().isForbidden());
+    accountCommand(31, session, 31, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 1))
+        .andExpect(status().isForbidden());
+    accountCommand(31, session, 32, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 1))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void permanentSuspensionAndReinstatementRequireDistinctSuperAdministrators() throws Exception {
+    String first = login(31), second = login(39);
+    var proposal =
+        object(
+            accountCommand(
+                    31, first, 80, "PROPOSE", enforcementPayload(0, "PERMANENTLY_SUSPENDED", 0))
+                .andExpect(status().isOk()));
+    assertEquals("ACTIVE", accountState(31, first, 80));
+    var approval = Map.<String, Object>of("proposal_id", proposal.get("resource_id"));
+    accountCommand(31, first, 80, "APPROVE", approval).andExpect(status().isForbidden());
+    accountCommand(39, second, 80, "APPROVE", approval).andExpect(status().isOk());
+    assertEquals("PERMANENTLY_SUSPENDED", accountState(31, first, 80));
+    accountCommand(31, first, 80, "REINSTATE", enforcementPayload(1, "ACTIVE", 0))
+        .andExpect(status().isForbidden());
+    var reinstate =
+        object(
+            accountCommand(31, first, 80, "PROPOSE", enforcementPayload(1, "ACTIVE", 0))
+                .andExpect(status().isOk()));
+    accountCommand(39, second, 80, "APPROVE", Map.of("proposal_id", reinstate.get("resource_id")))
+        .andExpect(status().isOk());
+    assertEquals("ACTIVE", accountState(31, first, 80));
+  }
+
+  @Test
+  void accountCommandsAreIdempotentVersionedAndImmutable() throws Exception {
+    String mod = login(32), key = UUID.randomUUID().toString();
+    var payload = enforcementPayload(0, "TEMPORARILY_SUSPENDED", 1);
+    var first =
+        object(accountCommand(32, mod, 80, "ENFORCE", payload, key).andExpect(status().isOk()));
+    assertEquals(
+        first,
+        object(accountCommand(32, mod, 80, "ENFORCE", payload, key).andExpect(status().isOk())));
+    accountCommand(32, mod, 80, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 2), key)
+        .andExpect(status().isConflict());
+    accountCommand(32, mod, 80, "REINSTATE", enforcementPayload(0, "ACTIVE", 0))
+        .andExpect(status().isConflict());
+    assertEquals(
+        Integer.valueOf(0),
+        data.<Integer>as(
+            UUID.fromString(u(80)),
+            db -> db.sql("update enforcement_private.accounts set state='ACTIVE'").update()));
+    assertEquals("TEMPORARILY_SUSPENDED", accountState(32, mod, 80));
+    assertThrows(
+        org.springframework.dao.DataAccessException.class,
+        () ->
+            data.as(
+                UUID.fromString(u(80)),
+                db -> db.sql("delete from enforcement_private.events").update()));
+    assertEquals(
+        Integer.valueOf(1),
+        data.<Integer>as(
+            UUID.fromString(u(80)),
+            db ->
+                db.sql("select count(*) from enforcement_private.notices")
+                    .query(Integer.class)
+                    .single()));
+    assertEquals(
+        Integer.valueOf(0),
+        data.<Integer>as(
+            UUID.fromString(u(81)),
+            db ->
+                db.sql("select count(*) from enforcement_private.notices")
+                    .query(Integer.class)
+                    .single()));
+  }
+
+  @Test
+  void temporaryExpiryUsesDatabaseTimeAndPreservesHistory() throws Exception {
+    String mod = login(32);
+    accountCommand(32, mod, 80, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 1))
+        .andExpect(status().isOk());
+    assertFalse(
+        data.<Boolean>as(
+            UUID.fromString(u(80)),
+            db ->
+                db.sql(
+                        "select"
+                            + " enforcement_private.allowed(enforcement_private.actor(),'messaging')")
+                    .query(Boolean.class)
+                    .single()));
+    owner(
+        "update enforcement_private.accounts set until_at=clock_timestamp()-interval '1 second'"
+            + " where user_id='"
+            + u(80)
+            + "';");
+    assertEquals("ACTIVE", accountState(32, mod, 80));
+    assertTrue(
+        data.<Boolean>as(
+            UUID.fromString(u(80)),
+            db ->
+                db.sql(
+                        "select"
+                            + " enforcement_private.allowed(enforcement_private.actor(),'messaging')")
+                    .query(Boolean.class)
+                    .single()));
+    assertEquals(
+        Integer.valueOf(1),
+        data.<Integer>as(
+            UUID.fromString(u(80)),
+            db ->
+                db.sql("select count(*) from enforcement_private.decisions")
+                    .query(Integer.class)
+                    .single()));
+  }
+
+  ResultActions ownAppeal(int user, String operation, Map<String, Object> payload)
+      throws Exception {
+    return mvc.perform(
+        post("/api/v1/account/appeals")
+            .with(jwt().jwt(j -> j.subject(u(user))))
+            .contentType("application/json")
+            .content(
+                json.writeValueAsString(
+                    Map.of(
+                        "request_key",
+                        UUID.randomUUID(),
+                        "operation",
+                        operation,
+                        "payload",
+                        payload))));
+  }
+
+  @Test
+  void appealsRequireOwnershipDeadlinesIndependentReviewAndDoNotLiftRestrictions()
+      throws Exception {
+    String mod = login(32), ops = login(36);
+    var result =
+        object(
+            accountCommand(
+                    32, mod, 80, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 24))
+                .andExpect(status().isOk()));
+    var appeal =
+        Map.<String, Object>of(
+            "decision_id",
+            result.get("resource_id"),
+            "statement",
+            "Please independently review this protective hold.",
+            "evidence_ref",
+            "local:new-case");
+    ownAppeal(81, "APPEAL_SUBMIT", appeal).andExpect(status().isConflict());
+    var submitted = object(ownAppeal(80, "APPEAL_SUBMIT", appeal).andExpect(status().isOk()));
+    ownAppeal(80, "APPEAL_SUBMIT", appeal).andExpect(status().isConflict());
+    assertEquals("TEMPORARILY_SUSPENDED", accountState(32, mod, 80));
+    var review =
+        Map.<String, Object>of("appeal_id", submitted.get("resource_id"), "appeal_version", 1);
+    accountCommand(32, mod, 80, "APPEAL_REVIEW", review).andExpect(status().isForbidden());
+    accountCommand(36, ops, 80, "APPEAL_REVIEW", review).andExpect(status().isOk());
+    var decision = new HashMap<String, Object>(enforcementPayload(1, "ACTIVE", 0));
+    decision.putAll(
+        Map.of(
+            "appeal_id",
+            submitted.get("resource_id"),
+            "appeal_version",
+            2,
+            "outcome",
+            "OVERTURNED",
+            "resolution",
+            "Independent evidence supports reinstatement."));
+    accountCommand(
+            36,
+            ops,
+            80,
+            "APPEAL_DECIDE",
+            Map.of(
+                "appeal_id",
+                submitted.get("resource_id"),
+                "appeal_version",
+                2,
+                "outcome",
+                "OVERTURNED",
+                "resolution",
+                "Resolution without the mandatory decision evidence must rollback."))
+        .andExpect(status().isConflict());
+    assertEquals("TEMPORARILY_SUSPENDED", accountState(36, ops, 80));
+    var forbiddenPermanent = new HashMap<String, Object>(decision);
+    forbiddenPermanent.put("state", "PERMANENTLY_SUSPENDED");
+    forbiddenPermanent.put("outcome", "MODIFIED");
+    accountCommand(36, ops, 80, "APPEAL_DECIDE", forbiddenPermanent)
+        .andExpect(status().isForbidden());
+    assertEquals("TEMPORARILY_SUSPENDED", accountState(36, ops, 80));
+    accountCommand(36, ops, 80, "APPEAL_DECIDE", decision).andExpect(status().isOk());
+    assertEquals("ACTIVE", accountState(36, ops, 80));
+    owner(
+        "update enforcement_private.decisions set notified_at=clock_timestamp()-interval '31 days'"
+            + " where id='"
+            + result.get("resource_id")
+            + "';");
+    ownAppeal(80, "APPEAL_SUBMIT", appeal).andExpect(status().isConflict());
+  }
+
+  @Test
+  void suspensionSerializesWithBookingCreationAndPreservesCounterpartyObligations()
+      throws Exception {
+    owner(
+        "insert into"
+            + " public.talent_profiles(id,display_name,category_id,city,day_rate,bio,skills,published)"
+            + " values('"
+            + u(80)
+            + "','Concurrency fixture','actors','Pune',1000,'Fixture','{}',true) on conflict(id) do"
+            + " update set published=true;");
+    String mod = login(32);
+    var entered = new java.util.concurrent.CountDownLatch(1);
+    var release = new java.util.concurrent.CountDownLatch(1);
+    var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+    try {
+      var booking =
+          executor.submit(
+              () ->
+                  data.as(
+                      UUID.fromString(u(1)),
+                      db -> {
+                        var row =
+                            ActorDatabase.one(
+                                db.sql(
+                                        "insert into"
+                                            + " public.bookings(client_id,talent_id,project_type,proposed_date,location,requirements,indicative_budget)"
+                                            + " values(:c,:t,'Serial"
+                                            + " obligation',current_date+2,'Pune','Concurrency"
+                                            + " fixture',1000) returning id")
+                                    .param("c", UUID.fromString(u(1)))
+                                    .param("t", UUID.fromString(u(80))));
+                        entered.countDown();
+                        try {
+                          if (!release.await(10, java.util.concurrent.TimeUnit.SECONDS))
+                            throw new IllegalStateException("Release timeout");
+                        } catch (InterruptedException e) {
+                          Thread.currentThread().interrupt();
+                          throw new RuntimeException(e);
+                        }
+                        return row;
+                      }));
+      assertTrue(entered.await(10, java.util.concurrent.TimeUnit.SECONDS));
+      var hold =
+          executor.submit(
+              () ->
+                  accountCommand(
+                          32, mod, 80, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 1))
+                      .andExpect(status().isOk()));
+      // Observe the real PostgreSQL lock waiter, rather than depending on a scheduler sleep.
+      long deadline = System.nanoTime() + java.time.Duration.ofSeconds(5).toNanos();
+      boolean waiting = false;
+      while (System.nanoTime() < deadline && !waiting) {
+        waiting =
+            data.as(
+                UUID.fromString(u(1)),
+                db ->
+                    db.sql(
+                            "select exists(select 1 from pg_locks where locktype='advisory' and not"
+                                + " granted)")
+                        .query(Boolean.class)
+                        .single());
+        Thread.onSpinWait();
+      }
+      assertTrue(waiting, "Restriction must wait for the business transaction's account lock");
+      assertFalse(hold.isDone());
+      release.countDown();
+      var existing = booking.get(10, java.util.concurrent.TimeUnit.SECONDS);
+      hold.get(10, java.util.concurrent.TimeUnit.SECONDS);
+      assertEquals(
+          Integer.valueOf(1),
+          data.<Integer>as(
+              UUID.fromString(u(1)),
+              db ->
+                  db.sql("select count(*) from public.bookings where id=:b")
+                      .param("b", UUID.fromString(existing.get("id").toString()))
+                      .query(Integer.class)
+                      .single()));
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () ->
+              data.as(
+                  UUID.fromString(u(1)),
+                  db ->
+                      db.sql(
+                              "insert into"
+                                  + " public.bookings(client_id,talent_id,project_type,proposed_date,location,requirements,indicative_budget)"
+                                  + " values(:c,:t,'Blocked new"
+                                  + " request',current_date+2,'Pune','Isolated concurrency"
+                                  + " fixture',1000)")
+                          .param("c", UUID.fromString(u(1)))
+                          .param("t", UUID.fromString(u(80)))
+                          .update()));
+      assertEquals(
+          Integer.valueOf(1),
+          data.<Integer>as(
+              UUID.fromString(u(1)),
+              db ->
+                  db.sql("update public.bookings set status='cancelled' where id=:b")
+                      .param("b", UUID.fromString(existing.get("id").toString()))
+                      .update()));
+    } finally {
+      release.countDown();
+      executor.shutdownNow();
+    }
+  }
+
+  @Test
+  void appealReopeningRequiresNewEvidenceAndIndependentDetermination() throws Exception {
+    String mod = login(32), ops = login(36);
+    var decision =
+        object(
+            accountCommand(
+                    32, mod, 80, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 24))
+                .andExpect(status().isOk()));
+    var submitted =
+        object(
+            ownAppeal(
+                    80,
+                    "APPEAL_SUBMIT",
+                    Map.of(
+                        "decision_id",
+                        decision.get("resource_id"),
+                        "statement",
+                        "Please review this case with independent evidence.",
+                        "evidence_ref",
+                        "local:initial"))
+                .andExpect(status().isOk()));
+    String id = submitted.get("resource_id").toString();
+    ownAppeal(80, "APPEAL_WITHDRAW", Map.of("appeal_id", id, "appeal_version", 1))
+        .andExpect(status().isOk());
+    ownAppeal(
+            80,
+            "APPEAL_REOPEN_REQUEST",
+            Map.of(
+                "appeal_id",
+                id,
+                "appeal_version",
+                2,
+                "statement",
+                "Significant new evidence available for independent review.",
+                "evidence_ref",
+                "local:initial"))
+        .andExpect(status().isConflict());
+    ownAppeal(
+            80,
+            "APPEAL_REOPEN_REQUEST",
+            Map.of(
+                "appeal_id",
+                id,
+                "appeal_version",
+                2,
+                "statement",
+                "Significant new evidence available for independent review.",
+                "evidence_ref",
+                "local:significant-new"))
+        .andExpect(status().isOk());
+    accountCommand(
+            32,
+            mod,
+            80,
+            "APPEAL_REOPEN",
+            Map.of("appeal_id", id, "appeal_version", 3, "significant", true))
+        .andExpect(status().isForbidden());
+    accountCommand(
+            36,
+            ops,
+            80,
+            "APPEAL_REOPEN",
+            Map.of("appeal_id", id, "appeal_version", 3, "significant", false))
+        .andExpect(status().isConflict());
+    accountCommand(
+            36,
+            ops,
+            80,
+            "APPEAL_REOPEN",
+            Map.of("appeal_id", id, "appeal_version", 3, "significant", true))
+        .andExpect(status().isOk());
+    assertEquals("TEMPORARILY_SUSPENDED", accountState(36, ops, 80));
+  }
+
+  void seededRestrictedTalent() throws Exception {
+    owner(
+        "insert into"
+            + " public.talent_profiles(id,display_name,category_id,city,day_rate,bio,skills,published)"
+            + " values('"
+            + u(80)
+            + "','Concurrency fixture','actors','Pune',1000,'Fixture','{}',true) on conflict(id) do"
+            + " update set published=true;");
+  }
+
+  void assertMutationSerialized(
+      java.util.function.Function<org.springframework.jdbc.core.simple.JdbcClient, Object> mutation)
+      throws Exception {
+    String mod = login(32);
+    var entered = new java.util.concurrent.CountDownLatch(1);
+    var release = new java.util.concurrent.CountDownLatch(1);
+    var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+    try {
+      var business =
+          executor.submit(
+              () ->
+                  data.as(
+                      UUID.fromString(u(80)),
+                      db -> {
+                        Object result = mutation.apply(db);
+                        entered.countDown();
+                        try {
+                          if (!release.await(10, java.util.concurrent.TimeUnit.SECONDS))
+                            throw new IllegalStateException("Release timeout");
+                        } catch (InterruptedException e) {
+                          Thread.currentThread().interrupt();
+                          throw new RuntimeException(e);
+                        }
+                        return result;
+                      }));
+      assertTrue(entered.await(10, java.util.concurrent.TimeUnit.SECONDS));
+      var hold =
+          executor.submit(
+              () ->
+                  accountCommand(
+                          32, mod, 80, "ENFORCE", enforcementPayload(0, "TEMPORARILY_SUSPENDED", 1))
+                      .andExpect(status().isOk()));
+      boolean waiting = false;
+      long deadline = System.nanoTime() + java.time.Duration.ofSeconds(5).toNanos();
+      while (System.nanoTime() < deadline && !waiting) {
+        waiting =
+            data.as(
+                UUID.fromString(u(1)),
+                db ->
+                    db.sql(
+                            "select exists(select 1 from pg_locks where locktype='advisory' and not"
+                                + " granted)")
+                        .query(Boolean.class)
+                        .single());
+        Thread.onSpinWait();
+      }
+      assertTrue(waiting, "Restriction must serialize with the actual business trigger");
+      assertFalse(hold.isDone());
+      release.countDown();
+      business.get(10, java.util.concurrent.TimeUnit.SECONDS);
+      hold.get(10, java.util.concurrent.TimeUnit.SECONDS);
+      assertThrows(
+          org.springframework.dao.DataAccessException.class,
+          () -> data.as(UUID.fromString(u(80)), mutation));
+    } finally {
+      release.countDown();
+      executor.shutdownNow();
+    }
+  }
+
+  @Test
+  void restrictionSerializesWithPublicProfilePublication() throws Exception {
+    seededRestrictedTalent();
+    assertMutationSerialized(
+        db ->
+            db.sql("update public.talent_profiles set published=true where id=:u")
+                .param("u", UUID.fromString(u(80)))
+                .update());
+  }
+
+  @Test
+  void restrictionSerializesWithMessageSending() throws Exception {
+    seededRestrictedTalent();
+    owner(
+        "insert into"
+            + " public.bookings(client_id,talent_id,project_type,proposed_date,location,requirements,indicative_budget,status)"
+            + " values('"
+            + u(1)
+            + "','"
+            + u(80)
+            + "','Existing message obligation',current_date+2,'Pune','Isolated concurrency"
+            + " fixture',1000,'accepted');insert into public.conversations(client_id,talent_id)"
+            + " values('"
+            + u(1)
+            + "','"
+            + u(80)
+            + "') on conflict do nothing;");
+    UUID conversation =
+        data.as(
+            UUID.fromString(u(80)),
+            db ->
+                db.sql("select id from public.conversations where client_id=:c and talent_id=:t")
+                    .param("c", UUID.fromString(u(1)))
+                    .param("t", UUID.fromString(u(80)))
+                    .query(UUID.class)
+                    .single());
+    assertMutationSerialized(
+        db ->
+            db.sql(
+                    "insert into public.messages(conversation_id,sender_id,body)"
+                        + " values(:c,:u,'Local concurrency fixture')")
+                .param("c", conversation)
+                .param("u", UUID.fromString(u(80)))
+                .update());
+    assertEquals(
+        Integer.valueOf(1),
+        data.<Integer>as(
+            UUID.fromString(u(1)),
+            db ->
+                db.sql(
+                        "insert into public.messages(conversation_id,sender_id,body)"
+                            + " values(:c,:u,'Counterparty retains existing access')")
+                    .param("c", conversation)
+                    .param("u", UUID.fromString(u(1)))
+                    .update()));
+  }
+
+  @Test
+  void restrictionSerializesWithBookingAcceptance() throws Exception {
+    seededRestrictedTalent();
+    owner(
+        "insert into"
+            + " public.bookings(id,client_id,talent_id,project_type,proposed_date,location,requirements,indicative_budget)"
+            + " values('74000000-0000-0000-0000-000000000001','"
+            + u(1)
+            + "','"
+            + u(80)
+            + "','Acceptance race',current_date+2,'Pune','Isolated concurrency fixture',1000) on"
+            + " conflict do nothing;insert into"
+            + " public.bookings(id,client_id,talent_id,project_type,proposed_date,location,requirements,indicative_budget)"
+            + " values('74000000-0000-0000-0000-000000000002','"
+            + u(1)
+            + "','"
+            + u(80)
+            + "','Second acceptance race',current_date+2,'Pune','Isolated concurrency"
+            + " fixture',1000) on conflict do nothing;");
+    assertMutationSerialized(
+        db -> {
+          // A fresh requested row is necessary for each acceptance attempt; no status reset bypass.
+          var requested =
+              ActorDatabase.rows(
+                  db.sql(
+                          "select id from public.bookings where client_id=:c and talent_id=:t and"
+                              + " status='requested' order by id limit 1")
+                      .param("c", UUID.fromString(u(1)))
+                      .param("t", UUID.fromString(u(80))));
+          if (requested.isEmpty())
+            throw new IllegalStateException("Missing requested booking fixture");
+          return db.sql("update public.bookings set status='accepted' where id=:b")
+              .param("b", UUID.fromString(requested.getFirst().get("id").toString()))
+              .update();
+        });
+  }
+
+  @Test
+  void permanentAppealOverturnNeedsTwoIndependentSuperAdministrators() throws Exception {
+    owner(
+        "begin;set local castly.admin_bootstrap_reviewed='M7.1-owner-approved';insert into"
+            + " admin_private.principals(user_id,roles,state) values('"
+            + u(40)
+            + "',array['SUPER_ADMIN'],'active'),('"
+            + u(41)
+            + "',array['SUPER_ADMIN'],'active');commit;");
+    String first = login(31), second = login(39), reviewer = login(40), approver = login(41);
+    var proposal =
+        object(
+            accountCommand(
+                    31, first, 80, "PROPOSE", enforcementPayload(0, "PERMANENTLY_SUSPENDED", 0))
+                .andExpect(status().isOk()));
+    var permanent =
+        object(
+            accountCommand(
+                    39, second, 80, "APPROVE", Map.of("proposal_id", proposal.get("resource_id")))
+                .andExpect(status().isOk()));
+    var appeal =
+        object(
+            ownAppeal(
+                    80,
+                    "APPEAL_SUBMIT",
+                    Map.of(
+                        "decision_id",
+                        permanent.get("resource_id"),
+                        "statement",
+                        "Independent review requested with significant account evidence.",
+                        "evidence_ref",
+                        "local:permanent-appeal"))
+                .andExpect(status().isOk()));
+    var review =
+        Map.<String, Object>of("appeal_id", appeal.get("resource_id"), "appeal_version", 1);
+    accountCommand(31, first, 80, "APPEAL_REVIEW", review).andExpect(status().isForbidden());
+    accountCommand(39, second, 80, "APPEAL_REVIEW", review).andExpect(status().isForbidden());
+    accountCommand(40, reviewer, 80, "APPEAL_REVIEW", review).andExpect(status().isOk());
+    var payload = new HashMap<String, Object>(enforcementPayload(1, "ACTIVE", 0));
+    payload.putAll(
+        Map.of(
+            "appeal_id",
+            appeal.get("resource_id"),
+            "appeal_version",
+            2,
+            "outcome",
+            "OVERTURNED",
+            "resolution",
+            "Independent appeal evidence supports reinstatement."));
+    var overturn =
+        object(
+            accountCommand(40, reviewer, 80, "APPEAL_DECIDE", payload).andExpect(status().isOk()));
+    assertEquals("PERMANENTLY_SUSPENDED", accountState(31, first, 80));
+    var approval = Map.<String, Object>of("proposal_id", overturn.get("resource_id"));
+    accountCommand(40, reviewer, 80, "APPROVE", approval).andExpect(status().isForbidden());
+    accountCommand(31, first, 80, "APPROVE", approval).andExpect(status().isForbidden());
+    accountCommand(41, approver, 80, "APPROVE", approval).andExpect(status().isOk());
+    assertEquals("ACTIVE", accountState(41, approver, 80));
   }
 }

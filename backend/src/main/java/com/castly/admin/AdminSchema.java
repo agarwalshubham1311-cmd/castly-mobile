@@ -22,7 +22,8 @@ public class AdminSchema implements InitializingBean {
           db -> {
             if (db.sql(
                         "select count(*) from admin_private.role_permissions where"
-                            + " role='SUPER_ADMIN'")
+                            + " role='SUPER_ADMIN' and permission in"
+                            + " ('users.read','users.suspend','users.verify','bookings.read','bookings.manage','reports.review','moderation.action','subscriptions.read','finance.read','analytics.read','admins.manage','audit.read')")
                     .query(Integer.class)
                     .single()
                 != 12) throw new IllegalStateException("Reviewed M7.1 schema is required");

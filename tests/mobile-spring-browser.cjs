@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Buffer } = require('node:buffer');
 const id = (n) => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
+let accessAppeals = [];
 const stamp = '2026-11-02T00:00:00Z';
 const accounts = new Map([
   [
@@ -205,7 +206,15 @@ function session(subject) {
           },
           body: status === 204 ? '' : JSON.stringify(value),
         });
-      if (relative === 'engagement/configuration') return finish({push:false,email:false,engagement:false,analytics:false,push_delivery:false,email_delivery:false});
+      if (relative === 'engagement/configuration')
+        return finish({
+          push: false,
+          email: false,
+          engagement: false,
+          analytics: false,
+          push_delivery: false,
+          email_delivery: false,
+        });
       if (method === 'OPTIONS') return finish({}, 204);
       if (relative === 'categories') return finish(categories);
       if (relative === 'talents' || relative === 'portfolio') {
@@ -224,6 +233,43 @@ function session(subject) {
         );
       if (portfolio) return finish(assets.filter((a) => a.talent_id === portfolio[1]));
       if (!subject || expireAll) return finish({}, 401);
+      if (relative === 'account/access')
+        return finish({
+          available: true,
+          state: 'TEMPORARILY_SUSPENDED',
+          version: 1,
+          explanation: 'Protective account hold while account security is reviewed.',
+          until_at: '2026-11-27T12:00:00Z',
+          denied: ['messaging', 'profile', 'booking_create'],
+          decisions: [
+            {
+              id: id(950),
+              state: 'TEMPORARILY_SUSPENDED',
+              explanation: 'Protective account hold while account security is reviewed.',
+              reason_code: 'ACCOUNT_COMPROMISE',
+              notified_at: '2026-11-26T10:00:00Z',
+              until_at: '2026-11-27T12:00:00Z',
+            },
+          ],
+          appeals: accessAppeals,
+        });
+      if (relative === 'account/appeals' && method === 'POST') {
+        accessAppeals = [
+          {
+            id: id(951),
+            decision_id: id(950),
+            version: 1,
+            status: 'SUBMITTED',
+            statement: body.payload.statement,
+            evidence_ref: body.payload.evidence_ref,
+            due_at: '2026-12-03T10:00:00Z',
+            overdue: false,
+            resolution: null,
+            reopen_evidence: null,
+          },
+        ];
+        return finish({ resource_id: id(951) });
+      }
       if (relative === 'account') {
         if (expireFirst) {
           expireFirst = false;
@@ -353,6 +399,48 @@ function session(subject) {
         (r) => r.path === 'portfolio/' + id(600) && r.method === 'PATCH' && r.subject === id(2),
       ),
     );
+    await go(page, '/settings/access', 'Account access');
+    await page
+      .getByRole('heading', { name: 'TEMPORARILY SUSPENDED', exact: true })
+      .first()
+      .waitFor();
+    const accessDir = path.resolve(
+      process.env.CASTLY_M72_SCREENSHOT_DIR || 'artifacts/m72-completion/screenshots',
+    );
+    fs.mkdirSync(accessDir, { recursive: true });
+    for (const [width, height] of [
+      [360, 800],
+      [390, 844],
+      [430, 932],
+    ]) {
+      await page.setViewportSize({ width, height });
+      assert.equal(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        true,
+      );
+      await ready(page);
+      await page.screenshot({
+        path: path.join(accessDir, 'm72-mobile-access-' + width + '.png'),
+        fullPage: true,
+      });
+    }
+    await page.getByRole('button', { name: 'Choose decision for appeal', exact: true }).click();
+    await page
+      .getByRole('textbox', { name: 'Appeal statement', exact: true })
+      .fill('Please independently review the account security evidence.');
+    await page
+      .getByRole('textbox', {
+        name: 'Evidence reference (do not paste private documents)',
+        exact: true,
+      })
+      .fill('support:local-evidence');
+    await page.getByRole('button', { name: 'Submit appeal', exact: true }).click();
+    await page.getByText('Appeal · SUBMITTED', { exact: true }).waitFor();
+    await page.screenshot({
+      path: path.join(accessDir, 'm72-mobile-appeal-430.png'),
+      fullPage: true,
+    });
+    assert.equal(accessAppeals.length, 1);
     expireAll = true;
     rejectRefresh = true;
     await go(page, '/account');

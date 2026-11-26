@@ -1,3 +1,5 @@
+> Historical checkpoint: the subsequently approved restriction policy is implemented and reviewed in [m72-completion-review.md](m72-completion-review.md). Results below describe the earlier local commits.
+
 # M7.2 local progress checkpoint — 25 November 2026
 
 **M7.2 is not complete.** Suspension/reinstatement/appeal policy and enforcement remain blocked on the owner's explicit policy decisions. No defaults were invented for these rules. This checkpoint preserves independently implementable directory, minimized summaries and verification work. No M7.3 work, push, merge, deployment, hosted SQL, production configuration change or real notification occurred.

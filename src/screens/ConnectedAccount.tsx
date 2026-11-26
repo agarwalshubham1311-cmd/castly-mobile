@@ -99,6 +99,7 @@ export default function ConnectedAccount() {
           <Label>{auth.session?.user.email}</Label>
         </View>
       </View>
+      <PrimaryButton title="Account access and appeals" onPress={() => router.push('/settings/access')} />
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {[
           [counts?.bookings ?? '…', 'Bookings'],

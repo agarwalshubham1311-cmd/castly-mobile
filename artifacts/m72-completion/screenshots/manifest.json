@@ -1,0 +1,538 @@
+[
+  {
+    "file": "regression/accessibility/profile-enlarged-text-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 67733,
+    "sha256": "ff88d6ee1e0a391be477d369634766add1a252e5946613b7b3de275bbe481747",
+    "decoded": true
+  },
+  {
+    "file": "regression/accessibility/profile-enlarged-text-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 74207,
+    "sha256": "3e566eae539bfbaad98a697a9205181282fdb0ad8cedd2e5c3ba511e68ed2ba6",
+    "decoded": true
+  },
+  {
+    "file": "regression/accessibility/profile-enlarged-text-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 91920,
+    "sha256": "479104ee16065753c96c81f9b65d10376ea454dc7eb24eb2d644336b8e4e4271",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/account-profile-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 48340,
+    "sha256": "7b76a82de5a05f99d85fb9b9ac7bba591d77de787c4fd3ee9c9ffc6183da3fb9",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/account-profile-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 52220,
+    "sha256": "efab49b4dee4a6b85424c53c645b2ead58e41e7d52f3c365ac85b072e50a14ff",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/account-profile-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 53432,
+    "sha256": "2a254c789a5d564ad45f1f1e750dca551a2d0719329c6bd358c6abb781934008",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/booking-request-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 45397,
+    "sha256": "fba9db46198dda48154cf2080937662eba61523f514fe5700b21113e2dc0764c",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/booking-request-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 46713,
+    "sha256": "750f9b0f72cc35a8b84d40b07eeffa908bc627b6dc78a5704660715fed6e629d",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/booking-request-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 55088,
+    "sha256": "da89fbab6d06d71bb14a2eb7ce4f654777168c010ac3428595197ed683c4dbea",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/bookings-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 53865,
+    "sha256": "119f0e53ff3049412ed82d8e7ac42b7f623803a0641710749b49fbefe71c4d66",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/bookings-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 54272,
+    "sha256": "35ee5a1f493ed2065a94c9758d657c90236ba1ce302fe06e8bec3c785afe084a",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/bookings-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 54807,
+    "sha256": "0f1bcb4d0bc37d516dbc6ee472ff869d81dff5c52a91ffd1a2fadbef9096435b",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/discovery-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 162948,
+    "sha256": "c770bdab58f7e15277f464421765631f4a2ea411f018bcdad36a068860511b67",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/discovery-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 175590,
+    "sha256": "db0a1a00f5d7e0878af2aa77753f268e0a18db5bb52dc43c45fa469f7f4d6e87",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/discovery-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 227648,
+    "sha256": "8a7dc33ccd9958c62159575bc2d6236931ea7744c2b53171bdf38f72ee04b17a",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/filters-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 35181,
+    "sha256": "fa92a0e9e54eb3372f3bf89c8acbe866747b35d2564423f2409603181f05bee7",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/filters-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 39064,
+    "sha256": "8243203d589f1bb129f2122c40870824fa017c54be7b7393c292bb95ab6c902d",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/filters-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 45228,
+    "sha256": "8e1e6107181db463f1cd6508c7583f3789d6907d4df15aef624703386c563292",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/messages-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 50620,
+    "sha256": "7d3ceba1d4b338957eb436bbce1138fb388efa6cfa3dfbc8aa63007567e046e8",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/messages-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 51548,
+    "sha256": "e5984f505c17687e8d123c6c5c8c0a2ff3c9b2fa1b206052ca7e512a1702e85e",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/messages-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 52318,
+    "sha256": "1ddd3c2c6dbe2f8bad6e0d5b218dc21f8ec7efe7319fc311274aa0afd3369fbb",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/portfolio-gallery-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 146538,
+    "sha256": "6cf2dd7a7eba18a3d8d8d30e487d1a8d85829085d123c2da9fc069c8984e5fb7",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/portfolio-gallery-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 160595,
+    "sha256": "c25133016131e31fc909aed2b11e9cee43b6dcd36c2c38d34b3b715b051c5cf6",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/portfolio-gallery-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 188352,
+    "sha256": "589f62e7efa2e21f05fd9410091578a6ef362c88ec096501e88e54e1618ad7ab",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/saved-talent-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 42282,
+    "sha256": "189ea47a815b29db53f881e8634cfe23bbd0b05d631250ec8fe2150f72ada8ef",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/saved-talent-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 42988,
+    "sha256": "de5a08658e79792cf646f9d15bc4a435b6ed126d1f6aee5197cb6d8c8886c379",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/saved-talent-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 43442,
+    "sha256": "4ab1deb667595afa94de291177825bf29bd271a9b1773250db0b4c9c6eabd5d1",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/search-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 185674,
+    "sha256": "ab86a594ae450cea945016998a3c02b52292cdb019bc24b1188681ab8f49e5c4",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/search-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 214410,
+    "sha256": "3b69cfa3f158d8c190fd82ad888afae589cc7da9bc1f8dd5487d5da3c6190255",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/search-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 283632,
+    "sha256": "a6b81fd755145e68ca23257e0da2097af586a45e087c57f6b18e9a9dd16f0394",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/talent-profile-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 120253,
+    "sha256": "689b8d8d02074606404c0d39269268d49e7cb8b188f15883ddbe7a6d2c0d565f",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/talent-profile-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 139518,
+    "sha256": "be4791365f7d4ee21806c7747b77827cefb7161b7a0380fbd6fe3db265a791f4",
+    "decoded": true
+  },
+  {
+    "file": "regression/screenshots/talent-profile-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 185933,
+    "sha256": "049bfc38e71c6361a42183f2a0b2ac7f62390b5ba44a6f5e04c3bc0e81414d7b",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/accepted-booking-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 38137,
+    "sha256": "981f0ee3589acc37e0b34fcd7b0c1abce0dced30fc18794c3f6b7159595ff334",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/booking-confirmation-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 41706,
+    "sha256": "92bb651845053ab85cb7e6b0471621af9353475727be834ca33118877b6bd20d",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/booking-confirmation-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 40636,
+    "sha256": "7e7414e567f7e25af2965e7529df1babb6fb9d5752fedf9e7597fb3dab741273",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/booking-confirmation-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 40284,
+    "sha256": "60884d98f17204b63c14209d3e008c9f60cf36f9bb94ccc0322fae8fe434dc31",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/conversation-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 30476,
+    "sha256": "df0f50bee224a8d9014c7bb1ab8803231ee51700b16715583f3a4a81215cf2c0",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/creator-pro-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 56145,
+    "sha256": "8fcec121906a93147620725615e257482712f7ed98ccc0787d964c3a18d38099",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/engagement-preferences-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 53487,
+    "sha256": "9da9995375ead780403b713b635b3edbbac00edb1aabf51c61055643ee03bdf9",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/engagement-preferences-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 56874,
+    "sha256": "47e3bfb6748b284087bc9c1dba0d11dc7b679b3893bf76cb4a334f2854038404",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/engagement-preferences-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 61778,
+    "sha256": "497211680a8ed175a66e65e05f92e33afd462d73337a13bdbe9468902bd2fafe",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/notifications-360x800.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 34727,
+    "sha256": "34dc74b30da5690fda4fdf406318ae33b756de75fc2dce9d8af2ebe1cdacfb11",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/notifications-390x844.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 35298,
+    "sha256": "8576b3cbc4cdb91b1078a7c5985df92e035c0f3d43fbd3ae7e662cff620a3fea",
+    "decoded": true
+  },
+  {
+    "file": "regression/spring/notifications-430x932.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 35393,
+    "sha256": "9178d939c891ffd5522641a467c4c1644d0f649e2c560ddd0e5c3328a0e28c8a",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/administrators-1440.png",
+    "width": 1440,
+    "height": 1761,
+    "bytes": 162180,
+    "sha256": "b087d180604036b4b5b1a284fd70a712b553f685e5cda797aaefac08c68de81c",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/audit-1440.png",
+    "width": 1440,
+    "height": 2048,
+    "bytes": 376172,
+    "sha256": "903ce81bc69f8d3070c5c52c446b28f3187b8d3837374d31beb029e2bb72e49e",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-appeal-overturned-1440.png",
+    "width": 1440,
+    "height": 2819,
+    "bytes": 262307,
+    "sha256": "fbfe424146a9420800f79f4c48f8976b5bb45937b4a2e97bc9255a85358b5c69",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-appeal-queue-1440.png",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 64146,
+    "sha256": "b15610fa50641f27690271c1e120eb13bfefc16528fd24863bd2a4c69157cf4c",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-mobile-access-360.png",
+    "width": 360,
+    "height": 800,
+    "bytes": 50984,
+    "sha256": "a0aa02f6a4035d908552e69af394a0d1119054ef20cdb3ced5576bc0f2f0b320",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-mobile-access-390.png",
+    "width": 390,
+    "height": 844,
+    "bytes": 51355,
+    "sha256": "36e702078681edf18a11cb7d94c259c446d4fbf13696901a03dfe664ad9d6d2b",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-mobile-access-430.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 51090,
+    "sha256": "2d3c684c3f5ec6d6fd690056dd02f1f57f81efbdab1ce39ca93d1d4e9c49c5bf",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-mobile-appeal-430.png",
+    "width": 430,
+    "height": 932,
+    "bytes": 54681,
+    "sha256": "83e6a2791494d78248051e0db333933e29fc19341d7c9ee896cab60f46dbea86",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-restrictions-1440.png",
+    "width": 1440,
+    "height": 2278,
+    "bytes": 230487,
+    "sha256": "31ed7e9f337ba78ca966a16aff6e43c7c1c281c5bc33dc8382cb26bbf90945d7",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-restrictions-360.png",
+    "width": 360,
+    "height": 3001,
+    "bytes": 203640,
+    "sha256": "0fffab587f792b2309ad750a54bb66a22f0a4ef106cf5a59f8ee0b93645fa845",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-restrictions-390.png",
+    "width": 390,
+    "height": 2881,
+    "bytes": 202097,
+    "sha256": "5d3301a81a536f5b0a7e081f87d71307e6c1c1f6caa1ede6ee2c4db829f2b6c1",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-restrictions-430.png",
+    "width": 430,
+    "height": 2857,
+    "bytes": 201734,
+    "sha256": "8c39ce31e44ce252b288f39253575e6b7ba31c4315dc88ba1f5aeefd56390e71",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-user-detail-1440.png",
+    "width": 1440,
+    "height": 2046,
+    "bytes": 178998,
+    "sha256": "7c5b7c0ad9c615175ad22e145ea92765139eea5ee77c4f3eec90fe5099c09847",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-users-1440.png",
+    "width": 1440,
+    "height": 2163,
+    "bytes": 240063,
+    "sha256": "5833744e768578453544b63d135f5321c231ac0aa44fc0d05822ed74f13b34b3",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-users-360.png",
+    "width": 360,
+    "height": 2564,
+    "bytes": 120080,
+    "sha256": "78d8cd5700a463b3e1e947c7ca6defb08344f5d66da9b865414b15347f336e2d",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-users-390.png",
+    "width": 390,
+    "height": 2516,
+    "bytes": 130264,
+    "sha256": "e7f7e7280ac86dc6303c35ae4d49afad2624dde6d4525ea812d59b9e72cc0d03",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-users-430.png",
+    "width": 430,
+    "height": 2516,
+    "bytes": 144955,
+    "sha256": "9a8e4955fb92dc6f960034e764df7832ee6e4538d1d42b2ccfe1e95ea128e26d",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/m72-verifications-1440.png",
+    "width": 1440,
+    "height": 1057,
+    "bytes": 114986,
+    "sha256": "151fec2fa86a283e820c8e0e6b6303dd2c0702d2bff016e1e8e17f60262d7d09",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/overview-1440.png",
+    "width": 1440,
+    "height": 946,
+    "bytes": 115470,
+    "sha256": "ebbe25d246767a84bbcf13e678c0f2ac9637a48112496cbfb09790f947296575",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/overview-360.png",
+    "width": 360,
+    "height": 1530,
+    "bytes": 96419,
+    "sha256": "f2cd1986682c05205319102c30bb0c2cc6c96b8f69d90127fdb50c8e74eef79a",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/overview-390.png",
+    "width": 390,
+    "height": 1465,
+    "bytes": 95785,
+    "sha256": "e4a3c309af2406a3766fb161e2451251e121e53d2f2aaaf78340cf955b8dbbad",
+    "decoded": true
+  },
+  {
+    "file": "screenshots/overview-430.png",
+    "width": 430,
+    "height": 1424,
+    "bytes": 95545,
+    "sha256": "897b6b6170ec8be7114528ae8071dce9cea5dbf59a873976423b4e2dbb54e9c4",
+    "decoded": true
+  }
+]

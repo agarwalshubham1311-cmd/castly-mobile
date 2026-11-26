@@ -160,6 +160,10 @@ export type BookingRequest = {
 };
 export function createApiServices(request: ReturnType<typeof createApiTransport>) {
   return {
+    accountAccess: {
+      current: () => request<import('./enforcement').AccessStatus>('account/access'),
+      appeal: (command: import('./enforcement').AppealCommand, actor: string) => request<{ resource_id: string }>('account/appeals', 'POST', command, { expectedSubject: actor }),
+    },
     trust: createTrustServices(request),
     engagement: createEngagementServices(request),
     discovery: {
@@ -204,6 +208,7 @@ export function createApiServices(request: ReturnType<typeof createApiTransport>
           { reason },
           { expectedSubject: actor },
         ),
+      purchaseEligibility: () => request<{ allowed: boolean }>('subscriptions/purchase-eligibility', 'POST'),
       billingConfiguration: () =>
         request<BillingConfiguration>('subscriptions/google-play/configuration'),
       plans: () =>

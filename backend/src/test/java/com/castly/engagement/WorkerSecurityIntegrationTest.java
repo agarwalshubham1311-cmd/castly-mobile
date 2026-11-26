@@ -164,6 +164,9 @@ class WorkerSecurityIntegrationTest {
     return new ApplicationContextRunner()
         .withUserConfiguration(WorkerConfiguration.class)
         .withBean(ActorDatabase.class, () -> actors)
+        .withBean(
+            com.castly.enforcement.AccountEnforcement.class,
+            () -> new com.castly.enforcement.AccountEnforcement(actors, json, false))
         .withBean(Phase5Service.class, () -> discovery)
         .withBean(Phase6Settings.class, () -> f)
         .withBean(Phase6Signals.class, () -> new Phase6Signals(f))

@@ -94,7 +94,7 @@ export function PlayBilling({ onVerified }: { onVerified: () => void }) {
           <PrimaryButton
             title={`Subscribe · ${offer.label}`}
             disabled={busy || ['pending', 'verifying', 'connecting'].includes(status)}
-            onPress={() => void run(() => billing.current!.purchase(offer))}
+            onPress={() => void run(async () => { await services!.subscriptions.purchaseEligibility(); await billing.current!.purchase(offer); })}
           />
         </View>
       ))}

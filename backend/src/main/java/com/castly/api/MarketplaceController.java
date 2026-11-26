@@ -15,6 +15,9 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/v1")
 public class MarketplaceController {
+  @org.springframework.beans.factory.annotation.Autowired
+  private com.castly.enforcement.AccountEnforcement enforcement;
+
   private final ActorDatabase data;
 
   @org.springframework.beans.factory.annotation.Autowired
@@ -122,7 +125,9 @@ public class MarketplaceController {
                               + trust.fields()
                               + " from public.talent_profiles "
                               + trust.join()
-                              + " where published and (:query='' or position(lower(:query) in"
+                              + " where published "
+                              + enforcement.discovery("talent_profiles.id")
+                              + " and (:query='' or position(lower(:query) in"
                               + " lower(display_name||' '||city||' '||bio||'"
                               + " '||array_to_string(skills,' ')))>0) and (:category='' or"
                               + " category_id=:category) and (:city='' or lower(city)=lower(:city))"

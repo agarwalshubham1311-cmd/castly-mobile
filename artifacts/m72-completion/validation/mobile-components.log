@@ -1,0 +1,91 @@
+
+> castly-mobile@0.1.0 test:components
+> node --experimental-strip-types --test tests/*components.test.cjs
+
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ booking confirmation requires an explicit action, supports cancel and disables both controls while busy (66.371398ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ booking status is accessible text for every existing server state, with no completion action (5.260519ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ account switch clears private draft and discards delayed prior-account parse (53.009038ms)
+✔ changing a confirmed constraint discards delayed shortlist and draft (31.358353ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ limited access preserves obligation, privacy and support navigation and submits an actor-bound appeal (86.918374ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ delayed access data from a previous account never appears under a new account (5.056326ms)
+✔ appeal withdrawal requires explicit confirmation and can be cancelled (12.928349ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ disabled engagement hides opt-in controls and providers are never silently enabled (35.7749ms)
+An update to Scoped inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ toggles remain local until explicit save and unknown provider state stays disabled (35.891933ms)
+An update to Scoped inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Scoped inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ account switching discards old preference response and exported personal data (40.41634ms)
+✔ delayed saved-search matches cannot appear under another account (20.907249ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ count invalidations during an in-flight request schedule one fresh read instead of losing the event (36.969045ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ notification feed marks read without navigation, retains history on live refresh and opens booking (264.015263ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ plans render without invented prices and unavailable billing remains disabled (48.216259ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ delayed old-account membership cannot appear after account switch (12.117007ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ promotion form rejects untrusted URL and then displays authoritative pending status (14.769016ms)
+✔ checkout pause keeps Restore Purchases available in native UI (8.215805ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ legacy completed status without both attestations cannot display review submission (31.856462ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ route remount and late previous-resource read cannot edit another booking review (12.565361ms)
+✔ private image consent is bound to the displayed approved policy version (59.980272ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2809.993375
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.3
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.3
+npm notice To update run: npm install -g npm@12.2.3
+npm notice

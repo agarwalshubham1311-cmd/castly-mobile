@@ -1,0 +1,628 @@
+
+> castly-mobile@0.1.0 test:reconciliation
+> node scripts/test-reconciliation.cjs
+
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/02-prepare.sql:8: ERROR:  Review 01-inventory against README structural checklist before setting castly.reconciliation_schema_reviewed=issue-1-reviewed
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/structural-check.sql:56: ERROR:  Structural mismatch: bookings.indicative_budget must be int4
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/backfill-booking-names.sql:15: ERROR:  Unresolved booking display names: review source accounts before preparing/cutting over
+psql:/tmp/castly-sql/reconciliation/issue-1/04-verify.sql:59: NOTICE:  PASS reconciliation catalog verification; cutover=f
+NOTICE:  PASS signup metadata cannot assign role
+NOTICE:  PASS all nine application tables enable RLS
+NOTICE:  PASS anonymous discovery hides drafts
+NOTICE:  PASS anonymous portfolio hides drafts
+NOTICE:  PASS public categories readable
+NOTICE:  PASS anonymous cannot read private accounts
+NOTICE:  PASS anonymous cannot read bookings
+NOTICE:  PASS anonymous cannot read messages
+NOTICE:  PASS anonymous cannot read saved talent
+NOTICE:  PASS anonymous cannot read entitlements
+NOTICE:  PASS anonymous onboarding denied
+NOTICE:  PASS only registered published portfolio media accessible anonymously
+NOTICE:  PASS client sees only their own account
+NOTICE:  PASS client cannot read private Auth user directory
+NOTICE:  PASS outsider cannot read booking
+NOTICE:  PASS outsider cannot read conversation
+NOTICE:  PASS outsider cannot read messages
+NOTICE:  PASS outsider cannot read private shortlist
+NOTICE:  PASS outsider cannot read entitlement
+NOTICE:  PASS role column update denied
+NOTICE:  PASS onboarding cannot change an existing role
+NOTICE:  PASS cannot rename another account
+NOTICE:  PASS client cannot edit talent
+NOTICE:  PASS client cannot create talent profile
+NOTICE:  PASS cannot save on behalf of another user
+NOTICE:  PASS cannot save an unpublished profile
+NOTICE:  PASS cannot impersonate a booking client
+NOTICE:  PASS cannot inject protected booking status
+NOTICE:  PASS cannot change agreed rates
+NOTICE:  PASS cannot reassign participants
+NOTICE:  PASS cannot impersonate a conversation participant
+NOTICE:  PASS ordinary message sends disabled
+NOTICE:  PASS cannot grant entitlement
+NOTICE:  PASS cannot extend entitlement
+NOTICE:  PASS cannot delete entitlement
+NOTICE:  PASS cannot upload to another talent folder
+NOTICE:  PASS cannot read another private file
+NOTICE:  PASS cannot request a past booking date
+NOTICE:  PASS cannot request unpublished talent
+NOTICE:  PASS client can create own published-talent request
+NOTICE:  PASS new request receives server-managed defaults
+NOTICE:  PASS client can create own conversation metadata
+NOTICE:  PASS cannot delete another private file
+NOTICE:  PASS booking client can read own request
+NOTICE:  PASS conversation client can read messages
+NOTICE:  PASS owner can read entitlement
+NOTICE:  PASS owner can read shortlist
+NOTICE:  PASS owner can read private file
+NOTICE:  PASS owner can edit account name
+NOTICE:  PASS booking owner still cannot change status
+NOTICE:  PASS owner can remove saved talent
+NOTICE:  PASS relevant talent can read booking
+NOTICE:  PASS conversation talent can read messages
+NOTICE:  PASS owner can edit own portfolio label
+NOTICE:  PASS portfolio path cannot be reassigned
+NOTICE:  PASS talent can edit own profile
+NOTICE:  PASS talent cannot edit another profile
+NOTICE:  PASS talent cannot delete another portfolio
+NOTICE:  PASS talent cannot insert another portfolio
+NOTICE:  PASS profile owner ID immutable to client
+NOTICE:  PASS talent can unpublish own profile
+NOTICE:  PASS unpublish removes public discovery
+NOTICE:  PASS unpublish hides public portfolio metadata
+NOTICE:  PASS unpublish prevents new public media reads
+NOTICE:  PASS talent can read own draft
+NOTICE:  PASS talent can read own draft portfolio
+NOTICE:  PASS talent can upload in own folder
+NOTICE:  PASS object moves/overwrites denied
+NOTICE:  PASS authenticated user can onboard once
+NOTICE:  PASS talent role can create own profile
+NOTICE:  PASS role cannot change after onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:10: NOTICE:  PASS booking data and name snapshots preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:11: NOTICE:  PASS history preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:12: NOTICE:  PASS booking historical timestamps preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:13: NOTICE:  PASS favourites preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:14: NOTICE:  PASS entitlements preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:15: NOTICE:  PASS Storage rows preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:16: NOTICE:  PASS real ledger baseline preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:19: NOTICE:  PASS anonymous API discovery hides draft
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:20: NOTICE:  PASS anonymous API private accounts hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:21: NOTICE:  PASS anonymous API bookings hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:22: NOTICE:  PASS anonymous API cannot impersonate client
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:26: NOTICE:  PASS unrelated API booking isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:27: NOTICE:  PASS unrelated API conversation isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:28: NOTICE:  PASS unrelated API message isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:29: NOTICE:  PASS unrelated API cannot open accepted conversation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:32: NOTICE:  PASS API self onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:36: NOTICE:  PASS talent private self account
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:39: NOTICE:  PASS cannot edit another portfolio
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:40: NOTICE:  PASS API cannot grant entitlements
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:42: NOTICE:  PASS API cannot impersonate sender
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:47: NOTICE:  PASS talent cannot see client private media
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:48: NOTICE:  PASS cross-owner Storage upload denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:53: NOTICE:  PASS trigger blocks protected fields even with accidental wider column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:56: NOTICE:  PASS terminal status cannot reopen
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:57: NOTICE:  PASS direct API SQL send stops after cancellation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:58: NOTICE:  PASS participant history retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:61: NOTICE:  PASS Realtime participant SELECT retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:65: NOTICE:  PASS Realtime unrelated SELECT denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:69: NOTICE:  PASS API private favourites accessible
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:71: NOTICE:  PASS API favourite removal
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:74: NOTICE:  PASS client private Storage read retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:78: NOTICE:  PASS no table-wide API booking update
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:79: NOTICE:  PASS status-only API column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:80: NOTICE:  PASS no protected rate grant
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/03-cutover.sql:11: ERROR:  Separate owner cutover approval required
+psql:/tmp/castly-sql/reconciliation/issue-1/04-verify.sql:59: NOTICE:  PASS reconciliation catalog verification; cutover=t
+NOTICE:  PASS intervening legacy request gets snapshots at cutover
+NOTICE:  PASS cutover preserves intervening request timestamp
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:10: NOTICE:  PASS booking data and name snapshots preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:11: NOTICE:  PASS history preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:12: NOTICE:  PASS booking historical timestamps preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:13: NOTICE:  PASS favourites preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:14: NOTICE:  PASS entitlements preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:15: NOTICE:  PASS Storage rows preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:16: NOTICE:  PASS real ledger baseline preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:19: NOTICE:  PASS anonymous API discovery hides draft
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:20: NOTICE:  PASS anonymous API private accounts hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:21: NOTICE:  PASS anonymous API bookings hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:22: NOTICE:  PASS anonymous API cannot impersonate client
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:26: NOTICE:  PASS unrelated API booking isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:27: NOTICE:  PASS unrelated API conversation isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:28: NOTICE:  PASS unrelated API message isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:29: NOTICE:  PASS unrelated API cannot open accepted conversation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:32: NOTICE:  PASS API self onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:36: NOTICE:  PASS talent private self account
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:39: NOTICE:  PASS cannot edit another portfolio
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:40: NOTICE:  PASS API cannot grant entitlements
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:42: NOTICE:  PASS API cannot impersonate sender
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:47: NOTICE:  PASS talent cannot see client private media
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:48: NOTICE:  PASS cross-owner Storage upload denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:53: NOTICE:  PASS trigger blocks protected fields even with accidental wider column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:56: NOTICE:  PASS terminal status cannot reopen
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:57: NOTICE:  PASS direct API SQL send stops after cancellation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:58: NOTICE:  PASS participant history retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:61: NOTICE:  PASS Realtime participant SELECT retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:65: NOTICE:  PASS Realtime unrelated SELECT denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:69: NOTICE:  PASS API private favourites accessible
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:71: NOTICE:  PASS API favourite removal
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:74: NOTICE:  PASS client private Storage read retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:78: NOTICE:  PASS no table-wide API booking update
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:79: NOTICE:  PASS status-only API column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:80: NOTICE:  PASS no protected rate grant
+psql:/tmp/castly-sql/tests/phase4.sql:9: NOTICE:  PASS Phase4 private evidence catalog and reviewer window
+psql:/tmp/castly-sql/tests/phase4.sql:24: NOTICE:  PASS authenticated dispute write denied
+psql:/tmp/castly-sql/tests/phase4.sql:24: NOTICE:  PASS authenticated evidence write denied
+psql:/tmp/castly-sql/tests/phase4.sql:24: NOTICE:  PASS reviewer provisioning denied
+psql:/tmp/castly-sql/tests/phase5.sql:34: NOTICE:  PASS mobile cannot write availability directly
+psql:/tmp/castly-sql/tests/phase5.sql:35: NOTICE:  PASS mobile cannot change region consent
+psql:/tmp/castly-sql/tests/phase5.sql:36: NOTICE:  PASS mobile cannot read busy summary
+psql:/tmp/castly-sql/tests/phase5.sql:39: NOTICE:  PASS other unpublished creator calendar hidden
+psql:/tmp/castly-sql/tests/phase5.sql:40: NOTICE:  PASS other unpublished busy summary hidden
+psql:/tmp/castly-sql/tests/phase5.sql:41: NOTICE:  PASS API cannot forge busy projection
+psql:/tmp/castly-sql/tests/phase5.sql:42: NOTICE:  PASS API cannot write other creator calendar
+psql:/tmp/castly-sql/tests/phase5.sql:43: NOTICE:  PASS API cannot erase other creator calendar
+psql:/tmp/castly-sql/tests/phase5.sql:44: NOTICE:  PASS API cannot write other user rate counter
+psql:/tmp/castly-sql/tests/phase5.sql:46: NOTICE:  PASS all Phase5 tables use RLS
+psql:/tmp/castly-sql/tests/phase5.sql:47: NOTICE:  PASS normalized skill GIN index exists
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:24: NOTICE:  PASS visibility helper is invoker
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:25: NOTICE:  PASS no direct authenticated visibility helper
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:26: NOTICE:  PASS no auth schema privilege required
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:29: NOTICE:  PASS published Free creator visible
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:31: NOTICE:  PASS client block removes candidate
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:32: NOTICE:  PASS blocked region hidden by RLS
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:33: NOTICE:  PASS blocked availability hidden by RLS
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:34: NOTICE:  PASS blocked busy projection hidden by RLS
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:37: NOTICE:  PASS unrelated actor remains isolated
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:40: NOTICE:  PASS blocked creator keeps own declaration
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:43: NOTICE:  PASS reverse block still excludes candidate
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:48: NOTICE:  PASS unpublished creator excluded for outsider
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:50: NOTICE:  PASS owner cannot include unpublished self in discovery
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:51: NOTICE:  PASS owner can still withdraw unpublished declaration
+psql:/tmp/castly-sql/tests/phase6.sql:11: NOTICE:  PASS all Phase6 tables use RLS
+psql:/tmp/castly-sql/tests/phase6.sql:12: NOTICE:  PASS no privileged Phase6 functions
+psql:/tmp/castly-sql/tests/phase6.sql:13: NOTICE:  PASS worker cannot read booking prose
+psql:/tmp/castly-sql/tests/phase6.sql:14: NOTICE:  PASS worker cannot read message bodies
+psql:/tmp/castly-sql/tests/phase6.sql:15: NOTICE:  PASS worker has no auth schema access
+psql:/tmp/castly-sql/tests/phase6.sql:16: NOTICE:  PASS API needs no auth schema access
+psql:/tmp/castly-sql/tests/phase6.sql:20: NOTICE:  PASS direct mobile token access denied
+psql:/tmp/castly-sql/tests/phase6.sql:21: NOTICE:  PASS direct mobile outbox access denied
+psql:/tmp/castly-sql/tests/phase6.sql:24: NOTICE:  PASS other actor token hidden
+psql:/tmp/castly-sql/tests/phase6.sql:25: NOTICE:  PASS other actor preferences hidden
+psql:/tmp/castly-sql/tests/phase6.sql:27: NOTICE:  PASS cannot register another actor device
+psql:/tmp/castly-sql/tests/phase6.sql:28: NOTICE:  PASS cannot forge verified email
+psql:/tmp/castly-sql/tests/phase6.sql:29: NOTICE:  PASS cannot self grant analytics admin
+psql:/tmp/castly-sql/tests/phase6.sql:30: NOTICE:  PASS cannot impersonate analytics actor
+psql:/tmp/castly-sql/tests/phase6.sql:31: NOTICE:  PASS cannot forge outbox event
+psql:/tmp/castly-sql/tests/phase6.sql:32: NOTICE:  PASS direct enqueue cannot bypass source trigger
+psql:/tmp/castly-sql/tests/phase6.sql:33: NOTICE:  PASS scheduler cannot ignore consent/source
+psql:/tmp/castly-sql/tests/phase6.sql:40: NOTICE:  PASS consented reengagement dedupes within local week
+psql:/tmp/castly-sql/tests/phase6.sql:42: NOTICE:  PASS withdrawn reengagement cannot queue
+psql:/tmp/castly-sql/tests/phase6.sql:43: NOTICE:  PASS admin roster is isolated
+psql:/tmp/castly-sql/tests/phase6.sql:46: NOTICE:  PASS worker cannot enumerate devices without delivery sources
+psql:/tmp/castly-sql/tests/phase6.sql:48: NOTICE:  PASS worker cannot edit accounts
+psql:/tmp/castly-sql/tests/phase6.sql:49: NOTICE:  PASS worker cannot change bookings
+psql:/tmp/castly-sql/tests/phase6.sql:50: NOTICE:  PASS worker cannot grant analytics admin
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:8: NOTICE:  PASS worker role has no privileged attributes and is NOINHERIT
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:9: NOTICE:  PASS worker has no role memberships
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:10: NOTICE:  PASS worker owns no application tables
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:11: NOTICE:  PASS worker cannot create schema objects
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:12: NOTICE:  PASS worker has no auth schema usage
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:13: NOTICE:  PASS worker cannot execute application SECURITY DEFINER functions
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:14: NOTICE:  PASS existing definer functions have migration-owner ownership and pinned empty search_path
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:15: NOTICE:  PASS Phase6 queue helpers are all SECURITY INVOKER
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:16: NOTICE:  PASS booking grants expose only required columns
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:17: NOTICE:  PASS conversation grants expose only required columns
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:28: NOTICE:  PASS SQL tests execute as the restricted worker
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:29: NOTICE:  PASS worker actually remains subject to RLS
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:30: NOTICE:  PASS worker sees metadata for a valid delivery source
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:31: NOTICE:  PASS worker cannot enumerate unrelated bookings
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:32: NOTICE:  PASS worker sees queued conversation references
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:33: NOTICE:  PASS worker cannot enumerate unrelated conversations
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:34: NOTICE:  PASS worker can resolve a queued device
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:35: NOTICE:  PASS worker cannot enumerate unqueued tokens
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:36: NOTICE:  PASS worker can resolve a queued verified contact
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:37: NOTICE:  PASS worker cannot enumerate unqueued email contacts
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:38: NOTICE:  PASS worker cannot read booking prose
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:39: NOTICE:  PASS worker cannot read message bodies
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:40: NOTICE:  PASS worker cannot read private accounts
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:41: NOTICE:  PASS worker cannot read payment orders
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:42: NOTICE:  PASS worker cannot read private evidence
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:43: NOTICE:  PASS worker cannot update booking transitions
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:44: NOTICE:  PASS worker cannot write private accounts
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:45: NOTICE:  PASS worker cannot manufacture notification sources
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:46: NOTICE:  PASS worker cannot retarget queue recipients
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:47: NOTICE:  PASS worker cannot retarget queue business sources
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:48: NOTICE:  PASS worker cannot escalate through legacy definer RPC
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:49: NOTICE:  PASS worker cannot switch to business API role
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:50: NOTICE:  PASS worker cannot switch to authenticated role
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:51: NOTICE:  PASS worker cannot grant itself role membership
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:53: NOTICE:  PASS permitted queue claim succeeds under worker RLS
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:55: NOTICE:  PASS forged transaction claim cannot expand worker metadata scope
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:59: NOTICE:  PASS ordinary actor cannot inspect another recipient outbox
+psql:/tmp/castly-sql/tests/admin-rbac.sql:11: NOTICE:  PASS all seven administrative tables use RLS
+psql:/tmp/castly-sql/tests/admin-rbac.sql:12: NOTICE:  PASS no admin SECURITY DEFINER functions
+psql:/tmp/castly-sql/tests/admin-rbac.sql:14: NOTICE:  PASS mobile cannot access admin principals
+psql:/tmp/castly-sql/tests/admin-rbac.sql:15: NOTICE:  PASS mobile cannot execute admin helper
+psql:/tmp/castly-sql/tests/admin-rbac.sql:19: NOTICE:  PASS no auth schema grant
+psql:/tmp/castly-sql/tests/admin-rbac.sql:20: NOTICE:  PASS super-admin role alone is not a session
+psql:/tmp/castly-sql/tests/admin-rbac.sql:21: NOTICE:  PASS no session sees only own principal
+psql:/tmp/castly-sql/tests/admin-rbac.sql:25: NOTICE:  PASS valid TOTP-bound session receives explicit permission
+psql:/tmp/castly-sql/tests/admin-rbac.sql:26: NOTICE:  PASS super admin directory works without RLS recursion
+psql:/tmp/castly-sql/tests/admin-rbac.sql:27: NOTICE:  PASS no application super-admin promotion
+psql:/tmp/castly-sql/tests/admin-rbac.sql:28: NOTICE:  PASS self-change denied
+psql:/tmp/castly-sql/tests/admin-rbac.sql:29: NOTICE:  PASS audit update not granted
+psql:/tmp/castly-sql/tests/admin-rbac.sql:30: NOTICE:  PASS audit deletion not granted
+psql:/tmp/castly-sql/tests/admin-rbac.sql:31: NOTICE:  PASS audit truncate not granted
+psql:/tmp/castly-sql/tests/admin-rbac.sql:32: NOTICE:  PASS projection cannot be edited directly
+psql:/tmp/castly-sql/tests/admin-rbac.sql:33: NOTICE:  PASS projection cannot be inserted directly
+psql:/tmp/castly-sql/tests/admin-rbac.sql:34: NOTICE:  PASS no uninvited activation
+psql:/tmp/castly-sql/tests/admin-rbac.sql:35: NOTICE:  PASS no auth session fixation
+psql:/tmp/castly-sql/tests/admin-rbac.sql:37: NOTICE:  PASS MFA downgrade invalidates access
+psql:/tmp/castly-sql/tests/admin-rbac.sql:39: NOTICE:  PASS different JWT session cannot reuse admin session
+psql:/tmp/castly-sql/tests/admin-rbac.sql:41: NOTICE:  PASS projection selects only current actor
+psql:/tmp/castly-sql/tests/admin-rbac.sql:42: NOTICE:  PASS analyst cannot read audit
+psql:/tmp/castly-sql/tests/admin-rbac.sql:43: NOTICE:  PASS analyst cannot enumerate other sessions
+psql:/tmp/castly-sql/tests/admin-rbac.sql:44: NOTICE:  PASS analyst cannot invite
+psql:/tmp/castly-sql/tests/admin-rbac.sql:45: NOTICE:  PASS permission definition writes denied
+psql:/tmp/castly-sql/tests/admin-users.sql:8: NOTICE:  PASS all seven user read models/history use RLS
+psql:/tmp/castly-sql/tests/admin-users.sql:9: NOTICE:  PASS projection maintenance is SECURITY INVOKER
+psql:/tmp/castly-sql/tests/admin-users.sql:10: NOTICE:  PASS operational lookups have purpose indexes
+psql:/tmp/castly-sql/tests/admin-users.sql:11: NOTICE:  PASS account security review has an actor-scoped denial index
+psql:/tmp/castly-sql/tests/admin-users.sql:17: NOTICE:  PASS ordinary user cannot enumerate operational directory
+psql:/tmp/castly-sql/tests/admin-users.sql:18: NOTICE:  PASS ordinary user cannot read operational history
+psql:/tmp/castly-sql/tests/admin-users.sql:19: NOTICE:  PASS ordinary user cannot forge a projection
+psql:/tmp/castly-sql/tests/admin-users.sql:20: NOTICE:  PASS account history cannot be deleted
+psql:/tmp/castly-sql/tests/admin-users.sql:21: NOTICE:  PASS account history cannot be rewritten
+psql:/tmp/castly-sql/tests/admin-users.sql:24: NOTICE:  PASS legitimate source update projects atomically
+psql:/tmp/castly-sql/tests/admin-users.sql:25: NOTICE:  PASS source update appends immutable history
+psql:/tmp/castly-sql/tests/admin-users.sql:27: NOTICE:  PASS worker cannot read admin user directory
+psql:/tmp/castly-sql/tests/admin-users.sql:30: NOTICE:  PASS mobile cannot read admin user directory
+psql:/tmp/castly-sql/tests/admin-users.sql:37: NOTICE:  PASS valid administrator sees minimized operational metadata
+psql:/tmp/castly-sql/tests/admin-users.sql:38: NOTICE:  PASS admin directory does not widen private source-account RLS
+psql:/tmp/castly-sql/tests/admin-users.sql:39: NOTICE:  PASS even administrator cannot directly modify source projections
+psql:/tmp/castly-sql/tests/admin-users.sql:40: NOTICE:  PASS administrator cannot fabricate account history
+psql:/tmp/castly-sql/tests/admin-users.sql:42: NOTICE:  PASS missing session removes all operational access
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:10: NOTICE:  PASS enforcement uses no SECURITY DEFINER
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:11: NOTICE:  PASS all enforcement tables have RLS
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:12: NOTICE:  PASS auth schema fallback boundary preserved
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:13: NOTICE:  PASS no table-wide booking UPDATE
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:26: NOTICE:  PASS restricted command succeeds without administrator DB credentials
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:27: NOTICE:  PASS direct account state overwrite affects zero rows
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:28: NOTICE:  PASS direct capability forgery denied
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:29: NOTICE:  PASS event forgery denied
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:30: NOTICE:  PASS immutable decisions cannot be deleted
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:31: NOTICE:  PASS immutable notes cannot be rewritten
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:33: NOTICE:  PASS suspended talent retains existing booking obligation
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:34: NOTICE:  PASS account owner cannot read confidential investigation notes
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:35: NOTICE:  PASS account gets durable transactional notice
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:36: NOTICE:  PASS owner cannot use discovery helpers to expose a restricted profile
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:37: NOTICE:  PASS new purchases denied without revoking existing entitlements
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:38: NOTICE:  PASS business API profile mutation denied
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:40: NOTICE:  PASS counterparty retains booking access
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:41: NOTICE:  PASS restricted talent absent from counterparty discovery
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:42: NOTICE:  PASS unrelated private case not visible
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:43: NOTICE:  PASS restricted talent cannot receive new bookings
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:47: NOTICE:  PASS direct Supabase cannot read cases
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:48: NOTICE:  PASS direct Supabase cannot write administrative commands
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:49: NOTICE:  PASS direct Supabase profile update cannot bypass restrictions
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:50: NOTICE:  PASS direct Storage portfolio upload denied
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:53: NOTICE:  PASS anonymous discovery hides restricted talent
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:54: NOTICE:  PASS anonymous role cannot read restriction metadata
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:57: NOTICE:  PASS worker eligibility excludes suspended recipient
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:58: NOTICE:  PASS delivery worker cannot read confidential notes
+PASS castly_reconcile_baseline: inventory, refusal gates, preparation preserving legacy M1, API/RLS/Storage actors, cutover, data and ledger preservation
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/02-prepare.sql:8: ERROR:  Review 01-inventory against README structural checklist before setting castly.reconciliation_schema_reviewed=issue-1-reviewed
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/structural-check.sql:56: ERROR:  Structural mismatch: bookings.indicative_budget must be int4
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/backfill-booking-names.sql:15: ERROR:  Unresolved booking display names: review source accounts before preparing/cutting over
+psql:/tmp/castly-sql/reconciliation/issue-1/04-verify.sql:59: NOTICE:  PASS reconciliation catalog verification; cutover=f
+NOTICE:  PASS signup metadata cannot assign role
+NOTICE:  PASS all nine application tables enable RLS
+NOTICE:  PASS anonymous discovery hides drafts
+NOTICE:  PASS anonymous portfolio hides drafts
+NOTICE:  PASS public categories readable
+NOTICE:  PASS anonymous cannot read private accounts
+NOTICE:  PASS anonymous cannot read bookings
+NOTICE:  PASS anonymous cannot read messages
+NOTICE:  PASS anonymous cannot read saved talent
+NOTICE:  PASS anonymous cannot read entitlements
+NOTICE:  PASS anonymous onboarding denied
+NOTICE:  PASS only registered published portfolio media accessible anonymously
+NOTICE:  PASS client sees only their own account
+NOTICE:  PASS client cannot read private Auth user directory
+NOTICE:  PASS outsider cannot read booking
+NOTICE:  PASS outsider cannot read conversation
+NOTICE:  PASS outsider cannot read messages
+NOTICE:  PASS outsider cannot read private shortlist
+NOTICE:  PASS outsider cannot read entitlement
+NOTICE:  PASS role column update denied
+NOTICE:  PASS onboarding cannot change an existing role
+NOTICE:  PASS cannot rename another account
+NOTICE:  PASS client cannot edit talent
+NOTICE:  PASS client cannot create talent profile
+NOTICE:  PASS cannot save on behalf of another user
+NOTICE:  PASS cannot save an unpublished profile
+NOTICE:  PASS cannot impersonate a booking client
+NOTICE:  PASS cannot inject protected booking status
+NOTICE:  PASS cannot change agreed rates
+NOTICE:  PASS cannot reassign participants
+NOTICE:  PASS cannot impersonate a conversation participant
+NOTICE:  PASS ordinary message sends disabled
+NOTICE:  PASS cannot grant entitlement
+NOTICE:  PASS cannot extend entitlement
+NOTICE:  PASS cannot delete entitlement
+NOTICE:  PASS cannot upload to another talent folder
+NOTICE:  PASS cannot read another private file
+NOTICE:  PASS cannot request a past booking date
+NOTICE:  PASS cannot request unpublished talent
+NOTICE:  PASS client can create own published-talent request
+NOTICE:  PASS new request receives server-managed defaults
+NOTICE:  PASS client can create own conversation metadata
+NOTICE:  PASS cannot delete another private file
+NOTICE:  PASS booking client can read own request
+NOTICE:  PASS conversation client can read messages
+NOTICE:  PASS owner can read entitlement
+NOTICE:  PASS owner can read shortlist
+NOTICE:  PASS owner can read private file
+NOTICE:  PASS owner can edit account name
+NOTICE:  PASS booking owner still cannot change status
+NOTICE:  PASS owner can remove saved talent
+NOTICE:  PASS relevant talent can read booking
+NOTICE:  PASS conversation talent can read messages
+NOTICE:  PASS owner can edit own portfolio label
+NOTICE:  PASS portfolio path cannot be reassigned
+NOTICE:  PASS talent can edit own profile
+NOTICE:  PASS talent cannot edit another profile
+NOTICE:  PASS talent cannot delete another portfolio
+NOTICE:  PASS talent cannot insert another portfolio
+NOTICE:  PASS profile owner ID immutable to client
+NOTICE:  PASS talent can unpublish own profile
+NOTICE:  PASS unpublish removes public discovery
+NOTICE:  PASS unpublish hides public portfolio metadata
+NOTICE:  PASS unpublish prevents new public media reads
+NOTICE:  PASS talent can read own draft
+NOTICE:  PASS talent can read own draft portfolio
+NOTICE:  PASS talent can upload in own folder
+NOTICE:  PASS object moves/overwrites denied
+NOTICE:  PASS authenticated user can onboard once
+NOTICE:  PASS talent role can create own profile
+NOTICE:  PASS role cannot change after onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:10: NOTICE:  PASS booking data and name snapshots preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:11: NOTICE:  PASS history preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:12: NOTICE:  PASS booking historical timestamps preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:13: NOTICE:  PASS favourites preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:14: NOTICE:  PASS entitlements preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:15: NOTICE:  PASS Storage rows preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:16: NOTICE:  PASS real ledger baseline preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:19: NOTICE:  PASS anonymous API discovery hides draft
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:20: NOTICE:  PASS anonymous API private accounts hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:21: NOTICE:  PASS anonymous API bookings hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:22: NOTICE:  PASS anonymous API cannot impersonate client
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:26: NOTICE:  PASS unrelated API booking isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:27: NOTICE:  PASS unrelated API conversation isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:28: NOTICE:  PASS unrelated API message isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:29: NOTICE:  PASS unrelated API cannot open accepted conversation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:32: NOTICE:  PASS API self onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:36: NOTICE:  PASS talent private self account
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:39: NOTICE:  PASS cannot edit another portfolio
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:40: NOTICE:  PASS API cannot grant entitlements
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:42: NOTICE:  PASS API cannot impersonate sender
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:47: NOTICE:  PASS talent cannot see client private media
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:48: NOTICE:  PASS cross-owner Storage upload denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:53: NOTICE:  PASS trigger blocks protected fields even with accidental wider column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:56: NOTICE:  PASS terminal status cannot reopen
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:57: NOTICE:  PASS direct API SQL send stops after cancellation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:58: NOTICE:  PASS participant history retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:61: NOTICE:  PASS Realtime participant SELECT retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:65: NOTICE:  PASS Realtime unrelated SELECT denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:69: NOTICE:  PASS API private favourites accessible
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:71: NOTICE:  PASS API favourite removal
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:74: NOTICE:  PASS client private Storage read retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:78: NOTICE:  PASS no table-wide API booking update
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:79: NOTICE:  PASS status-only API column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:80: NOTICE:  PASS no protected rate grant
+PASS expected rejection: psql:/tmp/castly-sql/reconciliation/issue-1/03-cutover.sql:11: ERROR:  Separate owner cutover approval required
+psql:/tmp/castly-sql/reconciliation/issue-1/04-verify.sql:59: NOTICE:  PASS reconciliation catalog verification; cutover=t
+NOTICE:  PASS intervening legacy request gets snapshots at cutover
+NOTICE:  PASS cutover preserves intervening request timestamp
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:10: NOTICE:  PASS booking data and name snapshots preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:11: NOTICE:  PASS history preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:12: NOTICE:  PASS booking historical timestamps preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:13: NOTICE:  PASS favourites preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:14: NOTICE:  PASS entitlements preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:15: NOTICE:  PASS Storage rows preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:16: NOTICE:  PASS real ledger baseline preserved
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:19: NOTICE:  PASS anonymous API discovery hides draft
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:20: NOTICE:  PASS anonymous API private accounts hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:21: NOTICE:  PASS anonymous API bookings hidden
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:22: NOTICE:  PASS anonymous API cannot impersonate client
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:26: NOTICE:  PASS unrelated API booking isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:27: NOTICE:  PASS unrelated API conversation isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:28: NOTICE:  PASS unrelated API message isolation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:29: NOTICE:  PASS unrelated API cannot open accepted conversation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:32: NOTICE:  PASS API self onboarding
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:36: NOTICE:  PASS talent private self account
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:39: NOTICE:  PASS cannot edit another portfolio
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:40: NOTICE:  PASS API cannot grant entitlements
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:42: NOTICE:  PASS API cannot impersonate sender
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:47: NOTICE:  PASS talent cannot see client private media
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:48: NOTICE:  PASS cross-owner Storage upload denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:53: NOTICE:  PASS trigger blocks protected fields even with accidental wider column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:56: NOTICE:  PASS terminal status cannot reopen
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:57: NOTICE:  PASS direct API SQL send stops after cancellation
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:58: NOTICE:  PASS participant history retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:61: NOTICE:  PASS Realtime participant SELECT retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:65: NOTICE:  PASS Realtime unrelated SELECT denied
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:69: NOTICE:  PASS API private favourites accessible
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:71: NOTICE:  PASS API favourite removal
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:74: NOTICE:  PASS client private Storage read retained
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:78: NOTICE:  PASS no table-wide API booking update
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:79: NOTICE:  PASS status-only API column grant
+psql:/tmp/castly-sql/tests/reconciliation-behavior.sql:80: NOTICE:  PASS no protected rate grant
+psql:/tmp/castly-sql/tests/phase4.sql:9: NOTICE:  PASS Phase4 private evidence catalog and reviewer window
+psql:/tmp/castly-sql/tests/phase4.sql:24: NOTICE:  PASS authenticated dispute write denied
+psql:/tmp/castly-sql/tests/phase4.sql:24: NOTICE:  PASS authenticated evidence write denied
+psql:/tmp/castly-sql/tests/phase4.sql:24: NOTICE:  PASS reviewer provisioning denied
+psql:/tmp/castly-sql/tests/phase5.sql:34: NOTICE:  PASS mobile cannot write availability directly
+psql:/tmp/castly-sql/tests/phase5.sql:35: NOTICE:  PASS mobile cannot change region consent
+psql:/tmp/castly-sql/tests/phase5.sql:36: NOTICE:  PASS mobile cannot read busy summary
+psql:/tmp/castly-sql/tests/phase5.sql:39: NOTICE:  PASS other unpublished creator calendar hidden
+psql:/tmp/castly-sql/tests/phase5.sql:40: NOTICE:  PASS other unpublished busy summary hidden
+psql:/tmp/castly-sql/tests/phase5.sql:41: NOTICE:  PASS API cannot forge busy projection
+psql:/tmp/castly-sql/tests/phase5.sql:42: NOTICE:  PASS API cannot write other creator calendar
+psql:/tmp/castly-sql/tests/phase5.sql:43: NOTICE:  PASS API cannot erase other creator calendar
+psql:/tmp/castly-sql/tests/phase5.sql:44: NOTICE:  PASS API cannot write other user rate counter
+psql:/tmp/castly-sql/tests/phase5.sql:46: NOTICE:  PASS all Phase5 tables use RLS
+psql:/tmp/castly-sql/tests/phase5.sql:47: NOTICE:  PASS normalized skill GIN index exists
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:24: NOTICE:  PASS visibility helper is invoker
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:25: NOTICE:  PASS no direct authenticated visibility helper
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:26: NOTICE:  PASS no auth schema privilege required
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:29: NOTICE:  PASS published Free creator visible
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:31: NOTICE:  PASS client block removes candidate
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:32: NOTICE:  PASS blocked region hidden by RLS
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:33: NOTICE:  PASS blocked availability hidden by RLS
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:34: NOTICE:  PASS blocked busy projection hidden by RLS
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:37: NOTICE:  PASS unrelated actor remains isolated
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:40: NOTICE:  PASS blocked creator keeps own declaration
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:43: NOTICE:  PASS reverse block still excludes candidate
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:48: NOTICE:  PASS unpublished creator excluded for outsider
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:50: NOTICE:  PASS owner cannot include unpublished self in discovery
+psql:/tmp/castly-sql/tests/phase5-trust-integration.sql:51: NOTICE:  PASS owner can still withdraw unpublished declaration
+psql:/tmp/castly-sql/tests/phase6.sql:11: NOTICE:  PASS all Phase6 tables use RLS
+psql:/tmp/castly-sql/tests/phase6.sql:12: NOTICE:  PASS no privileged Phase6 functions
+psql:/tmp/castly-sql/tests/phase6.sql:13: NOTICE:  PASS worker cannot read booking prose
+psql:/tmp/castly-sql/tests/phase6.sql:14: NOTICE:  PASS worker cannot read message bodies
+psql:/tmp/castly-sql/tests/phase6.sql:15: NOTICE:  PASS worker has no auth schema access
+psql:/tmp/castly-sql/tests/phase6.sql:16: NOTICE:  PASS API needs no auth schema access
+psql:/tmp/castly-sql/tests/phase6.sql:20: NOTICE:  PASS direct mobile token access denied
+psql:/tmp/castly-sql/tests/phase6.sql:21: NOTICE:  PASS direct mobile outbox access denied
+psql:/tmp/castly-sql/tests/phase6.sql:24: NOTICE:  PASS other actor token hidden
+psql:/tmp/castly-sql/tests/phase6.sql:25: NOTICE:  PASS other actor preferences hidden
+psql:/tmp/castly-sql/tests/phase6.sql:27: NOTICE:  PASS cannot register another actor device
+psql:/tmp/castly-sql/tests/phase6.sql:28: NOTICE:  PASS cannot forge verified email
+psql:/tmp/castly-sql/tests/phase6.sql:29: NOTICE:  PASS cannot self grant analytics admin
+psql:/tmp/castly-sql/tests/phase6.sql:30: NOTICE:  PASS cannot impersonate analytics actor
+psql:/tmp/castly-sql/tests/phase6.sql:31: NOTICE:  PASS cannot forge outbox event
+psql:/tmp/castly-sql/tests/phase6.sql:32: NOTICE:  PASS direct enqueue cannot bypass source trigger
+psql:/tmp/castly-sql/tests/phase6.sql:33: NOTICE:  PASS scheduler cannot ignore consent/source
+psql:/tmp/castly-sql/tests/phase6.sql:40: NOTICE:  PASS consented reengagement dedupes within local week
+psql:/tmp/castly-sql/tests/phase6.sql:42: NOTICE:  PASS withdrawn reengagement cannot queue
+psql:/tmp/castly-sql/tests/phase6.sql:43: NOTICE:  PASS admin roster is isolated
+psql:/tmp/castly-sql/tests/phase6.sql:46: NOTICE:  PASS worker cannot enumerate devices without delivery sources
+psql:/tmp/castly-sql/tests/phase6.sql:48: NOTICE:  PASS worker cannot edit accounts
+psql:/tmp/castly-sql/tests/phase6.sql:49: NOTICE:  PASS worker cannot change bookings
+psql:/tmp/castly-sql/tests/phase6.sql:50: NOTICE:  PASS worker cannot grant analytics admin
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:8: NOTICE:  PASS worker role has no privileged attributes and is NOINHERIT
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:9: NOTICE:  PASS worker has no role memberships
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:10: NOTICE:  PASS worker owns no application tables
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:11: NOTICE:  PASS worker cannot create schema objects
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:12: NOTICE:  PASS worker has no auth schema usage
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:13: NOTICE:  PASS worker cannot execute application SECURITY DEFINER functions
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:14: NOTICE:  PASS existing definer functions have migration-owner ownership and pinned empty search_path
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:15: NOTICE:  PASS Phase6 queue helpers are all SECURITY INVOKER
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:16: NOTICE:  PASS booking grants expose only required columns
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:17: NOTICE:  PASS conversation grants expose only required columns
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:28: NOTICE:  PASS SQL tests execute as the restricted worker
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:29: NOTICE:  PASS worker actually remains subject to RLS
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:30: NOTICE:  PASS worker sees metadata for a valid delivery source
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:31: NOTICE:  PASS worker cannot enumerate unrelated bookings
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:32: NOTICE:  PASS worker sees queued conversation references
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:33: NOTICE:  PASS worker cannot enumerate unrelated conversations
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:34: NOTICE:  PASS worker can resolve a queued device
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:35: NOTICE:  PASS worker cannot enumerate unqueued tokens
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:36: NOTICE:  PASS worker can resolve a queued verified contact
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:37: NOTICE:  PASS worker cannot enumerate unqueued email contacts
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:38: NOTICE:  PASS worker cannot read booking prose
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:39: NOTICE:  PASS worker cannot read message bodies
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:40: NOTICE:  PASS worker cannot read private accounts
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:41: NOTICE:  PASS worker cannot read payment orders
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:42: NOTICE:  PASS worker cannot read private evidence
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:43: NOTICE:  PASS worker cannot update booking transitions
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:44: NOTICE:  PASS worker cannot write private accounts
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:45: NOTICE:  PASS worker cannot manufacture notification sources
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:46: NOTICE:  PASS worker cannot retarget queue recipients
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:47: NOTICE:  PASS worker cannot retarget queue business sources
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:48: NOTICE:  PASS worker cannot escalate through legacy definer RPC
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:49: NOTICE:  PASS worker cannot switch to business API role
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:50: NOTICE:  PASS worker cannot switch to authenticated role
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:51: NOTICE:  PASS worker cannot grant itself role membership
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:53: NOTICE:  PASS permitted queue claim succeeds under worker RLS
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:55: NOTICE:  PASS forged transaction claim cannot expand worker metadata scope
+psql:/tmp/castly-sql/tests/phase6-worker-security.sql:59: NOTICE:  PASS ordinary actor cannot inspect another recipient outbox
+psql:/tmp/castly-sql/tests/admin-rbac.sql:11: NOTICE:  PASS all seven administrative tables use RLS
+psql:/tmp/castly-sql/tests/admin-rbac.sql:12: NOTICE:  PASS no admin SECURITY DEFINER functions
+psql:/tmp/castly-sql/tests/admin-rbac.sql:14: NOTICE:  PASS mobile cannot access admin principals
+psql:/tmp/castly-sql/tests/admin-rbac.sql:15: NOTICE:  PASS mobile cannot execute admin helper
+psql:/tmp/castly-sql/tests/admin-rbac.sql:19: NOTICE:  PASS no auth schema grant
+psql:/tmp/castly-sql/tests/admin-rbac.sql:20: NOTICE:  PASS super-admin role alone is not a session
+psql:/tmp/castly-sql/tests/admin-rbac.sql:21: NOTICE:  PASS no session sees only own principal
+psql:/tmp/castly-sql/tests/admin-rbac.sql:25: NOTICE:  PASS valid TOTP-bound session receives explicit permission
+psql:/tmp/castly-sql/tests/admin-rbac.sql:26: NOTICE:  PASS super admin directory works without RLS recursion
+psql:/tmp/castly-sql/tests/admin-rbac.sql:27: NOTICE:  PASS no application super-admin promotion
+psql:/tmp/castly-sql/tests/admin-rbac.sql:28: NOTICE:  PASS self-change denied
+psql:/tmp/castly-sql/tests/admin-rbac.sql:29: NOTICE:  PASS audit update not granted
+psql:/tmp/castly-sql/tests/admin-rbac.sql:30: NOTICE:  PASS audit deletion not granted
+psql:/tmp/castly-sql/tests/admin-rbac.sql:31: NOTICE:  PASS audit truncate not granted
+psql:/tmp/castly-sql/tests/admin-rbac.sql:32: NOTICE:  PASS projection cannot be edited directly
+psql:/tmp/castly-sql/tests/admin-rbac.sql:33: NOTICE:  PASS projection cannot be inserted directly
+psql:/tmp/castly-sql/tests/admin-rbac.sql:34: NOTICE:  PASS no uninvited activation
+psql:/tmp/castly-sql/tests/admin-rbac.sql:35: NOTICE:  PASS no auth session fixation
+psql:/tmp/castly-sql/tests/admin-rbac.sql:37: NOTICE:  PASS MFA downgrade invalidates access
+psql:/tmp/castly-sql/tests/admin-rbac.sql:39: NOTICE:  PASS different JWT session cannot reuse admin session
+psql:/tmp/castly-sql/tests/admin-rbac.sql:41: NOTICE:  PASS projection selects only current actor
+psql:/tmp/castly-sql/tests/admin-rbac.sql:42: NOTICE:  PASS analyst cannot read audit
+psql:/tmp/castly-sql/tests/admin-rbac.sql:43: NOTICE:  PASS analyst cannot enumerate other sessions
+psql:/tmp/castly-sql/tests/admin-rbac.sql:44: NOTICE:  PASS analyst cannot invite
+psql:/tmp/castly-sql/tests/admin-rbac.sql:45: NOTICE:  PASS permission definition writes denied
+psql:/tmp/castly-sql/tests/admin-users.sql:8: NOTICE:  PASS all seven user read models/history use RLS
+psql:/tmp/castly-sql/tests/admin-users.sql:9: NOTICE:  PASS projection maintenance is SECURITY INVOKER
+psql:/tmp/castly-sql/tests/admin-users.sql:10: NOTICE:  PASS operational lookups have purpose indexes
+psql:/tmp/castly-sql/tests/admin-users.sql:11: NOTICE:  PASS account security review has an actor-scoped denial index
+psql:/tmp/castly-sql/tests/admin-users.sql:17: NOTICE:  PASS ordinary user cannot enumerate operational directory
+psql:/tmp/castly-sql/tests/admin-users.sql:18: NOTICE:  PASS ordinary user cannot read operational history
+psql:/tmp/castly-sql/tests/admin-users.sql:19: NOTICE:  PASS ordinary user cannot forge a projection
+psql:/tmp/castly-sql/tests/admin-users.sql:20: NOTICE:  PASS account history cannot be deleted
+psql:/tmp/castly-sql/tests/admin-users.sql:21: NOTICE:  PASS account history cannot be rewritten
+psql:/tmp/castly-sql/tests/admin-users.sql:24: NOTICE:  PASS legitimate source update projects atomically
+psql:/tmp/castly-sql/tests/admin-users.sql:25: NOTICE:  PASS source update appends immutable history
+psql:/tmp/castly-sql/tests/admin-users.sql:27: NOTICE:  PASS worker cannot read admin user directory
+psql:/tmp/castly-sql/tests/admin-users.sql:30: NOTICE:  PASS mobile cannot read admin user directory
+psql:/tmp/castly-sql/tests/admin-users.sql:37: NOTICE:  PASS valid administrator sees minimized operational metadata
+psql:/tmp/castly-sql/tests/admin-users.sql:38: NOTICE:  PASS admin directory does not widen private source-account RLS
+psql:/tmp/castly-sql/tests/admin-users.sql:39: NOTICE:  PASS even administrator cannot directly modify source projections
+psql:/tmp/castly-sql/tests/admin-users.sql:40: NOTICE:  PASS administrator cannot fabricate account history
+psql:/tmp/castly-sql/tests/admin-users.sql:42: NOTICE:  PASS missing session removes all operational access
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:10: NOTICE:  PASS enforcement uses no SECURITY DEFINER
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:11: NOTICE:  PASS all enforcement tables have RLS
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:12: NOTICE:  PASS auth schema fallback boundary preserved
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:13: NOTICE:  PASS no table-wide booking UPDATE
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:26: NOTICE:  PASS restricted command succeeds without administrator DB credentials
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:27: NOTICE:  PASS direct account state overwrite affects zero rows
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:28: NOTICE:  PASS direct capability forgery denied
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:29: NOTICE:  PASS event forgery denied
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:30: NOTICE:  PASS immutable decisions cannot be deleted
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:31: NOTICE:  PASS immutable notes cannot be rewritten
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:33: NOTICE:  PASS suspended talent retains existing booking obligation
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:34: NOTICE:  PASS account owner cannot read confidential investigation notes
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:35: NOTICE:  PASS account gets durable transactional notice
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:36: NOTICE:  PASS owner cannot use discovery helpers to expose a restricted profile
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:37: NOTICE:  PASS new purchases denied without revoking existing entitlements
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:38: NOTICE:  PASS business API profile mutation denied
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:40: NOTICE:  PASS counterparty retains booking access
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:41: NOTICE:  PASS restricted talent absent from counterparty discovery
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:42: NOTICE:  PASS unrelated private case not visible
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:43: NOTICE:  PASS restricted talent cannot receive new bookings
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:47: NOTICE:  PASS direct Supabase cannot read cases
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:48: NOTICE:  PASS direct Supabase cannot write administrative commands
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:49: NOTICE:  PASS direct Supabase profile update cannot bypass restrictions
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:50: NOTICE:  PASS direct Storage portfolio upload denied
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:53: NOTICE:  PASS anonymous discovery hides restricted talent
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:54: NOTICE:  PASS anonymous role cannot read restriction metadata
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:57: NOTICE:  PASS worker eligibility excludes suspended recipient
+psql:/tmp/castly-sql/tests/admin-enforcement.sql:58: NOTICE:  PASS delivery worker cannot read confidential notes
+PASS castly_reconcile_rpcs: inventory, refusal gates, preparation preserving legacy M1, API/RLS/Storage actors, cutover, data and ledger preservation
+PASS reconciliation scenarios: 608 SQL assertions/catalog gates on disposable PostgreSQL; no hosted database contacted.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.3
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.3
+npm notice To update run: npm install -g npm@12.2.3
+npm notice

@@ -18,6 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class GooglePlayService {
+  @org.springframework.beans.factory.annotation.Autowired
+  private com.castly.enforcement.AccountEnforcement enforcement;
+
   private final SubscriptionService subscriptions;
   private final SubscriptionRateLimiter limiter;
   private final GooglePlayGateway google;
@@ -106,7 +109,7 @@ public class GooglePlayService {
               "enabled",
               ready,
               "checkout_enabled",
-              ready && checkoutEnabled,
+              ready && checkoutEnabled && enforcement.purchaseAllowed(db, actor),
               "package_name",
               ready ? packageName : "",
               "obfuscated_account_id",

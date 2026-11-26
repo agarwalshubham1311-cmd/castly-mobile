@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/client';
 import { useAdmin } from './AdminShell';
+import { AccountControls } from './AccountControls';
 import type { Page, UserSummary, UserDetail, BookingSummary } from '@/lib/users';
 
 export function useResource<T>(path: string, allowed: boolean) {
@@ -44,6 +45,7 @@ export function UserDirectory() {
       q: '',
       role: '',
       verification: '',
+      state: '',
       from: '',
       until: '',
     }),
@@ -79,7 +81,7 @@ export function UserDirectory() {
           }}
         >
           <div className="grid">
-            {(['q', 'role', 'verification', 'from', 'until'] as const).map((key) => (
+            {(['q', 'role', 'verification', 'state', 'from', 'until'] as const).map((key) => (
               <div key={key}>
                 <label htmlFor={'filter-' + key}>
                   {
@@ -87,6 +89,7 @@ export function UserDirectory() {
                       q: 'Name prefix',
                       role: 'Account type',
                       verification: 'Verification state',
+                      state: 'Account access',
                       from: 'Created from',
                       until: 'Created through',
                     }[key]
@@ -101,6 +104,19 @@ export function UserDirectory() {
                     <option value="">All account types</option>
                     <option value="client">Client</option>
                     <option value="talent">Talent</option>
+                  </select>
+                ) : key === 'state' ? (
+                  <select
+                    id={'filter-' + key}
+                    value={filters.state}
+                    onChange={(e) => setFilters({ ...filters, state: e.target.value })}
+                  >
+                    <option value="">All account states</option>
+                    {['ACTIVE', 'RESTRICTED', 'TEMPORARILY_SUSPENDED', 'PERMANENTLY_SUSPENDED'].map(
+                      (x) => (
+                        <option key={x}>{x}</option>
+                      ),
+                    )}
                   </select>
                 ) : key === 'verification' ? (
                   <select
@@ -251,6 +267,7 @@ export function UserDetails({ id }: { id: string }) {
           {new Date(d.account.updated_at).toLocaleString()}
         </p>
       </section>
+      <AccountControls key={id} id={id} />
       <section className="card">
         <h2>Talent profile</h2>
         {d.talent.length ? (

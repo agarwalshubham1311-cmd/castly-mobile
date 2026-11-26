@@ -107,7 +107,7 @@ if (!['repository', 'reconciliation'].includes(schemaPath))
   throw new Error('Unknown disposable schema path');
 if (schemaPath === 'repository') {
   for (const name of fs.readdirSync(path.join(root, 'supabase/migrations')).sort()) {
-    if (process.env.CASTLY_TEST_SKIP_PHASE4 === 'true' && (name.startsWith('20261110') || name.startsWith('20261112') || name.startsWith('20261125'))) continue;
+    if (process.env.CASTLY_TEST_SKIP_PHASE4 === 'true' && (name.startsWith('20261110') || name.startsWith('20261112') || name.startsWith('20261125') || name.startsWith('20261126'))) continue;
     if (name === identityMigration) beforeIdentityMigration();
     sql(fs.readFileSync(path.join(root, 'supabase/migrations', name), 'utf8'), testDatabase);
     if (name === identityMigration) afterIdentityMigration();
@@ -164,6 +164,8 @@ if (schemaPath === 'reconciliation') {
   if (process.env.CASTLY_TEST_SKIP_PHASE4 !== 'true')
     sql(fs.readFileSync(path.join(root, 'supabase/migrations/20261125110000_admin_account_security_index.sql'), 'utf8'), testDatabase);
 }
+if (schemaPath === 'reconciliation' && process.env.CASTLY_TEST_SKIP_PHASE4 !== 'true')
+  sql(fs.readFileSync(path.join(root, 'supabase/migrations/20261126100000_account_enforcement.sql'), 'utf8'), testDatabase);
 // Reproduce hosted restrictions for EVERY Java business operation, on both schema paths.
 sql('revoke usage on schema auth from castly_api;', testDatabase);
 sql("alter role castly_api login password 'castly-api-local-test';", testDatabase);

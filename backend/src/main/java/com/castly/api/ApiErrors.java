@@ -33,6 +33,9 @@ public class ApiErrors {
       if (cause instanceof com.castly.engagement.EngagementBodyLimit.TooLarge)
         return ProblemDetail.forStatusAndDetail(
             HttpStatus.PAYLOAD_TOO_LARGE, "Engagement request exceeds size limit");
+      else if (cause instanceof com.castly.enforcement.EnforcementBodyLimit.TooLarge)
+        return ProblemDetail.forStatusAndDetail(
+            HttpStatus.PAYLOAD_TOO_LARGE, "Account request exceeds size limit");
       else if (cause instanceof com.castly.trust.EvidenceUploadLimitFilter.TooLarge)
         return ProblemDetail.forStatusAndDetail(
             HttpStatus.PAYLOAD_TOO_LARGE, "Evidence request exceeds size limit");
@@ -101,7 +104,8 @@ public class ApiErrors {
           HttpStatus.CONFLICT, "The change conflicts with existing data or constraints.");
     if ("42501".equals(SqlFailureKind.sqlState(e)))
       return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Not permitted");
-    if ("P0001".equals(SqlFailureKind.sqlState(e)))
+    if (java.util.Set.of("P0001", "40001", "40P01")
+        .contains(java.util.Objects.toString(SqlFailureKind.sqlState(e), "")))
       return ProblemDetail.forStatusAndDetail(
           HttpStatus.CONFLICT, "The requested change is not allowed");
     return ProblemDetail.forStatusAndDetail(

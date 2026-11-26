@@ -1,0 +1,796 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -----------------------< com.castly:castly-api >------------------------
+[INFO] Building castly-api 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- clean:3.4.1:clean (default-clean) @ castly-api ---
+[INFO] Deleting /workspace/castly-m7-2/backend/target
+[INFO]
+[INFO] --- jacoco:0.8.14:prepare-agent (default) @ castly-api ---
+[INFO] argLine set to -javaagent:/workspace/.m2/repository/org/jacoco/org.jacoco.agent/0.8.14/org.jacoco.agent-0.8.14-runtime.jar=destfile=/workspace/castly-m7-2/backend/target/jacoco.exec
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ castly-api ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO]
+[INFO] --- compiler:3.14.1:compile (default-compile) @ castly-api ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 87 source files with javac [debug parameters release 21] to target/classes
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ castly-api ---
+[INFO] skip non existing resourceDirectory /workspace/castly-m7-2/backend/src/test/resources
+[INFO]
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ castly-api ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 28 source files with javac [debug parameters release 21] to target/test-classes
+[INFO]
+[INFO] --- surefire:3.5.4:test (default-test) @ castly-api ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.castly.BusinessApiTest
+08:56:14.960 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.castly.BusinessApiTest]: BusinessApiTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+08:56:15.790 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.castly.CastlyApplication for test class com.castly.BusinessApiTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2026-11-26T08:56:38.834Z  INFO 162651 --- [           main] com.castly.BusinessApiTest               : Starting BusinessApiTest using Java 21.0.12.1 with PID 162651 (started by agent in /workspace/castly-m7-2/backend)
+2026-11-26T08:56:38.838Z  INFO 162651 --- [           main] com.castly.BusinessApiTest               : No active profile set, falling back to 1 default profile: "default"
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/workspace/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-11-26T08:56:44.718Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Starting...
+2026-11-26T08:56:45.467Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-business - Added connection org.postgresql.jdbc.PgConnection@29fccabd
+2026-11-26T08:56:45.472Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Start completed.
+2026-11-26T08:56:48.654Z  INFO 162651 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-26T08:56:49.915Z  INFO 162651 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-26T08:56:49.915Z  INFO 162651 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-26T08:56:49.918Z  INFO 162651 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-11-26T08:56:50.260Z  INFO 162651 --- [           main] com.castly.BusinessApiTest               : Started BusinessApiTest in 33.475 seconds (process running for 40.053)
+2026-11-26T08:56:50.587Z  WARN 162651 --- [           main] o.s.w.s.h.HandlerMappingIntrospector     : Cache miss for REQUEST dispatch to '/api/v1/talents/me' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+2026-11-26T08:56:53.961Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-26T08:56:54.024Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4da18e2c
+2026-11-26T08:56:54.025Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-26T08:56:54.546Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-11-26T08:56:54.558Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-11-26T08:56:56.076Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-11-26T08:56:56.095Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@7fdf3d7e
+2026-11-26T08:56:56.095Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-11-26T08:56:56.487Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-11-26T08:56:56.503Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection org.postgresql.jdbc.PgConnection@58ff0c7b
+2026-11-26T08:56:56.504Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-11-26T08:56:56.534Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown initiated...
+2026-11-26T08:56:56.536Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown completed.
+2026-11-26T08:56:56.732Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown initiated...
+2026-11-26T08:56:56.738Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown completed.
+2026-11-26T08:56:56.961Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=740ce65a-bbe2-4a79-b5ae-1d5f31042374 operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=postgres_rls_denied
+2026-11-26T08:57:07.008Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-11-26T08:57:07.024Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@226dfffd
+2026-11-26T08:57:07.024Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-11-26T08:57:07.228Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown initiated...
+2026-11-26T08:57:07.232Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown completed.
+2026-11-26T08:57:07.406Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2026-11-26T08:57:07.420Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection org.postgresql.jdbc.PgConnection@3d458cb8
+2026-11-26T08:57:07.420Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2026-11-26T08:57:07.552Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Starting...
+2026-11-26T08:57:07.564Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-6 - Added connection org.postgresql.jdbc.PgConnection@287e719
+2026-11-26T08:57:07.564Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Start completed.
+2026-11-26T08:57:07.627Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown initiated...
+2026-11-26T08:57:07.628Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown completed.
+2026-11-26T08:57:07.629Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown initiated...
+2026-11-26T08:57:07.630Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown completed.
+2026-11-26T08:57:07.810Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=3c3598c7-5f8d-48a5-806b-b2267f3bf59d operation=booking.accepted.update sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=postgres_privilege_denied booking_diagnostics=Evidence[probe=postgres_privilege_denied, identityPresent=true, identityMatches=true, accountVisible=null, roleMatches=null, callerIsTalent=true, priorRequested=true]
+2026-11-26T08:57:09.708Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=03f0fcdd-698a-4c4f-a1b0-3eb633dceb50 operation=conversation.insert sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=postgres_rls_denied booking_diagnostics=disabled_or_not_applicable
+2026-11-26T08:57:10.716Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Starting...
+2026-11-26T08:57:10.732Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-7 - Added connection org.postgresql.jdbc.PgConnection@4f0d5da2
+2026-11-26T08:57:10.732Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Start completed.
+2026-11-26T08:57:11.006Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown initiated...
+2026-11-26T08:57:11.010Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown completed.
+2026-11-26T08:57:13.497Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=67845fa3-cbed-4533-ac2b-b8d4c70ef67d operation=booking.accepted.lock sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=postgres_privilege_denied booking_diagnostics=disabled_or_not_applicable
+2026-11-26T08:57:13.719Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=ebdbdcbc-6238-4e07-a933-3e45f58c8481 operation=booking.accepted.update sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=postgres_rls_denied booking_diagnostics=Evidence[probe=ok, identityPresent=true, identityMatches=true, accountVisible=true, roleMatches=true, callerIsTalent=true, priorRequested=true]
+2026-11-26T08:57:14.068Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Starting...
+2026-11-26T08:57:14.080Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-8 - Added connection org.postgresql.jdbc.PgConnection@290df0bf
+2026-11-26T08:57:14.080Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Start completed.
+2026-11-26T08:57:14.275Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown initiated...
+2026-11-26T08:57:14.276Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown completed.
+2026-11-26T08:57:14.914Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Starting...
+2026-11-26T08:57:14.925Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-9 - Added connection org.postgresql.jdbc.PgConnection@175ddffd
+2026-11-26T08:57:14.925Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Start completed.
+2026-11-26T08:57:15.546Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown initiated...
+2026-11-26T08:57:15.550Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown completed.
+2026-11-26T08:57:15.755Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=61ad1d3e-addb-4906-81fc-059e5326ac04 operation=booking.accepted.update sqlstate=42501 exception_class=BadSqlGrammarException cause_class=PSQLException reason=booking_guard_account_role booking_diagnostics=Evidence[probe=ok, identityPresent=true, identityMatches=true, accountVisible=false, roleMatches=false, callerIsTalent=true, priorRequested=true]
+2026-11-26T08:57:16.424Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=e4ec7329-7dd7-4c47-8f8f-842b33d74940 operation=database.operation sqlstate=23514 exception_class=DataIntegrityViolationException reason=other_database_error
+2026-11-26T08:57:16.757Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Starting...
+2026-11-26T08:57:16.769Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-10 - Added connection org.postgresql.jdbc.PgConnection@3cf27af6
+2026-11-26T08:57:16.770Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Start completed.
+2026-11-26T08:57:16.967Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown initiated...
+2026-11-26T08:57:16.970Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown completed.
+2026-11-26T08:57:19.672Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Starting...
+2026-11-26T08:57:19.744Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-11 - Added connection org.postgresql.jdbc.PgConnection@5adfa95c
+2026-11-26T08:57:19.749Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Start completed.
+2026-11-26T08:57:20.087Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Shutdown initiated...
+2026-11-26T08:57:20.089Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Shutdown completed.
+2026-11-26T08:57:21.563Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Shutdown initiated...
+2026-11-26T08:57:21.565Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Shutdown completed.
+[INFO] Tests run: 105, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 67.60 s -- in com.castly.BusinessApiTest
+[INFO] Running com.castly.UnmigratedTrustCompatibilityTest
+2026-11-26T08:57:21.582Z  INFO 162651 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.castly.UnmigratedTrustCompatibilityTest]: UnmigratedTrustCompatibilityTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-26T08:57:21.594Z  INFO 162651 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.castly.CastlyApplication for test class com.castly.UnmigratedTrustCompatibilityTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2026-11-26T08:57:35.525Z  INFO 162651 --- [           main] c.c.UnmigratedTrustCompatibilityTest     : Starting UnmigratedTrustCompatibilityTest using Java 21.0.12.1 with PID 162651 (started by agent in /workspace/castly-m7-2/backend)
+2026-11-26T08:57:35.525Z  INFO 162651 --- [           main] c.c.UnmigratedTrustCompatibilityTest     : No active profile set, falling back to 1 default profile: "default"
+2026-11-26T08:57:36.139Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Starting...
+2026-11-26T08:57:36.152Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-business - Added connection org.postgresql.jdbc.PgConnection@20a9257
+2026-11-26T08:57:36.152Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Start completed.
+2026-11-26T08:57:36.557Z  INFO 162651 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-26T08:57:36.730Z  INFO 162651 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-26T08:57:36.730Z  INFO 162651 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-26T08:57:36.731Z  INFO 162651 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-26T08:57:36.757Z  INFO 162651 --- [           main] c.c.UnmigratedTrustCompatibilityTest     : Started UnmigratedTrustCompatibilityTest in 15.156 seconds (process running for 86.55)
+2026-11-26T08:57:36.766Z  WARN 162651 --- [           main] o.s.w.s.h.HandlerMappingIntrospector     : Cache miss for REQUEST dispatch to '/api/v1/talents/me' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.36 s -- in com.castly.UnmigratedTrustCompatibilityTest
+[INFO] Running com.castly.engagement.WorkerSecurityIntegrationTest
+2026-11-26T08:57:51.976Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-1a29b6fd-c71d-4234-92a9-760d4105fb27 - Starting...
+2026-11-26T08:57:51.994Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : worker-security-1a29b6fd-c71d-4234-92a9-760d4105fb27 - Added connection org.postgresql.jdbc.PgConnection@5db29e7
+2026-11-26T08:57:51.994Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-1a29b6fd-c71d-4234-92a9-760d4105fb27 - Start completed.
+2026-11-26T08:57:52.293Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-48947e3e-afb7-489a-bfe0-ccffc08b560b - Starting...
+2026-11-26T08:57:52.305Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : worker-security-48947e3e-afb7-489a-bfe0-ccffc08b560b - Added connection org.postgresql.jdbc.PgConnection@13ad8965
+2026-11-26T08:57:52.305Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-48947e3e-afb7-489a-bfe0-ccffc08b560b - Start completed.
+2026-11-26T08:57:52.443Z  WARN 162651 --- [           main] com.zaxxer.hikari.pool.ProxyConnection   : worker-security-48947e3e-afb7-489a-bfe0-ccffc08b560b - Connection org.postgresql.jdbc.PgConnection@13ad8965 marked as broken because of SQLSTATE(57P01), ErrorCode(0)
+
+org.postgresql.util.PSQLException: FATAL: terminating connection due to administrator command
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2736) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2421) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:525) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:435) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:196) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgPreparedStatement.executeUpdate(PgPreparedStatement.java:157) ~[postgresql-42.7.8.jar:42.7.8]
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java) ~[HikariCP-6.3.3.jar:na]
+	at org.springframework.jdbc.core.JdbcTemplate.lambda$update$2(JdbcTemplate.java:977) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:658) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:972) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:993) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate.update(NamedParameterJdbcTemplate.java:337) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.simple.DefaultJdbcClient$DefaultStatementSpec.update(DefaultJdbcClient.java:237) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at com.castly.engagement.EngagementWorker.finish(EngagementWorker.java:477) ~[classes/:na]
+	at com.castly.engagement.EngagementWorker.apply(EngagementWorker.java:341) ~[classes/:na]
+	at com.castly.engagement.EngagementWorker.lambda$dispatch$1(EngagementWorker.java:306) ~[classes/:na]
+	at org.springframework.transaction.support.TransactionTemplate.execute(TransactionTemplate.java:140) ~[spring-tx-6.2.12.jar:6.2.12]
+	at com.castly.engagement.EngagementWorker.dispatch(EngagementWorker.java:121) ~[classes/:na]
+	at com.castly.engagement.EngagementWorker.tick(EngagementWorker.java:104) ~[classes/:na]
+	at com.castly.engagement.WorkerSecurityIntegrationTest.lambda$connectionLossAfterProviderAcceptanceIsQuarantinedNotRetried$21(WorkerSecurityIntegrationTest.java:472) ~[test-classes/:na]
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53) ~[junit-jupiter-api-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35) ~[junit-jupiter-api-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128) ~[junit-jupiter-api-5.12.2.jar:5.12.2]
+	at com.castly.engagement.WorkerSecurityIntegrationTest.connectionLossAfterProviderAcceptanceIsQuarantinedNotRetried(WorkerSecurityIntegrationTest.java:472) ~[test-classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775) ~[junit-platform-commons-1.12.2.jar:1.12.2]
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479) ~[junit-platform-commons-1.12.2.jar:1.12.2]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.4.jar:3.5.4]
+
+2026-11-26T08:57:52.450Z ERROR 162651 --- [           main] o.s.t.support.TransactionTemplate        : Application exception overridden by rollback exception
+
+org.springframework.dao.DataAccessResourceFailureException: PreparedStatementCallback; SQL [update engagement_private.outbox set state=?,error_code=?,receipt=coalesce(?,receipt),delivered_at=coalesce(?,delivered_at),lease_until=null where id=?]; FATAL: terminating connection due to administrator command
+	at org.springframework.jdbc.support.SQLStateSQLExceptionTranslator.doTranslate(SQLStateSQLExceptionTranslator.java:152) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:116) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.translateException(JdbcTemplate.java:1556) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:677) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:972) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:993) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate.update(NamedParameterJdbcTemplate.java:337) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.simple.DefaultJdbcClient$DefaultStatementSpec.update(DefaultJdbcClient.java:237) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at com.castly.engagement.EngagementWorker.finish(EngagementWorker.java:477) ~[classes/:na]
+	at com.castly.engagement.EngagementWorker.apply(EngagementWorker.java:341) ~[classes/:na]
+	at com.castly.engagement.EngagementWorker.lambda$dispatch$1(EngagementWorker.java:306) ~[classes/:na]
+	at org.springframework.transaction.support.TransactionTemplate.execute(TransactionTemplate.java:140) ~[spring-tx-6.2.12.jar:6.2.12]
+	at com.castly.engagement.EngagementWorker.dispatch(EngagementWorker.java:121) ~[classes/:na]
+	at com.castly.engagement.EngagementWorker.tick(EngagementWorker.java:104) ~[classes/:na]
+	at com.castly.engagement.WorkerSecurityIntegrationTest.lambda$connectionLossAfterProviderAcceptanceIsQuarantinedNotRetried$21(WorkerSecurityIntegrationTest.java:472) ~[test-classes/:na]
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53) ~[junit-jupiter-api-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35) ~[junit-jupiter-api-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128) ~[junit-jupiter-api-5.12.2.jar:5.12.2]
+	at com.castly.engagement.WorkerSecurityIntegrationTest.connectionLossAfterProviderAcceptanceIsQuarantinedNotRetried(WorkerSecurityIntegrationTest.java:472) ~[test-classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775) ~[junit-platform-commons-1.12.2.jar:1.12.2]
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479) ~[junit-platform-commons-1.12.2.jar:1.12.2]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.4.jar:3.5.4]
+Caused by: org.postgresql.util.PSQLException: FATAL: terminating connection due to administrator command
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2736) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2421) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:525) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:435) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:196) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgPreparedStatement.executeUpdate(PgPreparedStatement.java:157) ~[postgresql-42.7.8.jar:42.7.8]
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java) ~[HikariCP-6.3.3.jar:na]
+	at org.springframework.jdbc.core.JdbcTemplate.lambda$update$2(JdbcTemplate.java:977) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:658) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	... 90 common frames omitted
+
+2026-11-26T08:57:52.561Z  WARN 162651 --- [           main] com.zaxxer.hikari.pool.ProxyConnection   : worker-security-48947e3e-afb7-489a-bfe0-ccffc08b560b - Connection org.postgresql.jdbc.PgConnection@666fad24 marked as broken because of SQLSTATE(57P01), ErrorCode(0)
+
+org.postgresql.util.PSQLException: FATAL: terminating connection due to administrator command
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2736) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2421) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:525) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:435) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:196) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgPreparedStatement.executeUpdate(PgPreparedStatement.java:157) ~[postgresql-42.7.8.jar:42.7.8]
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java) ~[HikariCP-6.3.3.jar:na]
+	at org.springframework.jdbc.core.JdbcTemplate.lambda$update$2(JdbcTemplate.java:977) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:658) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:972) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:993) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate.update(NamedParameterJdbcTemplate.java:337) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.simple.DefaultJdbcClient$DefaultStatementSpec.update(DefaultJdbcClient.java:237) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at com.castly.engagement.EngagementWorker.tick(EngagementWorker.java:73) ~[classes/:na]
+	at com.castly.engagement.WorkerSecurityIntegrationTest.recoverTick(WorkerSecurityIntegrationTest.java:490) ~[test-classes/:na]
+	at com.castly.engagement.WorkerSecurityIntegrationTest.connectionLossAfterProviderAcceptanceIsQuarantinedNotRetried(WorkerSecurityIntegrationTest.java:474) ~[test-classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775) ~[junit-platform-commons-1.12.2.jar:1.12.2]
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479) ~[junit-platform-commons-1.12.2.jar:1.12.2]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.4.jar:3.5.4]
+
+2026-11-26T08:57:52.689Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-48947e3e-afb7-489a-bfe0-ccffc08b560b - Shutdown initiated...
+2026-11-26T08:57:52.691Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-48947e3e-afb7-489a-bfe0-ccffc08b560b - Shutdown completed.
+2026-11-26T08:57:52.863Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:52.877Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-delivery - Added connection org.postgresql.jdbc.PgConnection@74f60344
+2026-11-26T08:57:52.877Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Start completed.
+2026-11-26T08:57:52.896Z  INFO 162651 --- [           main] o.s.s.config.TaskSchedulerRouter         : No TaskScheduler/ScheduledExecutorService bean found for scheduled processing
+2026-11-26T08:57:52.912Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown initiated...
+2026-11-26T08:57:52.913Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown completed.
+2026-11-26T08:57:53.147Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:53.156Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-delivery - Added connection org.postgresql.jdbc.PgConnection@30846b76
+2026-11-26T08:57:53.157Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Start completed.
+2026-11-26T08:57:53.165Z  INFO 162651 --- [           main] o.s.s.config.TaskSchedulerRouter         : No TaskScheduler/ScheduledExecutorService bean found for scheduled processing
+2026-11-26T08:57:53.177Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown initiated...
+2026-11-26T08:57:53.178Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown completed.
+2026-11-26T08:57:53.533Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-cd267e79-53f6-40d9-b28d-6e3cc92c7293 - Starting...
+2026-11-26T08:57:53.543Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : worker-security-cd267e79-53f6-40d9-b28d-6e3cc92c7293 - Added connection org.postgresql.jdbc.PgConnection@442ac743
+2026-11-26T08:57:53.543Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-cd267e79-53f6-40d9-b28d-6e3cc92c7293 - Start completed.
+2026-11-26T08:57:53.674Z  WARN 162651 --- [           main] com.zaxxer.hikari.pool.ProxyConnection   : worker-security-cd267e79-53f6-40d9-b28d-6e3cc92c7293 - Connection org.postgresql.jdbc.PgConnection@442ac743 marked as broken because of SQLSTATE(57P01), ErrorCode(0)
+
+org.postgresql.util.PSQLException: FATAL: terminating connection due to administrator command
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2736) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2421) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:525) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:435) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:196) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgPreparedStatement.executeUpdate(PgPreparedStatement.java:157) ~[postgresql-42.7.8.jar:42.7.8]
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java) ~[HikariCP-6.3.3.jar:na]
+	at org.springframework.jdbc.core.JdbcTemplate.lambda$update$2(JdbcTemplate.java:977) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:658) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:972) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:993) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate.update(NamedParameterJdbcTemplate.java:337) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at org.springframework.jdbc.core.simple.DefaultJdbcClient$DefaultStatementSpec.update(DefaultJdbcClient.java:237) ~[spring-jdbc-6.2.12.jar:6.2.12]
+	at com.castly.engagement.EngagementWorker.tick(EngagementWorker.java:73) ~[classes/:na]
+	at com.castly.engagement.WorkerSecurityIntegrationTest.recoverTick(WorkerSecurityIntegrationTest.java:490) ~[test-classes/:na]
+	at com.castly.engagement.WorkerSecurityIntegrationTest.realPoolRecoversAfterIdleConnectionTerminationWithoutDuplicateDelivery(WorkerSecurityIntegrationTest.java:443) ~[test-classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775) ~[junit-platform-commons-1.12.2.jar:1.12.2]
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479) ~[junit-platform-commons-1.12.2.jar:1.12.2]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.12.2.jar:5.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.12.2.jar:1.12.2]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.4.jar:3.5.4]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.4.jar:3.5.4]
+
+2026-11-26T08:57:53.848Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-cd267e79-53f6-40d9-b28d-6e3cc92c7293 - Shutdown initiated...
+2026-11-26T08:57:53.849Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-cd267e79-53f6-40d9-b28d-6e3cc92c7293 - Shutdown completed.
+2026-11-26T08:57:54.080Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:54.089Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-delivery - Added connection org.postgresql.jdbc.PgConnection@596e2222
+2026-11-26T08:57:54.090Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Start completed.
+2026-11-26T08:57:54.098Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown initiated...
+2026-11-26T08:57:54.099Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown completed.
+2026-11-26T08:57:54.100Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated non-owner delivery worker role required
+2026-11-26T08:57:54.303Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:54.315Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-delivery - Added connection org.postgresql.jdbc.PgConnection@1fafa1d6
+2026-11-26T08:57:54.315Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Start completed.
+2026-11-26T08:57:54.324Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown initiated...
+2026-11-26T08:57:54.325Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown completed.
+2026-11-26T08:57:54.326Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated non-owner delivery worker role required
+2026-11-26T08:57:54.561Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:54.575Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-delivery - Added connection org.postgresql.jdbc.PgConnection@6f77406a
+2026-11-26T08:57:54.599Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Start completed.
+2026-11-26T08:57:54.612Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown initiated...
+2026-11-26T08:57:54.616Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown completed.
+2026-11-26T08:57:54.616Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated non-owner delivery worker role required
+2026-11-26T08:57:54.814Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:54.824Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-delivery - Added connection org.postgresql.jdbc.PgConnection@c9057bf
+2026-11-26T08:57:54.824Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Start completed.
+2026-11-26T08:57:54.830Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown initiated...
+2026-11-26T08:57:54.831Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown completed.
+2026-11-26T08:57:54.831Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated non-owner delivery worker role required
+2026-11-26T08:57:55.007Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:55.019Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-delivery - Added connection org.postgresql.jdbc.PgConnection@1aa96f4f
+2026-11-26T08:57:55.020Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Start completed.
+2026-11-26T08:57:55.028Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown initiated...
+2026-11-26T08:57:55.030Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown completed.
+2026-11-26T08:57:55.031Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated non-owner delivery worker role required
+2026-11-26T08:57:55.248Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:55.259Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-delivery - Added connection org.postgresql.jdbc.PgConnection@5077a51b
+2026-11-26T08:57:55.260Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Start completed.
+2026-11-26T08:57:55.267Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown initiated...
+2026-11-26T08:57:55.268Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown completed.
+2026-11-26T08:57:55.268Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated non-owner delivery worker role required
+2026-11-26T08:57:55.547Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:55.560Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-delivery - Added connection org.postgresql.jdbc.PgConnection@5979e188
+2026-11-26T08:57:55.560Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Start completed.
+2026-11-26T08:57:55.571Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown initiated...
+2026-11-26T08:57:55.572Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Shutdown completed.
+2026-11-26T08:57:55.572Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated non-owner delivery worker role required
+2026-11-26T08:57:56.044Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-893cd040-e5ff-4274-942d-e5f6677c4bf0 - Starting...
+2026-11-26T08:57:56.058Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : worker-security-893cd040-e5ff-4274-942d-e5f6677c4bf0 - Added connection org.postgresql.jdbc.PgConnection@2de69a61
+2026-11-26T08:57:56.058Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-893cd040-e5ff-4274-942d-e5f6677c4bf0 - Start completed.
+2026-11-26T08:57:56.410Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-893cd040-e5ff-4274-942d-e5f6677c4bf0 - Shutdown initiated...
+2026-11-26T08:57:56.416Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-893cd040-e5ff-4274-942d-e5f6677c4bf0 - Shutdown completed.
+2026-11-26T08:57:56.583Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-cbbd773f-6b31-4c1d-aaa2-14283e978752 - Starting...
+2026-11-26T08:57:56.609Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : worker-security-cbbd773f-6b31-4c1d-aaa2-14283e978752 - Added connection org.postgresql.jdbc.PgConnection@33a6637e
+2026-11-26T08:57:56.609Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-cbbd773f-6b31-4c1d-aaa2-14283e978752 - Start completed.
+2026-11-26T08:57:56.630Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-cbbd773f-6b31-4c1d-aaa2-14283e978752 - Shutdown initiated...
+2026-11-26T08:57:56.635Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-cbbd773f-6b31-4c1d-aaa2-14283e978752 - Shutdown completed.
+2026-11-26T08:57:56.635Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-dafa62d6-b6e8-4d2a-bffb-9d74896ec256 - Starting...
+2026-11-26T08:57:56.651Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : worker-security-dafa62d6-b6e8-4d2a-bffb-9d74896ec256 - Added connection org.postgresql.jdbc.PgConnection@5db92249
+2026-11-26T08:57:56.653Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-dafa62d6-b6e8-4d2a-bffb-9d74896ec256 - Start completed.
+2026-11-26T08:57:56.664Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-dafa62d6-b6e8-4d2a-bffb-9d74896ec256 - Shutdown initiated...
+2026-11-26T08:57:56.666Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-dafa62d6-b6e8-4d2a-bffb-9d74896ec256 - Shutdown completed.
+2026-11-26T08:57:56.842Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-41be1ba0-1d22-4ff2-a98b-8a55ca5f4839 - Starting...
+2026-11-26T08:57:56.889Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : worker-security-41be1ba0-1d22-4ff2-a98b-8a55ca5f4839 - Added connection org.postgresql.jdbc.PgConnection@7fda62b9
+2026-11-26T08:57:56.890Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-41be1ba0-1d22-4ff2-a98b-8a55ca5f4839 - Start completed.
+2026-11-26T08:57:57.081Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-41be1ba0-1d22-4ff2-a98b-8a55ca5f4839 - Shutdown initiated...
+2026-11-26T08:57:57.086Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-41be1ba0-1d22-4ff2-a98b-8a55ca5f4839 - Shutdown completed.
+2026-11-26T08:57:57.589Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-dfbc6869-5930-4de1-a589-4c5acc36af72 - Starting...
+2026-11-26T08:57:57.615Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : worker-security-dfbc6869-5930-4de1-a589-4c5acc36af72 - Added connection org.postgresql.jdbc.PgConnection@20b30c5f
+2026-11-26T08:57:57.616Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-dfbc6869-5930-4de1-a589-4c5acc36af72 - Start completed.
+2026-11-26T08:57:58.368Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-dfbc6869-5930-4de1-a589-4c5acc36af72 - Shutdown initiated...
+2026-11-26T08:57:58.378Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-dfbc6869-5930-4de1-a589-4c5acc36af72 - Shutdown completed.
+2026-11-26T08:57:58.566Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated worker credentials required
+2026-11-26T08:57:58.592Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated worker credentials required
+2026-11-26T08:57:58.610Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated worker credentials required
+2026-11-26T08:57:58.625Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Dedicated worker credentials required
+2026-11-26T08:57:58.639Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Do not override identity through the JDBC URL
+2026-11-26T08:57:58.657Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-delivery - Starting...
+2026-11-26T08:57:59.675Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Failed to obtain JDBC Connection
+2026-11-26T08:57:59.691Z  WARN 162651 --- [           main] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'engagementWorker' defined in com.castly.engagement.WorkerConfiguration: Failed to instantiate [com.castly.engagement.EngagementWorker]: Factory method 'engagementWorker' threw exception with message: Use a PostgreSQL JDBC URL
+2026-11-26T08:57:59.695Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-1a29b6fd-c71d-4234-92a9-760d4105fb27 - Shutdown initiated...
+2026-11-26T08:57:59.701Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : worker-security-1a29b6fd-c71d-4234-92a9-760d4105fb27 - Shutdown completed.
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 22.75 s -- in com.castly.engagement.WorkerSecurityIntegrationTest
+[INFO] Running com.castly.engagement.VerifiedMailboxTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.423 s -- in com.castly.engagement.VerifiedMailboxTest
+[INFO] Running com.castly.engagement.BoundedHttpBodyTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.280 s -- in com.castly.engagement.BoundedHttpBodyTest
+[INFO] Running com.castly.engagement.ProviderSandboxTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.196 s -- in com.castly.engagement.ProviderSandboxTest
+[INFO] Running com.castly.engagement.DeliveryRulesTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 s -- in com.castly.engagement.DeliveryRulesTest
+[INFO] Running com.castly.subscription.GooglePlayHttpGatewayTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.911 s -- in com.castly.subscription.GooglePlayHttpGatewayTest
+[INFO] Running com.castly.subscription.GoogleRtdnSignatureTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.693 s -- in com.castly.subscription.GoogleRtdnSignatureTest
+[INFO] Running com.castly.subscription.GooglePurchaseTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.172 s -- in com.castly.subscription.GooglePurchaseTest
+[INFO] Running com.castly.ConfigurationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.291 s -- in com.castly.ConfigurationTest
+[INFO] Running com.castly.ConcurrentBoundaryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in com.castly.ConcurrentBoundaryTest
+[INFO] Running com.castly.JwtSecurityTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.784 s -- in com.castly.JwtSecurityTest
+[INFO] Running com.castly.discovery.BoundedProviderTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.273 s -- in com.castly.discovery.BoundedProviderTest
+[INFO] Running com.castly.discovery.CampaignParserTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.castly.discovery.CampaignParserTest
+[INFO] Running com.castly.admin.PortfolioPreviewGatewayTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.138 s -- in com.castly.admin.PortfolioPreviewGatewayTest
+[INFO] Running com.castly.admin.AdminIdentityTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in com.castly.admin.AdminIdentityTest
+[INFO] Running com.castly.AdminApiTest
+2026-11-26T08:58:04.993Z  INFO 162651 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.castly.AdminApiTest]: AdminApiTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-26T08:58:05.108Z  INFO 162651 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.castly.CastlyApplication for test class com.castly.AdminApiTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2026-11-26T08:58:20.156Z  INFO 162651 --- [           main] com.castly.AdminApiTest                  : Starting AdminApiTest using Java 21.0.12.1 with PID 162651 (started by agent in /workspace/castly-m7-2/backend)
+2026-11-26T08:58:20.157Z  INFO 162651 --- [           main] com.castly.AdminApiTest                  : No active profile set, falling back to 1 default profile: "default"
+2026-11-26T08:58:20.414Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Starting...
+2026-11-26T08:58:20.428Z  INFO 162651 --- [           main] com.zaxxer.hikari.pool.HikariPool        : castly-business - Added connection org.postgresql.jdbc.PgConnection@7f55a981
+2026-11-26T08:58:20.428Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Start completed.
+2026-11-26T08:58:20.747Z  INFO 162651 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-26T08:58:20.883Z  INFO 162651 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-26T08:58:20.884Z  INFO 162651 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-26T08:58:20.884Z  INFO 162651 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-26T08:58:20.904Z  INFO 162651 --- [           main] com.castly.AdminApiTest                  : Started AdminApiTest in 15.791 seconds (process running for 130.697)
+2026-11-26T08:58:21.176Z  WARN 162651 --- [           main] o.s.w.s.h.HandlerMappingIntrospector     : Cache miss for REQUEST dispatch to '/api/v1/admin/sessions' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+2026-11-26T08:58:21.667Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=7757b512-8066-4738-acc5-f3e2a47acb72 operation=database.operation sqlstate=23514 exception_class=DataIntegrityViolationException reason=other_database_error
+2026-11-26T08:58:21.688Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=88e98ff5-af86-46d7-b375-5ed48a8e9b2a operation=database.operation sqlstate=23505 exception_class=DuplicateKeyException reason=other_database_error
+2026-11-26T08:58:21.745Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=606ce819-09f0-4490-953d-cadd24778b92 operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:21.779Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=b9413945-e41d-4029-9fc7-e3250babc829 operation=database.operation sqlstate=23514 exception_class=DataIntegrityViolationException reason=other_database_error
+2026-11-26T08:58:21.807Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=7496f551-6ff5-4e2b-8241-c18ce1a287ce operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:21.956Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=a83cc543-3726-47e4-9264-7847fccf98af operation=database.operation sqlstate=23514 exception_class=DataIntegrityViolationException reason=other_database_error
+2026-11-26T08:58:22.586Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=e63fdaca-c2fd-43d0-ac84-61362c4852f7 operation=database.operation sqlstate=23505 exception_class=DuplicateKeyException reason=other_database_error
+2026-11-26T08:58:22.596Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=52b0682e-3ced-4947-8534-546173d6257f operation=database.operation sqlstate=40001 exception_class=CannotAcquireLockException reason=other_database_error
+2026-11-26T08:58:24.778Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=a90928e3-163f-4e4e-a95d-206cf37c50ed operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:24.847Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=258eee55-f3dd-4222-a431-9367dad1deee operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:24.931Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=75ddb9c7-e2e8-4a18-9962-00404672f411 operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:24.946Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=7930bcdd-3501-4549-9a5a-b45469af19d6 operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:26.612Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=fcf713f1-971b-43b8-8acc-496bf6c325d9 operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:26.626Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=ab0f7dbf-8d7f-48af-9945-396a138a67ff operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:29.766Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=912ea760-5985-424c-b498-563eac8d6d7f operation=database.operation sqlstate=23514 exception_class=DataIntegrityViolationException reason=other_database_error
+2026-11-26T08:58:29.815Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=156471c2-be01-4097-8afb-a6c588002ce9 operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:29.832Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=dee8b955-3071-492e-9f06-f900bf655eae operation=database.operation sqlstate=23514 exception_class=DataIntegrityViolationException reason=other_database_error
+2026-11-26T08:58:30.215Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=eb0f68e9-5e3a-4142-a9c0-b6df28c666fa operation=database.operation sqlstate=23514 exception_class=DataIntegrityViolationException reason=other_database_error
+2026-11-26T08:58:30.264Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=b0b5dd21-3c92-4767-b300-c7b8a57bb51c operation=database.operation sqlstate=23514 exception_class=DataIntegrityViolationException reason=other_database_error
+2026-11-26T08:58:30.279Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=c1eb127b-2cef-41ad-977d-4fd04e279407 operation=database.operation sqlstate=23514 exception_class=DataIntegrityViolationException reason=other_database_error
+2026-11-26T08:58:30.709Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=001a0dad-b8b5-4ed5-bffc-fde347ed3e73 operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:30.723Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=2871a3f4-bad4-4935-81fa-3451c677c64a operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:35.447Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=a50b1346-f70d-4661-a391-166fb2ca8f69 operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:35.502Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=f6450a76-4347-4fac-a5a3-168f3775b147 operation=database.operation sqlstate=42501 exception_class=BadSqlGrammarException reason=unclassified_42501
+2026-11-26T08:58:36.016Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Shutdown initiated...
+2026-11-26T08:58:36.018Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : castly-business - Shutdown completed.
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.03 s -- in com.castly.AdminApiTest
+[INFO] Running com.castly.enforcement.EnforcementBodyLimitTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in com.castly.enforcement.EnforcementBodyLimitTest
+[INFO] Running com.castly.api.BookingDiagnosticsTest
+2026-11-26T08:58:36.041Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=9831e960-82cd-4cc6-b7ce-62473dbe4d3a operation=booking.accepted.update sqlstate=42501 exception_class=BadSqlGrammarException cause_class=SQLException reason=booking_guard_account_role booking_diagnostics=disabled_or_not_applicable
+2026-11-26T08:58:36.047Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Database failure reference=5ecad0b0-90a0-443b-9f04-bae362870acb operation=database.transaction.begin sqlstate=08001 exception_class=CannotCreateTransactionException reason=dns_resolution_failed
+2026-11-26T08:58:36.051Z  WARN 162651 --- [           main] com.castly.api.ApiErrors                 : Business DB failure reference=7b33eeb9-b141-4586-b2b4-a808de63e490 operation=booking.accepted.update sqlstate=42501 exception_class=DataAccessResourceFailureException cause_class=SQLException reason=booking_guard_account_role booking_diagnostics=Evidence[probe=ok, identityPresent=true, identityMatches=true, accountVisible=false, roleMatches=false, callerIsTalent=true, priorRequested=true]
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in com.castly.api.BookingDiagnosticsTest
+[INFO] Running com.castly.api.ActivityAuthorizationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in com.castly.api.ActivityAuthorizationTest
+[INFO] Running com.castly.api.ConnectionLifecycleTest
+2026-11-26T08:58:36.059Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : synthetic-dns-lifecycle - Starting...
+2026-11-26T08:58:36.060Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : synthetic-dns-lifecycle - Start completed.
+2026-11-26T08:58:37.573Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : synthetic-dns-lifecycle - Shutdown initiated...
+2026-11-26T08:58:37.603Z  INFO 162651 --- [           main] com.zaxxer.hikari.HikariDataSource       : synthetic-dns-lifecycle - Shutdown completed.
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.550 s -- in com.castly.api.ConnectionLifecycleTest
+[INFO] Running com.castly.trust.TrustedContactServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in com.castly.trust.TrustedContactServiceTest
+[INFO] Running com.castly.trust.EvidenceUploadLimitFilterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.220 s -- in com.castly.trust.EvidenceUploadLimitFilterTest
+[INFO] Running com.castly.trust.TrustRefreshQueueTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.castly.trust.TrustRefreshQueueTest
+[INFO] Running com.castly.trust.StorageEvidenceGatewayTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.218 s -- in com.castly.trust.StorageEvidenceGatewayTest
+[INFO] Running com.castly.trust.EvidenceImageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.318 s -- in com.castly.trust.EvidenceImageTest
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 220, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[WARNING] Corrupted channel by directly writing to native stream in forked JVM 1. See FAQ web page and the dump file /workspace/castly-m7-2/backend/target/surefire-reports/2026-11-26T08-56-09_956-jvmRun1.dumpstream
+[INFO]
+[INFO] --- jar:3.4.2:jar (default-jar) @ castly-api ---
+[INFO] Building jar: /workspace/castly-m7-2/backend/target/castly-api-0.1.0-SNAPSHOT.jar
+[INFO]
+[INFO] --- spring-boot:3.5.7:repackage (repackage) @ castly-api ---
+[INFO] Replacing main artifact /workspace/castly-m7-2/backend/target/castly-api-0.1.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /workspace/castly-m7-2/backend/target/castly-api-0.1.0-SNAPSHOT.jar.original
+[INFO]
+[INFO] --- jacoco:0.8.14:report (coverage-report) @ castly-api ---
+[INFO] Loading execution data file /workspace/castly-m7-2/backend/target/jacoco.exec
+[INFO] Analyzed bundle 'castly-api' with 148 classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  02:46 min
+[INFO] Finished at: 2026-11-26T08:58:40Z
+[INFO] ------------------------------------------------------------------------

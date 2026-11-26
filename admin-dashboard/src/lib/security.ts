@@ -2,10 +2,10 @@ const uuid = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
 export function allowedBackend(method: string, path: string) {
   const routes: Record<string, RegExp> = {
     GET: new RegExp(
-      `^(me|principals|sessions|audit|users|users/${uuid}|users/${uuid}/bookings|users/verifications|users/verifications/${uuid})$`,
+      `^(me|principals|sessions|audit|users|users/${uuid}|users/${uuid}/bookings|users/${uuid}/access|account-queues/(appeals|approvals|overdue)|users/verifications|users/verifications/${uuid})$`,
     ),
     POST: new RegExp(
-      `^(sessions|invitations|invitations/activate|users/verifications/${uuid}/decision|users/verifications/${uuid}/evidence/${uuid}/preview)$`,
+      `^(sessions|invitations|invitations/activate|users/${uuid}/access|users/verifications/${uuid}/decision|users/verifications/${uuid}/evidence/${uuid}/preview)$`,
     ),
     PATCH: new RegExp(`^principals/${uuid}$`),
     DELETE: new RegExp(`^sessions/${uuid}$`),
@@ -37,7 +37,9 @@ export function cleanQuery(query: URLSearchParams) {
   const result = new URLSearchParams();
   for (const [key, value] of query) {
     if (
-      !['after', 'before', 'limit', 'q', 'role', 'verification', 'from', 'until'].includes(key) ||
+      !['after', 'before', 'limit', 'q', 'role', 'verification', 'state', 'from', 'until'].includes(
+        key,
+      ) ||
       value.length > (key === 'q' ? 80 : 50)
     )
       throw new Error('Invalid query');
@@ -70,6 +72,12 @@ export const PERMISSION_NAV: readonly {
   { href: '/dashboard', label: 'Overview', permission: null },
   { href: '/settings/admins', label: 'Administrators', permission: 'admins.manage' },
   { href: '/audit', label: 'Audit logs', permission: 'audit.read' },
+  {
+    href: '/account-queues',
+    label: 'Account reviews',
+    permission: 'accounts.read',
+    module: 'user_management',
+  },
   { href: '/users', label: 'Users', permission: 'users.read', module: 'user_management' },
   {
     href: '/users/verifications',

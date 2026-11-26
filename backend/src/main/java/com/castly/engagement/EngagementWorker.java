@@ -15,6 +15,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 /** Internal worker only; never reachable through a client queue/dispatch endpoint. */
 public class EngagementWorker implements AutoCloseable {
   private final JdbcClient db;
+  private final boolean accountEnforcement;
   private final TransactionTemplate tx;
   private final DataSource source;
   private final ActorDatabase actors;
@@ -33,6 +34,10 @@ public class EngagementWorker implements AutoCloseable {
       ObjectMapper json) {
     this.source = source;
     this.db = JdbcClient.create(source);
+    this.accountEnforcement =
+        db.sql("select to_regclass('enforcement_private.capabilities') is not null")
+            .query(Boolean.class)
+            .single();
     this.tx = new TransactionTemplate(new DataSourceTransactionManager(source));
     this.actors = actors;
     this.discovery = discovery;
@@ -121,6 +126,19 @@ public class EngagementWorker implements AutoCloseable {
                       .param("id", id));
           if (seed.isEmpty()) return null;
           UUID recipient = UUID.fromString(seed.getFirst().get("recipient_id").toString());
+          if (accountEnforcement) {
+            db.sql("select enforcement_private.lock_accounts(array[cast(:u as uuid)],false)")
+                .param("u", recipient)
+                .query()
+                .singleRow();
+            if (!db.sql("select enforcement_private.not_suspended(:u)")
+                .param("u", recipient)
+                .query(Boolean.class)
+                .single()) {
+              finish(id, "suppressed", "account_restricted", null, null);
+              return null;
+            }
+          }
           var preferences =
               rows(
                   db.sql("select * from public.engagement_preferences where user_id=:u for update")

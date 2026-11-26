@@ -145,3 +145,23 @@ test('user management proxy exposes only minimized fixed contracts', () => {
     'a%_ b',
   );
 });
+
+test('M7.2 proxy exposes bounded account contracts without exposing private schema or arbitrary RPC', () => {
+  const id = '00000000-0000-0000-0000-000000000080';
+  for (const method of ['GET', 'POST'])
+    assert.equal(allowedBackend(method, 'users/' + id + '/access'), true);
+  for (const queue of ['appeals', 'approvals', 'overdue'])
+    assert.equal(allowedBackend('GET', 'account-queues/' + queue), true);
+  for (const path of [
+    'account-queues/anything',
+    'enforcement_private/commands',
+    'rpc/process_command',
+    'users/' + id + '/access/../audit',
+  ])
+    assert.equal(allowedBackend('POST', path), false);
+  assert.equal(allowedBackend('POST', 'account-queues/appeals'), false);
+  assert.equal(
+    cleanQuery(new URLSearchParams({ state: 'TEMPORARILY_SUSPENDED', limit: '25' })),
+    'state=TEMPORARILY_SUSPENDED&limit=25',
+  );
+});

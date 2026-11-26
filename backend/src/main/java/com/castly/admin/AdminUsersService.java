@@ -15,6 +15,9 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @Service
 public class AdminUsersService {
+  @org.springframework.beans.factory.annotation.Autowired
+  private com.castly.enforcement.AccountEnforcement enforcement;
+
   private final boolean enabled;
 
   public AdminUsersService(@Value("${castly.admin.users-enabled:false}") boolean enabled) {
@@ -45,6 +48,7 @@ public class AdminUsersService {
       String query,
       String role,
       String verification,
+      String state,
       LocalDate from,
       LocalDate until) {
     if (from != null && until != null && from.isAfter(until))
@@ -62,6 +66,15 @@ public class AdminUsersService {
     if (!q.isEmpty()) {
       where += " and lower(u.display_name) like lower(:q) escape '!'";
       parameters.put("q", prefix);
+    }
+    if (!state.isEmpty()) {
+      where +=
+          " and ("
+              + (state.equals("ACTIVE")
+                  ? enforcement.stateField("u.user_id") + "=:state"
+                  : enforcement.stateFilter())
+              + ")";
+      parameters.put("state", state);
     }
     if (!role.isEmpty()) {
       where += " and u.primary_role=:role";
@@ -85,7 +98,9 @@ public class AdminUsersService {
                     "select"
                         + " u.user_id,u.display_name,u.primary_role,u.created_at,u.updated_at,t.category_id,t.city,t.published,"
                         + VERIFIED
-                        + " as verification_status"
+                        + " as verification_status,"
+                        + enforcement.stateField("u.user_id")
+                        + " as enforcement_state"
                         + DIRECTORY
                         + where
                         + " order by u.user_id limit :n")
@@ -104,7 +119,9 @@ public class AdminUsersService {
             db.sql(
                     "select u.user_id,u.display_name,u.primary_role,u.created_at,u.updated_at,"
                         + VERIFIED
-                        + " as verification_status"
+                        + " as verification_status,"
+                        + enforcement.stateField("u.user_id")
+                        + " as enforcement_state"
                         + DIRECTORY
                         + " where u.user_id=:u")
                 .param("u", user)));

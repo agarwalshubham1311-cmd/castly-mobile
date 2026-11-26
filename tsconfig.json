@@ -10,6 +10,7 @@
   },
   "exclude": [
     "node_modules",
-    "admin-dashboard"
+    "admin-dashboard",
+    "backend/target"
   ]
 }

@@ -60,4 +60,5 @@ testSQL(fs.readFileSync(path.join(__dirname, '../supabase/tests/phase5-trust-int
 testSQL(fs.readFileSync(path.join(__dirname, '../supabase/tests/phase6.sql'), 'utf8'));
 testSQL(fs.readFileSync(path.join(__dirname, '../supabase/tests/phase6-worker-security.sql'), 'utf8'));
 testSQL(fs.readFileSync(path.join(__dirname, '../supabase/tests/admin-users.sql'), 'utf8'));
+testSQL(fs.readFileSync(path.join(__dirname, '../supabase/tests/admin-enforcement.sql'), 'utf8'));
 console.log('PASS: migrations and RLS policy tests on PostgreSQL. Test fixtures rolled back.');

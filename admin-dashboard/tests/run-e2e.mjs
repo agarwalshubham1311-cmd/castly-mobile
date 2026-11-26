@@ -83,15 +83,21 @@ const fixture = http.createServer(async (req, res) => {
     id =
       body.email === 'super@example.test'
         ? uid(31)
-        : body.email === 'moderator@example.test'
-          ? uid(32)
-          : body.email === 'support@example.test'
-            ? uid(33)
-            : body.email === 'analyst@example.test'
-              ? uid(34)
-              : body.email === 'invitee@example.test'
-                ? uid(40)
-                : uid(1);
+        : body.email === 'operations@example.test'
+          ? uid(36)
+          : body.email === 'restricted@example.test'
+            ? uid(87)
+            : body.email === 'm72-moderator@example.test'
+              ? uid(43)
+              : body.email === 'moderator@example.test'
+                ? uid(32)
+                : body.email === 'support@example.test'
+                  ? uid(33)
+                  : body.email === 'analyst@example.test'
+                    ? uid(34)
+                    : body.email === 'invitee@example.test'
+                      ? uid(40)
+                      : uid(1);
     return res.end(
       JSON.stringify({ access_token: token(id), refresh_token: 'local-' + id, expires_in: 3600 }),
     );
@@ -235,12 +241,19 @@ try {
         JWT_SIGNING_MODE: 'jwks',
         CASTLY_ADMIN_ENABLED: 'true',
         CASTLY_ADMIN_USERS_ENABLED: 'true',
+        CASTLY_ADMIN_ENFORCEMENT_ENABLED: 'true',
         CASTLY_VERIFICATION_ENABLED: 'true',
         SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_local_fixture',
         CASTLY_ADMIN_AUDIT_KEY: 'local-fixture-audit-key-32-characters-long',
         CASTLY_SUBSCRIPTIONS_ENABLED: 'false',
         CASTLY_GOOGLE_PLAY_ENABLED: 'false',
         CASTLY_NOTIFICATIONS_ENABLED: 'false',
+        CASTLY_PHASE6_WORKER_ENABLED: 'false',
+        CASTLY_PHASE6_WORKER_JDBC_URL: '',
+        CASTLY_PHASE6_WORKER_DB_USER: '',
+        CASTLY_PHASE6_WORKER_DB_PASSWORD: '',
+        CASTLY_PHASE6_PUSH_PROVIDER: 'disabled',
+        CASTLY_PHASE6_EMAIL_PROVIDER: 'disabled',
       },
       stdio: ['ignore', javaLog, javaLog],
     },

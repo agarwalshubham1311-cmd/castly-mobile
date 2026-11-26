@@ -5,3 +5,8 @@ insert into public.portfolio_assets(id,talent_id,path,label) values('72800000-00
 insert into public.verification_requests(id,user_id,statement,consent_version) values('72800000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000088','Consented portfolio review of the local synthetic fixture.','profile-review-v1');
 insert into public.verification_evidence(request_id,revision,owner_id,portfolio_asset_id,portfolio_path) values('72800000-0000-0000-0000-000000000002',1,'00000000-0000-0000-0000-000000000088','72800000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000088/review.jpg');
 insert into trust_private.reviewers(user_id,scope) values('00000000-0000-0000-0000-000000000031','verification');
+-- Separate moderator: the inherited M7.1 browser test intentionally changes user 32's role.
+begin;
+set local castly.admin_bootstrap_reviewed='M7.1-owner-approved';
+insert into admin_private.principals(user_id,roles,state) values('00000000-0000-0000-0000-000000000043',array['MODERATOR'],'active');
+commit;

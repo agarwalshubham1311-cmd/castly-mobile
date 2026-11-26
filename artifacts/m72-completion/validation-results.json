@@ -1,0 +1,112 @@
+{
+  "scope": "Local disposable fixtures only; no hosted or native-device validation",
+  "branch": "feat/m7.2-user-talent-management",
+  "authorized_base": "dbf5ab228db2ae1acf263678a0727d73c0ee6022",
+  "backend": {
+    "java": "21",
+    "fresh": {
+      "tests": 220,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "result": "BUILD SUCCESS"
+    },
+    "reconciled": {
+      "tests": 220,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "result": "BUILD SUCCESS"
+    },
+    "jacoco_java_lines": {
+      "fresh": {
+        "covered_lines": 4551,
+        "total_lines": 5183,
+        "line_percent": 87.81
+      },
+      "reconciled": {
+        "covered_lines": 4551,
+        "total_lines": 5183,
+        "line_percent": 87.81
+      }
+    }
+  },
+  "sql": {
+    "fresh_passing_notices": 227,
+    "new_m72_enforcement_assertions": 28,
+    "reconciliation_assertions_and_catalog_gates": 608,
+    "historical_migrations_changed": false,
+    "owner_discovery_regression": {
+      "before": "Expected failure: restricted owner passed the old discovery-only helper",
+      "after": "PASS on fresh and both reconciled SQL fixtures"
+    }
+  },
+  "admin": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "format": "PASS",
+    "unit_tests": 10,
+    "security_contract_line_coverage_percent": 100,
+    "security_contract_branch_coverage_percent": 97.3,
+    "production_build": "PASS",
+    "real_browser_flows": 5,
+    "browser_accessibility": "Axe WCAG 2 A/AA: no violations in tested administrative pages"
+  },
+  "mobile": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "unit_tests": 76,
+    "component_tests": 20,
+    "http_fixture": "PASS, including M7.2 appeal and actor switch isolation",
+    "real_spring_browser": "PASS: 7 logged scenario groups; no sends",
+    "mock_navigation": "PASS",
+    "mock_ui_screenshots": 30,
+    "png_browser_decode": "PASS",
+    "accessibility": "PASS: three widths, 48px controls, 150% browser text simulation; not a native audit",
+    "mock_web_export": "PASS",
+    "connected_fixture_web_export": "PASS"
+  },
+  "png_artifacts": {
+    "count": 67,
+    "all_decoded": true,
+    "all_nonzero": true,
+    "mobile_viewports": [
+      "360x800",
+      "390x844",
+      "430x932"
+    ],
+    "admin_capture": "Full-page at recorded mobile/desktop viewport widths; actual PNG heights in manifest"
+  },
+  "benchmark": {
+    "synthetic_accounts": 10000,
+    "restricted_accounts": 1000,
+    "planning_ms": 0.989,
+    "execution_ms": 27.89,
+    "returned_rows": 26,
+    "mode": "Single local warm-cache sample, not production capacity evidence"
+  },
+  "warnings": [
+    "Surefire native-stream and Mockito self-attach warnings remain; suites succeeded.",
+    "An isolated worker fixture needed the new enforcement dependency; security assertions were preserved.",
+    "The inherited browser RBAC flow changes its Moderator to Analyst; M7.2 uses a separate disposable Moderator.",
+    "The real Spring mobile fixture requires Auth at 127.0.0.1:8098; the generic HTTP-only fixture can intercept either URL.",
+    "Admin Playwright selectors use accessible roles for wrapped selects/textareas; no expected security outcomes were weakened."
+  ],
+  "remaining_gates": [
+    "Owner M7.2 review and exact migration approval",
+    "Hosted schema/ACL, MFA, storage/cookie and restore/lock rehearsal",
+    "Provider/store-side checkout and issued signed-URL limitations documented",
+    "Independent Super administrator staffing",
+    "Native Android/iOS and representative concurrent load",
+    "Separate Phase 6 worker production release gate"
+  ],
+  "restrictions": {
+    "pushed": false,
+    "merged": false,
+    "deployed": false,
+    "hosted_services_changed": false,
+    "real_notifications_sent": false,
+    "m73_started": false,
+    "new_admin_enforcement_flag_default": false
+  }
+}

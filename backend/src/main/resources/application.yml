@@ -28,6 +28,7 @@ castly:
     enabled: ${CASTLY_ADMIN_ENABLED:false}
     audit-key: ${CASTLY_ADMIN_AUDIT_KEY:}
     users-enabled: ${CASTLY_ADMIN_USERS_ENABLED:false}
+    enforcement-enabled: ${CASTLY_ADMIN_ENFORCEMENT_ENABLED:false}
   phase6:
     push-enabled: ${CASTLY_PUSH_ENABLED:false}
     email-enabled: ${CASTLY_EMAIL_ENABLED:false}

@@ -4252,4 +4252,41 @@ class BusinessApiTest {
       p6Clear(CLIENT);
     }
   }
+
+  @Test
+  void phase6SuppressesSuspendedRecipientsAndPreservesPrivacyAndObligations() throws Exception {
+    String booking = newBooking(), talent = talentFor(booking);
+    p6Opt(CLIENT);
+    p6Device(CLIENT);
+    call("POST", "/api/v1/bookings/" + booking + "/accept", talent, null)
+        .andExpect(status().isOk());
+    // Owner-only eligibility fixture; command authorization is exercised by AdminApiTest.
+    ownerFixture(
+        "insert into enforcement_private.accounts(user_id,state,denied,until_at) values('"
+            + CLIENT
+            + "','TEMPORARILY_SUSPENDED',array['discovery','booking_create','booking_accept','messaging','profile','subscription_purchase'],clock_timestamp()+interval"
+            + " '1 hour');");
+    var provider = new P6Provider();
+    try (var worker = p6Worker(provider)) {
+      worker.tick(java.time.Instant.now());
+      assertEquals(0, provider.sends.get());
+      assertEquals(
+          1,
+          p6Count(
+              CLIENT,
+              "engagement_private.outbox",
+              "state='suppressed' and error_code='account_restricted'"));
+      call("GET", "/api/v1/bookings/" + booking, CLIENT, null).andExpect(status().isOk());
+      call("GET", "/api/v1/engagement/export", CLIENT, null).andExpect(status().isOk());
+      assertEquals(1, p6Count(CLIENT, "public.push_devices", "true"));
+    } finally {
+      ownerFixture(
+          "delete from enforcement_private.accounts where user_id='"
+              + CLIENT
+              + "';delete from enforcement_private.capabilities where user_id='"
+              + CLIENT
+              + "';");
+      p6Clear(CLIENT);
+    }
+  }
 }

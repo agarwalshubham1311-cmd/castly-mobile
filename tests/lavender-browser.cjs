@@ -10,7 +10,9 @@ const fs = require('node:fs');
     });
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
-    const folder = path.resolve(__dirname, '../artifacts/screenshots');
+    const folder = path.resolve(
+      process.env.CASTLY_SCREENSHOT_DIR || path.join(__dirname, '../artifacts/screenshots'),
+    );
     fs.mkdirSync(folder, { recursive: true });
     async function capture(name, width = 390, height = 844) {
       const controls = {

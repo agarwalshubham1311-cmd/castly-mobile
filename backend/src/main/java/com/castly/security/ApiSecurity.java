@@ -35,6 +35,10 @@ public class ApiSecurity {
         new com.castly.trust.EvidenceUploadLimitFilter(),
         org.springframework.security.oauth2.server.resource.web.authentication
             .BearerTokenAuthenticationFilter.class);
+    http.addFilterAfter(
+        new com.castly.enforcement.EnforcementBodyLimit(),
+        org.springframework.security.oauth2.server.resource.web.authentication
+            .BearerTokenAuthenticationFilter.class);
     return http.csrf(csrf -> csrf.disable())
         .cors(cors -> {})
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

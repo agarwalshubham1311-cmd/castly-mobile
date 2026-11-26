@@ -210,6 +210,13 @@ public class ActivityController {
                     .param("talent", talent)));
   }
 
+  @org.springframework.beans.factory.annotation.Autowired
+  private com.castly.enforcement.AccountEnforcement enforcement;
+
+  private String conversations() {
+    return conversationSql.replace(" as can_send,", enforcement.messagingField() + " as can_send,");
+  }
+
   private static final String CONVERSATIONS =
       "select c.*,coalesce((select b.client_name from public.bookings b where"
           + " b.client_id=c.client_id and b.talent_id=c.talent_id order by b.created_at desc,b.id"
@@ -234,7 +241,7 @@ public class ActivityController {
                 db,
                 rows(
                     db.sql(
-                            conversationSql
+                            conversations()
                                 + " order by c.created_at desc,c.id desc limit :limit offset"
                                 + " :offset")
                         .param("limit", limit)
@@ -247,7 +254,7 @@ public class ActivityController {
         actor(jwt),
         db ->
             notifications.decorate(
-                db, one(db.sql(conversationSql + " where c.id=:id").param("id", id))));
+                db, one(db.sql(conversations() + " where c.id=:id").param("id", id))));
   }
 
   @PostMapping("/conversations")

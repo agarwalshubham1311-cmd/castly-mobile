@@ -1,0 +1,2847 @@
+
+> castly-mobile@0.1.0 test:sql
+> node scripts/test-sql.cjs
+
+DROP DATABASE
+CREATE DATABASE
+DO
+CREATE SCHEMA
+CREATE TABLE
+CREATE FUNCTION
+GRANT
+GRANT
+CREATE SCHEMA
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+CREATE FUNCTION
+GRANT
+GRANT
+GRANT
+GRANT
+DO
+WARNING:  "wal_level" is insufficient to publish logical changes
+HINT:  Set "wal_level" to "logical" before creating subscriptions.
+BEGIN
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 5
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+INSERT 0 0
+CREATE FUNCTION
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+REVOKE
+GRANT
+REVOKE
+COMMIT
+BEGIN
+INSERT 0 2
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+COMMIT
+BEGIN
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE INDEX
+COMMIT
+BEGIN
+DO
+GRANT
+GRANT
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+DROP POLICY
+ALTER TABLE
+UPDATE 0
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE TRIGGER
+REVOKE
+DO
+COMMIT
+BEGIN
+CREATE INDEX
+CREATE FUNCTION
+REVOKE
+CREATE FUNCTION
+CREATE TRIGGER
+REVOKE
+COMMIT
+BEGIN
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+REVOKE
+DO
+COMMIT
+BEGIN
+GRANT
+COMMIT
+BEGIN
+SET
+DO
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+DO
+DO
+COMMIT
+BEGIN
+SET
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+ALTER TABLE
+REVOKE
+REVOKE
+GRANT
+GRANT
+GRANT
+DROP POLICY
+DROP POLICY
+DROP POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE FUNCTION
+DROP TRIGGER
+DROP TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+REVOKE
+DO
+COMMIT
+NOTICE:  relation "notifications" already exists, skipping
+NOTICE:  relation "notifications_recipient_cursor_idx" already exists, skipping
+NOTICE:  relation "notifications_unread_idx" already exists, skipping
+BEGIN
+CREATE TABLE
+INSERT 0 2
+CREATE TABLE
+INSERT 0 0
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE TABLE
+REVOKE
+GRANT
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+DO
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+GRANT
+CREATE POLICY
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+COMMIT
+BEGIN
+CREATE TABLE
+CREATE INDEX
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+COMMIT
+BEGIN
+ALTER TABLE
+GRANT
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+COMMIT
+BEGIN
+ALTER TABLE
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+INSERT 0 0
+COMMIT
+BEGIN
+CREATE SCHEMA
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE TABLE
+DO
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+GRANT
+CREATE POLICY
+CREATE POLICY
+GRANT
+CREATE POLICY
+CREATE POLICY
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+COMMIT
+BEGIN
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+ALTER POLICY
+ALTER POLICY
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+COMMIT
+BEGIN
+CREATE TABLE
+CREATE INDEX
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+COMMIT
+BEGIN
+ALTER POLICY
+CREATE FUNCTION
+REVOKE
+ALTER POLICY
+COMMIT
+BEGIN
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+INSERT 0 0
+ALTER TABLE
+ALTER TABLE
+UPDATE 0
+ALTER TABLE
+INSERT 0 0
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TRIGGER
+GRANT
+CREATE POLICY
+DO
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+ALTER TABLE
+GRANT
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE INDEX
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+INSERT 0 0
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+ALTER POLICY
+COMMIT
+BEGIN
+ALTER TABLE
+ALTER TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE TABLE
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+REVOKE
+GRANT
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 1
+GRANT
+CREATE POLICY
+GRANT
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+ALTER POLICY
+COMMIT
+BEGIN
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE INDEX
+ALTER TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+INSERT 0 0
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+COMMIT
+BEGIN
+DO
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+COMMIT
+BEGIN
+DO
+CREATE SCHEMA
+REVOKE
+GRANT
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+DO
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+GRANT
+GRANT
+CREATE POLICY
+CREATE FUNCTION
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+DO
+CREATE POLICY
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+CREATE POLICY
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+GRANT
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+DO
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+ALTER POLICY
+ALTER POLICY
+ALTER POLICY
+REVOKE
+GRANT
+GRANT
+COMMIT
+BEGIN
+CREATE SCHEMA
+REVOKE
+GRANT
+CREATE TABLE
+INSERT 0 13
+INSERT 0 12
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+ALTER TABLE
+CREATE POLICY
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+REVOKE
+REVOKE
+GRANT
+COMMIT
+BEGIN
+CREATE FUNCTION
+REVOKE
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+INSERT 0 0
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+ALTER TABLE
+REVOKE
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE INDEX
+CREATE FUNCTION
+REVOKE
+CREATE TRIGGER
+CREATE TRIGGER
+COMMIT
+BEGIN
+CREATE INDEX
+COMMIT
+BEGIN
+DO
+CREATE SCHEMA
+REVOKE
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE TABLE
+ALTER TABLE
+CREATE POLICY
+CREATE POLICY
+GRANT
+GRANT
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE TABLE
+INSERT 0 0
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+INSERT 0 15
+CREATE FUNCTION
+DO
+GRANT
+GRANT
+GRANT
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+DO
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TABLE
+INSERT 0 0
+ALTER TABLE
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+GRANT
+GRANT
+GRANT
+COMMIT
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 3
+UPDATE 2
+UPDATE 1
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000011
+(1 row)
+
+SET
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+SET
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000012
+(1 row)
+
+SET
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000013
+(1 row)
+
+SET
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+RESET
+SET
+ eq
+----
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000011
+(1 row)
+
+SET
+ eq
+----
+
+(1 row)
+
+RESET
+SET
+UPDATE 1
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ROLLBACK
+NOTICE:  PASS dedicated role is not privileged
+NOTICE:  PASS participant tables are in Realtime publication
+NOTICE:  PASS old decision RPC disabled
+NOTICE:  PASS old cancellation RPC disabled
+NOTICE:  PASS old onboarding RPC disabled
+NOTICE:  PASS direct account write disabled
+NOTICE:  PASS direct booking write disabled
+NOTICE:  PASS direct message write disabled
+NOTICE:  PASS direct favourite write disabled
+NOTICE:  PASS direct talent edit disabled
+NOTICE:  PASS API can create own client request
+NOTICE:  PASS client cannot accept own request even through API DB role
+NOTICE:  PASS API role cannot modify protected agreed rate
+NOTICE:  PASS API role cannot grant subscriptions
+NOTICE:  PASS API role cannot read Auth directory
+NOTICE:  PASS API private accounts remain self-only
+NOTICE:  PASS relevant talent can send
+NOTICE:  PASS API cannot impersonate sender
+NOTICE:  PASS outsider cannot read booking
+NOTICE:  PASS outsider cannot read conversation
+NOTICE:  PASS outsider cannot read messages
+NOTICE:  PASS Realtime RLS excludes outsider
+NOTICE:  PASS Realtime RLS includes participant
+NOTICE:  PASS message writes stop after cancellation
+NOTICE:  PASS history retained after cancellation
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 3
+UPDATE 1
+UPDATE 1
+INSERT 0 1
+              set_config
+--------------------------------------
+ b0000000-0000-0000-0000-000000000001
+(1 row)
+
+SET
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ b0000000-0000-0000-0000-000000000002
+(1 row)
+
+SET
+ eq
+----
+
+(1 row)
+
+UPDATE 1
+UPDATE 1
+RESET
+INSERT 0 1
+SET
+INSERT 0 1
+ denied
+--------
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ b0000000-0000-0000-0000-000000000001
+(1 row)
+
+SET
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+SET
+UPDATE 2
+ eq
+----
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ b0000000-0000-0000-0000-000000000003
+(1 row)
+
+SET
+ eq
+----
+
+(1 row)
+
+RESET
+SET
+ denied
+--------
+
+(1 row)
+
+RESET
+ eq
+----
+
+(1 row)
+
+ROLLBACK
+NOTICE:  PASS client cannot see talent request notification
+NOTICE:  PASS API cannot forge notification events
+NOTICE:  PASS talent receives one request notification
+NOTICE:  PASS API cannot reassign notification recipient
+NOTICE:  PASS accept retry produces one client notification
+NOTICE:  PASS message produces one recipient notification
+NOTICE:  PASS ordinary client must mark read through Spring
+NOTICE:  PASS ordinary client cannot call event trigger function
+NOTICE:  PASS API marks only its own notification read
+NOTICE:  PASS Realtime excludes unrelated recipient
+NOTICE:  PASS anonymous notification access denied
+NOTICE:  PASS notification publication membership exists
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+REVOKE
+INSERT 0 2
+UPDATE 1
+UPDATE 1
+INSERT 0 1
+CREATE TRIGGER
+CREATE TRIGGER
+ eq
+----
+
+(1 row)
+
+SET
+              set_config              |                   set_config
+--------------------------------------+------------------------------------------------
+ c1000000-0000-0000-0000-000000000001 | {"sub":"c1000000-0000-0000-0000-000000000001"}
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+              set_config              |                   set_config
+--------------------------------------+------------------------------------------------
+ c1000000-0000-0000-0000-000000000002 | {"sub":"c1000000-0000-0000-0000-000000000002"}
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+UPDATE 1
+INSERT 0 1
+              set_config              |                   set_config
+--------------------------------------+------------------------------------------------
+ c1000000-0000-0000-0000-000000000001 | {"sub":"c1000000-0000-0000-0000-000000000001"}
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+RESET
+SET
+              set_config              |                   set_config
+--------------------------------------+------------------------------------------------
+ c1000000-0000-0000-0000-000000000002 | {"sub":"c1000000-0000-0000-0000-000000000002"}
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ROLLBACK
+NOTICE:  PASS all notification functions are invokers
+NOTICE:  PASS notification writes require no auth schema access
+NOTICE:  PASS sender cannot read recipient notification
+NOTICE:  PASS direct API insert of a valid-looking event is denied
+NOTICE:  PASS API has no table-wide notification INSERT
+NOTICE:  PASS API cannot choose notification IDs
+NOTICE:  PASS API cannot install event triggers
+NOTICE:  PASS API cannot disable event validation
+NOTICE:  PASS talent receives request notice
+NOTICE:  PASS repeated trigger produces one accepted notice
+NOTICE:  PASS message sender cannot see recipient notice
+NOTICE:  PASS Realtime recipient sees one deduplicated message notice
+NOTICE:  PASS Realtime cannot read counterparty notices
+NOTICE:  PASS ordinary authenticated cannot write read markers directly
+NOTICE:  PASS Realtime needs no access to private API helper
+NOTICE:  PASS notifications are in Realtime publication
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 2
+UPDATE 2
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000051
+(1 row)
+
+SET
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+SET
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ set_config
+------------
+ yes
+(1 row)
+
+INSERT 0 1
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ set_config
+------------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000052
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ set_config
+------------
+ yes
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+ eq
+----
+
+(1 row)
+
+ROLLBACK
+NOTICE:  PASS mobile cannot grant premium
+NOTICE:  PASS mobile cannot read provider orders directly
+NOTICE:  PASS mobile cannot provision reviewer
+NOTICE:  PASS server catalog has two configurable plans
+NOTICE:  PASS unverified server transaction cannot grant
+NOTICE:  PASS unverified compatibility projection write denied
+NOTICE:  PASS server cannot provision reviewer
+NOTICE:  PASS verified server writes own ledger
+NOTICE:  PASS unverified order update denied
+NOTICE:  PASS other creator cannot read grants
+NOTICE:  PASS other creator cannot read orders
+NOTICE:  PASS verified context cannot grant another creator
+NOTICE:  PASS all subscription public tables have RLS
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 3
+SET
+INSERT 0 2
+REVOKE
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+SET
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 70000000-0000-0000-0000-000000000001
+(1 row)
+
+SET
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ set_config |          set_config           |              set_config              |       set_config
+------------+-------------------------------+--------------------------------------+------------------------
+ true       | 2026-11-26 08:59:32.203709+00 | 71000000-0000-0000-0000-000000000001 | SQL security rehearsal
+(1 row)
+
+INSERT 0 1
+              set_config
+--------------------------------------
+ 2f676252-856c-4995-9302-2f3b3ee5403f
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ set_config
+------------
+ false
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ set_config |              set_config
+------------+--------------------------------------
+ true       | 71000000-0000-0000-0000-000000000002
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 70000000-0000-0000-0000-000000000002
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+ROLLBACK
+NOTICE:  PASS all seven administrative tables use RLS
+NOTICE:  PASS no admin SECURITY DEFINER functions
+NOTICE:  PASS mobile cannot access admin principals
+NOTICE:  PASS mobile cannot execute admin helper
+NOTICE:  PASS no auth schema grant
+NOTICE:  PASS super-admin role alone is not a session
+NOTICE:  PASS no session sees only own principal
+NOTICE:  PASS valid TOTP-bound session receives explicit permission
+NOTICE:  PASS super admin directory works without RLS recursion
+NOTICE:  PASS no application super-admin promotion
+NOTICE:  PASS self-change denied
+NOTICE:  PASS audit update not granted
+NOTICE:  PASS audit deletion not granted
+NOTICE:  PASS audit truncate not granted
+NOTICE:  PASS projection cannot be edited directly
+NOTICE:  PASS projection cannot be inserted directly
+NOTICE:  PASS no uninvited activation
+NOTICE:  PASS no auth session fixation
+NOTICE:  PASS MFA downgrade invalidates access
+NOTICE:  PASS different JWT session cannot reuse admin session
+NOTICE:  PASS projection selects only current actor
+NOTICE:  PASS analyst cannot read audit
+NOTICE:  PASS analyst cannot enumerate other sessions
+NOTICE:  PASS analyst cannot invite
+NOTICE:  PASS permission definition writes denied
+BEGIN
+DO
+SET
+DO
+ROLLBACK
+NOTICE:  PASS Phase4 private evidence catalog and reviewer window
+NOTICE:  PASS authenticated dispute write denied
+NOTICE:  PASS authenticated evidence write denied
+NOTICE:  PASS reviewer provisioning denied
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 2
+UPDATE 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000061
+(1 row)
+
+SET
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+SET
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+SET
+                                        QUERY PLAN
+------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on talent_profiles
+   Recheck Cond: ((phase5_normalized_skills(skills) @> '{acting}'::text[]) AND published)
+   ->  Bitmap Index Scan on talent_search_skills
+         Index Cond: (phase5_normalized_skills(skills) @> '{acting}'::text[])
+(4 rows)
+
+ROLLBACK
+NOTICE:  PASS mobile cannot write availability directly
+NOTICE:  PASS mobile cannot change region consent
+NOTICE:  PASS mobile cannot read busy summary
+NOTICE:  PASS other unpublished creator calendar hidden
+NOTICE:  PASS other unpublished busy summary hidden
+NOTICE:  PASS API cannot forge busy projection
+NOTICE:  PASS API cannot write other creator calendar
+NOTICE:  PASS API cannot erase other creator calendar
+NOTICE:  PASS API cannot write other user rate counter
+NOTICE:  PASS all Phase5 tables use RLS
+NOTICE:  PASS normalized skill GIN index exists
+BEGIN
+REVOKE
+CREATE SCHEMA
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 70000000-0000-0000-0000-000000000001
+(1 row)
+
+SET
+ eq
+----
+
+(1 row)
+
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 70000000-0000-0000-0000-000000000003
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 70000000-0000-0000-0000-000000000002
+(1 row)
+
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 70000000-0000-0000-0000-000000000001
+(1 row)
+
+DELETE 1
+ eq
+----
+
+(1 row)
+
+RESET
+UPDATE 1
+SET
+              set_config
+--------------------------------------
+ 70000000-0000-0000-0000-000000000003
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 70000000-0000-0000-0000-000000000002
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ROLLBACK
+NOTICE:  PASS visibility helper is invoker
+NOTICE:  PASS no direct authenticated visibility helper
+NOTICE:  PASS no auth schema privilege required
+NOTICE:  PASS published Free creator visible
+NOTICE:  PASS client block removes candidate
+NOTICE:  PASS blocked region hidden by RLS
+NOTICE:  PASS blocked availability hidden by RLS
+NOTICE:  PASS blocked busy projection hidden by RLS
+NOTICE:  PASS unrelated actor remains isolated
+NOTICE:  PASS blocked creator keeps own declaration
+NOTICE:  PASS reverse block still excludes candidate
+NOTICE:  PASS unpublished creator excluded for outsider
+NOTICE:  PASS owner cannot include unpublished self in discovery
+NOTICE:  PASS owner can still withdraw unpublished declaration
+BEGIN
+REVOKE
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 2
+INSERT 0 1
+INSERT 0 1
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 60000000-0000-0000-0000-000000000001
+(1 row)
+
+                            set_config
+------------------------------------------------------------------
+ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+(1 row)
+
+SET
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+SET
+ eq
+----
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+INSERT 0 1
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ set_config | set_config
+------------+------------
+ false      | false
+(1 row)
+
+UPDATE 1
+INSERT 0 1
+INSERT 0 0
+ eq
+----
+
+(1 row)
+
+UPDATE 1
+ denied
+--------
+
+(1 row)
+
+ eq
+----
+
+(1 row)
+
+RESET
+SET
+ eq
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+ROLLBACK
+NOTICE:  PASS all Phase6 tables use RLS
+NOTICE:  PASS no privileged Phase6 functions
+NOTICE:  PASS worker cannot read booking prose
+NOTICE:  PASS worker cannot read message bodies
+NOTICE:  PASS worker has no auth schema access
+NOTICE:  PASS API needs no auth schema access
+NOTICE:  PASS direct mobile token access denied
+NOTICE:  PASS direct mobile outbox access denied
+NOTICE:  PASS other actor token hidden
+NOTICE:  PASS other actor preferences hidden
+NOTICE:  PASS cannot register another actor device
+NOTICE:  PASS cannot forge verified email
+NOTICE:  PASS cannot self grant analytics admin
+NOTICE:  PASS cannot impersonate analytics actor
+NOTICE:  PASS cannot forge outbox event
+NOTICE:  PASS direct enqueue cannot bypass source trigger
+NOTICE:  PASS scheduler cannot ignore consent/source
+NOTICE:  PASS consented reengagement dedupes within local week
+NOTICE:  PASS withdrawn reengagement cannot queue
+NOTICE:  PASS admin roster is isolated
+NOTICE:  PASS worker cannot enumerate devices without delivery sources
+NOTICE:  PASS worker cannot edit accounts
+NOTICE:  PASS worker cannot change bookings
+NOTICE:  PASS worker cannot grant analytics admin
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+INSERT 0 4
+UPDATE 4
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+INSERT 0 2
+SET
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 61000000-0000-0000-0000-000000000003
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 61000000-0000-0000-0000-000000000003
+(1 row)
+
+SET
+ ok
+----
+
+(1 row)
+
+RESET
+ROLLBACK
+NOTICE:  PASS worker role has no privileged attributes and is NOINHERIT
+NOTICE:  PASS worker has no role memberships
+NOTICE:  PASS worker owns no application tables
+NOTICE:  PASS worker cannot create schema objects
+NOTICE:  PASS worker has no auth schema usage
+NOTICE:  PASS worker cannot execute application SECURITY DEFINER functions
+NOTICE:  PASS existing definer functions have migration-owner ownership and pinned empty search_path
+NOTICE:  PASS Phase6 queue helpers are all SECURITY INVOKER
+NOTICE:  PASS booking grants expose only required columns
+NOTICE:  PASS conversation grants expose only required columns
+NOTICE:  PASS SQL tests execute as the restricted worker
+NOTICE:  PASS worker actually remains subject to RLS
+NOTICE:  PASS worker sees metadata for a valid delivery source
+NOTICE:  PASS worker cannot enumerate unrelated bookings
+NOTICE:  PASS worker sees queued conversation references
+NOTICE:  PASS worker cannot enumerate unrelated conversations
+NOTICE:  PASS worker can resolve a queued device
+NOTICE:  PASS worker cannot enumerate unqueued tokens
+NOTICE:  PASS worker can resolve a queued verified contact
+NOTICE:  PASS worker cannot enumerate unqueued email contacts
+NOTICE:  PASS worker cannot read booking prose
+NOTICE:  PASS worker cannot read message bodies
+NOTICE:  PASS worker cannot read private accounts
+NOTICE:  PASS worker cannot read payment orders
+NOTICE:  PASS worker cannot read private evidence
+NOTICE:  PASS worker cannot update booking transitions
+NOTICE:  PASS worker cannot write private accounts
+NOTICE:  PASS worker cannot manufacture notification sources
+NOTICE:  PASS worker cannot retarget queue recipients
+NOTICE:  PASS worker cannot retarget queue business sources
+NOTICE:  PASS worker cannot escalate through legacy definer RPC
+NOTICE:  PASS worker cannot switch to business API role
+NOTICE:  PASS worker cannot switch to authenticated role
+NOTICE:  PASS worker cannot grant itself role membership
+NOTICE:  PASS permitted queue claim succeeds under worker RLS
+NOTICE:  PASS forged transaction claim cannot expand worker metadata scope
+NOTICE:  PASS ordinary actor cannot inspect another recipient outbox
+BEGIN
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+INSERT 0 3
+SET
+INSERT 0 1
+              set_config
+--------------------------------------
+ 72000000-0000-0000-0000-000000000003
+(1 row)
+
+SET
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+UPDATE 1
+RESET
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+SET
+ denied
+--------
+
+(1 row)
+
+RESET
+SET
+ denied
+--------
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 72000000-0000-0000-0000-000000000001
+(1 row)
+
+ set_config |          set_config           |              set_config              |         set_config
+------------+-------------------------------+--------------------------------------+-----------------------------
+ true       | 2026-11-26 08:59:33.296481+00 | 72000000-0000-0000-0000-000000000099 | M72 local SQL security test
+(1 row)
+
+SET
+INSERT 0 1
+              set_config
+--------------------------------------
+ 63bf92f3-ff4d-4126-9bf2-36b43c0a5ed3
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ set_config
+------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+RESET
+ROLLBACK
+NOTICE:  PASS all seven user read models/history use RLS
+NOTICE:  PASS projection maintenance is SECURITY INVOKER
+NOTICE:  PASS operational lookups have purpose indexes
+NOTICE:  PASS account security review has an actor-scoped denial index
+NOTICE:  PASS ordinary user cannot enumerate operational directory
+NOTICE:  PASS ordinary user cannot read operational history
+NOTICE:  PASS ordinary user cannot forge a projection
+NOTICE:  PASS account history cannot be deleted
+NOTICE:  PASS account history cannot be rewritten
+NOTICE:  PASS legitimate source update projects atomically
+NOTICE:  PASS source update appends immutable history
+NOTICE:  PASS worker cannot read admin user directory
+NOTICE:  PASS mobile cannot read admin user directory
+NOTICE:  PASS valid administrator sees minimized operational metadata
+NOTICE:  PASS admin directory does not widen private source-account RLS
+NOTICE:  PASS even administrator cannot directly modify source projections
+NOTICE:  PASS administrator cannot fabricate account history
+NOTICE:  PASS missing session removes all operational access
+BEGIN
+REVOKE
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+INSERT 0 4
+UPDATE 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+SET
+INSERT 0 1
+              set_config              | set_config |          set_config           |              set_config
+--------------------------------------+------------+-------------------------------+--------------------------------------
+ 73000000-0000-0000-0000-000000000001 | true       | 2026-11-26 08:59:33.458462+00 | 73000000-0000-0000-0000-000000000099
+(1 row)
+
+SET
+INSERT 0 1
+              set_config
+--------------------------------------
+ bf3a675c-85c3-453b-8d43-3136de856222
+(1 row)
+
+INSERT 0 1
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ set_config |              set_config
+------------+--------------------------------------
+            | 73000000-0000-0000-0000-000000000002
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 73000000-0000-0000-0000-000000000003
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+              set_config
+--------------------------------------
+ 73000000-0000-0000-0000-000000000002
+(1 row)
+
+SET
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+SET
+ ok
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+SET
+ ok
+----
+
+(1 row)
+
+ denied
+--------
+
+(1 row)
+
+RESET
+ROLLBACK
+NOTICE:  PASS enforcement uses no SECURITY DEFINER
+NOTICE:  PASS all enforcement tables have RLS
+NOTICE:  PASS auth schema fallback boundary preserved
+NOTICE:  PASS no table-wide booking UPDATE
+NOTICE:  PASS restricted command succeeds without administrator DB credentials
+NOTICE:  PASS direct account state overwrite affects zero rows
+NOTICE:  PASS direct capability forgery denied
+NOTICE:  PASS event forgery denied
+NOTICE:  PASS immutable decisions cannot be deleted
+NOTICE:  PASS immutable notes cannot be rewritten
+NOTICE:  PASS suspended talent retains existing booking obligation
+NOTICE:  PASS account owner cannot read confidential investigation notes
+NOTICE:  PASS account gets durable transactional notice
+NOTICE:  PASS owner cannot use discovery helpers to expose a restricted profile
+NOTICE:  PASS new purchases denied without revoking existing entitlements
+NOTICE:  PASS business API profile mutation denied
+NOTICE:  PASS counterparty retains booking access
+NOTICE:  PASS restricted talent absent from counterparty discovery
+NOTICE:  PASS unrelated private case not visible
+NOTICE:  PASS restricted talent cannot receive new bookings
+NOTICE:  PASS direct Supabase cannot read cases
+NOTICE:  PASS direct Supabase cannot write administrative commands
+NOTICE:  PASS direct Supabase profile update cannot bypass restrictions
+NOTICE:  PASS direct Storage portfolio upload denied
+NOTICE:  PASS anonymous discovery hides restricted talent
+NOTICE:  PASS anonymous role cannot read restriction metadata
+NOTICE:  PASS worker eligibility excludes suspended recipient
+NOTICE:  PASS delivery worker cannot read confidential notes
+PASS: migrations and RLS policy tests on PostgreSQL. Test fixtures rolled back.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.3
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.3
+npm notice To update run: npm install -g npm@12.2.3
+npm notice

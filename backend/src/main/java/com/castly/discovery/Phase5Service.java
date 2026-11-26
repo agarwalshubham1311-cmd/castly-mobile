@@ -14,6 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class Phase5Service {
+  @org.springframework.beans.factory.annotation.Autowired
+  private com.castly.enforcement.AccountEnforcement enforcement;
+
   private final ActorDatabase data;
 
   @org.springframework.beans.factory.annotation.Autowired
@@ -182,7 +185,9 @@ public class Phase5Service {
             + " cast(:through_day as date))=:days then 'confirmed' else 'unknown' end"
             + " availability_status from public.talent_profiles t left join"
             + " public.talent_discovery_preferences p on p.talent_id=t.id and p.share_region where"
-            + " t.published and private.discovery_talent_visible(t.id) and (:category='' or"
+            + " t.published "
+            + enforcement.discovery("t.id")
+            + " and private.discovery_talent_visible(t.id) and (:category='' or"
             + " t.category_id=:category) and (:city='' or lower(t.city)=lower(:city)) and"
             + " (:region='' or lower(p.region)=lower(:region)) and t.day_rate between :min_rate and"
             + " :max_rate"

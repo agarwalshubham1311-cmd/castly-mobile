@@ -1,0 +1,112 @@
+BEGIN
+REVOKE
+CREATE SCHEMA
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+NOTICE:  PASS enforcement uses no SECURITY DEFINER
+ ok
+----
+
+(1 row)
+
+NOTICE:  PASS all enforcement tables have RLS
+ ok
+----
+
+(1 row)
+
+NOTICE:  PASS auth schema fallback boundary preserved
+ ok
+----
+
+(1 row)
+
+NOTICE:  PASS no table-wide booking UPDATE
+ ok
+----
+
+(1 row)
+
+INSERT 0 4
+UPDATE 1
+UPDATE 1
+INSERT 0 1
+INSERT 0 1
+SET
+INSERT 0 1
+              set_config              | set_config |          set_config           |              set_config
+--------------------------------------+------------+-------------------------------+--------------------------------------
+ 73000000-0000-0000-0000-000000000001 | true       | 2026-11-26 08:52:23.049645+00 | 73000000-0000-0000-0000-000000000099
+(1 row)
+
+SET
+INSERT 0 1
+              set_config
+--------------------------------------
+ 6e293fac-e182-4624-ae32-c2781d9497e2
+(1 row)
+
+INSERT 0 1
+NOTICE:  PASS restricted command succeeds without administrator DB credentials
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+NOTICE:  PASS direct account state overwrite affects zero rows
+NOTICE:  PASS direct capability forgery denied
+ denied
+--------
+
+(1 row)
+
+NOTICE:  PASS event forgery denied
+ denied
+--------
+
+(1 row)
+
+NOTICE:  PASS immutable decisions cannot be deleted
+ denied
+--------
+
+(1 row)
+
+NOTICE:  PASS immutable notes cannot be rewritten
+ denied
+--------
+
+(1 row)
+
+ set_config |              set_config
+------------+--------------------------------------
+            | 73000000-0000-0000-0000-000000000002
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+NOTICE:  PASS suspended talent retains existing booking obligation
+ ok
+----
+
+(1 row)
+
+NOTICE:  PASS account owner cannot read confidential investigation notes
+ ok
+----
+
+(1 row)
+
+NOTICE:  PASS account gets durable transactional notice
+ERROR:  FAIL owner cannot use discovery helpers to expose a restricted profile
+CONTEXT:  PL/pgSQL function enforcement_test.ok(boolean,text) line 1 at RAISE

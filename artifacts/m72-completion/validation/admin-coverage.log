@@ -1,0 +1,38 @@
+
+> castly-admin-dashboard@0.1.0 test:coverage
+> node --experimental-strip-types --experimental-test-coverage --test tests/*.test.ts
+
+✔ proxy exposes only implemented admin contracts (2.749286ms)
+✔ production origins reject SSRF and insecure transports (0.753219ms)
+✔ unsafe origins cannot pass CSRF check (0.130067ms)
+✔ query keys and bytes remain bounded (0.521805ms)
+✔ role controls have no super-admin issuance option (2.089955ms)
+✔ user agents reduce to bounded coarse families (0.284774ms)
+✔ production local-test flag cannot downgrade cookies on remote or mixed origins (1.571886ms)
+✔ cookie exception requires opt-in and three exact loopback fixture origins (0.230367ms)
+✔ user management proxy exposes only minimized fixed contracts (0.96128ms)
+✔ M7.2 proxy exposes bounded account contracts without exposing private schema or arbitrary RPC (0.340417ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 265.576143
+ℹ start of coverage report
+ℹ --------------------------------------------------------------
+ℹ file          | line % | branch % | funcs % | uncovered lines
+ℹ --------------------------------------------------------------
+ℹ src           |        |          |         |
+ℹ  lib          |        |          |         |
+ℹ   security.ts | 100.00 |    97.30 |  100.00 |
+ℹ --------------------------------------------------------------
+ℹ all files     | 100.00 |    97.30 |  100.00 |
+ℹ --------------------------------------------------------------
+ℹ end of coverage report
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.3
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.3
+npm notice To update run: npm install -g npm@12.2.3
+npm notice

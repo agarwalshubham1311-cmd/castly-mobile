@@ -4,7 +4,10 @@ const { assert, launch, go, noOverflow, ready } = require('./browser-utils.cjs')
 (async () => {
   const browser = await launch();
   const results = [];
-  const folder = path.resolve(__dirname, '../artifacts/ui-accessibility-fixes');
+  const folder = path.resolve(
+    process.env.CASTLY_ACCESSIBILITY_DIR ||
+      path.join(__dirname, '../artifacts/ui-accessibility-fixes'),
+  );
   fs.mkdirSync(folder, { recursive: true });
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });

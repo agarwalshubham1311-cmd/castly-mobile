@@ -1,0 +1,6 @@
+{
+  "supabase/migrations/20261119120000_admin_rbac_audit.sql": "6df834384e9c5d198960335601355207e0004d419f279eaecefd018a0b7bc45a",
+  "supabase/migrations/20261125100000_admin_user_read_models.sql": "00004c0adb5bdb18678ba0a431855d900a08e06bbc1bb69c51ad62ec20a457c4",
+  "supabase/migrations/20261125110000_admin_account_security_index.sql": "e5f0778e483b3f4b5d2d25a41f7925419bd151f27de0f694bc1f363cb574e1fc",
+  "supabase/migrations/20261126100000_account_enforcement.sql": "a9408f34233dbc55d3779db2231960f64a5147b0957bf3aef4a98de0a97cb635"
+}
