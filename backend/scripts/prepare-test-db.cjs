@@ -5,6 +5,7 @@ const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
+const { waitForPostgres } = require('./postgres-readiness.cjs');
 const container = 'castly-spring-test-db';
 function run(args, input) {
   const r = spawnSync('docker', args, { input, encoding: 'utf8' });
@@ -27,17 +28,7 @@ try {
     'postgres:17-alpine',
   ]);
 }
-let ready = false;
-for (let n = 0; n < 30; n++) {
-  try {
-    run(['exec', container, 'pg_isready', '-U', 'postgres']);
-    ready = true;
-    break;
-  } catch {
-    spawnSync('node', ['-e', 'setTimeout(()=>{},500)']);
-  }
-}
-if (!ready) throw new Error('PostgreSQL did not start');
+waitForPostgres(run, container);
 function sql(text, db = 'postgres') {
   run(['exec', '-i', container, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1'], text);
 }

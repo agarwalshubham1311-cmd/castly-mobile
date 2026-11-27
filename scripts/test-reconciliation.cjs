@@ -2,6 +2,7 @@
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
 const fs = require('node:fs');
+const { waitForPostgres } = require('../backend/scripts/postgres-readiness.cjs');
 let assertions = 0;
 const container = 'castly-issue1-reconciliation-db';
 const hardening = fs.readFileSync(path.resolve(__dirname, '../supabase/migrations/20261030090000_booking_guard_hardening.sql'), 'utf8');
@@ -27,12 +28,7 @@ try {
 } catch {
   run(['run', '--name', container, '-e', 'POSTGRES_PASSWORD=disposable-local-only', '-d', 'postgres:17-alpine']);
 }
-for (let n = 0; ; n++) {
-  const r = spawnSync('docker', ['exec', container, 'pg_isready', '-U', 'postgres']);
-  if (r.status === 0) break;
-  if (n >= 30) throw new Error('Disposable PostgreSQL did not start');
-  spawnSync('node', ['-e', 'setTimeout(()=>{},500)']);
-}
+waitForPostgres(run, container);
 run(['exec', container, 'mkdir', '-p', '/tmp/castly-sql']);
 run(['cp', path.resolve(__dirname, '../supabase') + '/.' , `${container}:/tmp/castly-sql`]);
 function sql(db, text, fail = false) {
